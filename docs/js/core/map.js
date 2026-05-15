@@ -728,6 +728,7 @@
 
   /* ── Переключение вид список/карточки ──────────────────────────────────── */
   function bindViewToggle() {
+    const listBtn = document.getElementById('mapListBtn');
     const gridBtn = document.getElementById('mapGridBtn');
     if (listBtn) listBtn.addEventListener('click', () => { viewMode = 'list'; listBtn.classList.add('active'); gridBtn && gridBtn.classList.remove('active'); buildVenueList(); });
     if (gridBtn) gridBtn.addEventListener('click', () => { viewMode = 'grid'; gridBtn.classList.add('active'); listBtn && listBtn.classList.remove('active'); buildVenueList(); });
