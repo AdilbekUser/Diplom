@@ -46,7 +46,7 @@ Expected result:
 
 ## 3. Frontend on GitHub Pages
 
-The workflow `.github/workflows/pages.yml` deploys the `frontend` folder without a build step.
+The frontend lives in the `docs` folder. The workflow `.github/workflows/pages.yml` deploys `docs` without a build step.
 
 In GitHub repository settings:
 
@@ -60,6 +60,8 @@ API_BASE_URL=https://<render-service>.onrender.com/api
 ```
 
 Push to `main` or run the workflow manually.
+
+Alternative: in `Settings -> Pages`, you can also choose `Deploy from a branch` and select `/docs` if you do not want to use GitHub Actions.
 
 ## 4. Local Development
 

@@ -7,7 +7,7 @@ const createApiRouter = require("./routes");
 const { notFound, errorHandler } = require("./middleware/errorHandler");
 
 const app = express();
-const frontendDir = path.join(__dirname, "..", "..", "frontend");
+const staticDir = path.join(__dirname, "..", "..", "docs");
 
 function splitOrigins(value) {
   return String(value || "")
@@ -44,7 +44,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.static(frontendDir));
+app.use(express.static(staticDir));
 
 app.get("/health", (req, res) => {
   res.json({
@@ -59,7 +59,7 @@ app.use("/api", createApiRouter());
 
 app.use((req, res, next) => {
   if (req.method === "GET" && req.accepts("html")) {
-    return res.sendFile(path.join(frontendDir, "index.html"));
+    return res.sendFile(path.join(staticDir, "index.html"));
   }
 
   return next();

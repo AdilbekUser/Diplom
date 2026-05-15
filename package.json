@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "cd backend && nodemon server.js",
-    "test": "node --check server.js && node --check backend/server.js && node --check backend/src/server.js && node --check backend/src/app.js && node --check frontend/js/core/namespace.js && node --check frontend/js/core/http.js && node --check frontend/js/core/toast.js && node --check frontend/js/core/theme.js && node --check frontend/js/core/i18n.js && node --check frontend/js/core/format.js && node --check frontend/js/core/session.js && node --check frontend/js/core/domain.js && node --check frontend/js/core/eventTemplates.js && node --check frontend/app.js"
+    "test": "node --check server.js && node --check backend/server.js && node --check backend/src/server.js && node --check backend/src/app.js && node --check docs/js/core/namespace.js && node --check docs/js/core/http.js && node --check docs/js/core/toast.js && node --check docs/js/core/theme.js && node --check docs/js/core/i18n.js && node --check docs/js/core/format.js && node --check docs/js/core/session.js && node --check docs/js/core/domain.js && node --check docs/js/core/eventTemplates.js && node --check docs/app.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

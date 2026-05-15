@@ -1,4 +1,4 @@
-name: Deploy frontend to GitHub Pages
+name: Deploy docs to GitHub Pages
 
 on:
   push:
@@ -41,13 +41,13 @@ jobs:
               echo '    USE_LOCAL_FALLBACK: true,'
               echo '  };'
               echo '})(window);'
-            } > frontend/config.js
+            } > docs/config.js
           fi
 
-      - name: Upload frontend
+      - name: Upload docs
         uses: actions/upload-pages-artifact@v3
         with:
-          path: frontend
+          path: docs
 
       - name: Deploy
         id: deployment

@@ -91,13 +91,11 @@ backend/src/
   routes/
   utils/
 
-frontend/
+docs/
   index.html
   styles.css
   app.js
   js/core/
-
-docs/
   DEFENSE_GUIDE.md
   API.md
 ```
