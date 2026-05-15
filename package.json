@@ -1,0 +1,11 @@
+{
+  "name": "diplom-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "cd backend && nodemon server.js",
+    "test": "node --check server.js && node --check backend/server.js && node --check backend/src/server.js && node --check backend/src/app.js && node --check frontend/js/core/namespace.js && node --check frontend/js/core/http.js && node --check frontend/js/core/toast.js && node --check frontend/js/core/theme.js && node --check frontend/js/core/i18n.js && node --check frontend/js/core/format.js && node --check frontend/js/core/session.js && node --check frontend/js/core/domain.js && node --check frontend/js/core/eventTemplates.js && node --check frontend/app.js"
+  }
+}

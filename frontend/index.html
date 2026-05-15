@@ -1,0 +1,1858 @@
+﻿<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta id="metaDescription" name="description" data-i18n-content="metaDescription" content="ORDA Smart Event System — web platform for events and conference hall management." />
+    <title>ORDA Event System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  </head>
+  <body>
+
+    <!-- ── Header ─────────────────────────────────────────────────────────── -->
+    <header class="shell-header">
+      <div class="header-left">
+        <button id="sidebarToggle" class="icon-button mobile-only" type="button" data-i18n-aria-label="openMenu">
+          <svg width="16" height="14" viewBox="0 0 16 14" fill="none"><rect width="16" height="2" rx="1" fill="currentColor"/><rect y="6" width="16" height="2" rx="1" fill="currentColor"/><rect y="12" width="10" height="2" rx="1" fill="currentColor"/></svg>
+        </button>
+        <div class="brand">
+          <div class="brand-mark">O</div>
+          <div>
+            <strong>ORDA</strong>
+            <span>Smart Event System</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Global Quick Search (Cvent-style) ── -->
+      <div class="header-search-wrap">
+        <div class="global-search">
+          <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input id="globalSearchInput" type="search" data-placeholder="globalSearchPlaceholder" autocomplete="off" />
+          <kbd> </kbd>
+        </div>
+        <div id="globalSearchDropdown" class="search-dropdown hidden"></div>
+      </div>
+
+      <div class="header-actions">
+        <div class="portal-switcher admin-only hidden" id="portalSwitcher">
+          <button id="portalClientBtn" class="portal-btn active" type="button" data-i18n="portalClient"></button>
+          <button id="portalAdminBtn" class="portal-btn" type="button" data-i18n="portalAdmin"></button>
+        </div>
+        <button id="browseBtn" class="secondary" type="button" data-i18n="browseEvents" data-portal-group="client"></button>
+        <!-- Notification bell -->
+        <button id="notifBtn" class="icon-button secondary" type="button" data-i18n-aria-label="notifications" data-i18n-title="notifications">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1.5A4 4 0 0 0 3.5 5.5v2l-1 2h10l-1-2v-2A4 4 0 0 0 7.5 1.5z" stroke="currentColor" stroke-width="1.4"/><path d="M6 11.5a1.5 1.5 0 0 0 3 0" stroke="currentColor" stroke-width="1.4"/></svg>
+          <span id="notifDot" class="notif-dot hidden"></span>
+        </button>
+        <button id="themeToggle" class="secondary icon-button" type="button" data-i18n-aria-label="toggleTheme" data-i18n-title="toggleTheme">
+          <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1V2M7.5 13V14M1 7.5H2M13 7.5H14M3.2 3.2l.7.7M11.1 11.1l.7.7M11.1 3.9l-.7.7M3.9 11.1l-.7.7M7.5 10.5a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </button>
+        <select id="languageSelect" class="language-select" data-i18n-aria-label="language">
+          <option value="ru">RU</option>
+          <option value="kk">KZ</option>
+          <option value="en">EN</option>
+        </select>
+        <span id="accountName" class="account-name"></span>
+        <button id="loginBtn" class="secondary" type="button" data-i18n="login" data-portal-group="client"></button>
+        <button id="logoutBtn" class="secondary hidden" type="button" data-i18n="logout"></button>
+      </div>
+    </header>
+
+    <div class="app-shell">
+
+      <!-- ── Sidebar Backdrop (mobile overlay) ─────────────────────────── -->
+      <div id="sidebarBackdrop" class="sidebar-backdrop" aria-hidden="true"></div>
+
+      <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
+      <aside id="sidebar" class="sidebar">
+        <nav class="side-nav">
+
+          <!-- ─── Client Navigation ──────────────────────────────────── -->
+          <button class="nav-item active" type="button" data-view="dashboard">
+            <span class="nav-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M2.5 8.2 9 3l6.5 5.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M4.2 7.8v6.3c0 .8.6 1.4 1.4 1.4h6.8c.8 0 1.4-.6 1.4-1.4V7.8" stroke="currentColor" stroke-width="1.6"/><path d="M7.2 15.5v-4.1h3.6v4.1" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </span>
+            <span data-i18n="navDashboard"></span>
+          </button>
+
+          <button class="nav-item" type="button" data-view="events">
+            <span class="nav-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3 5.2h12M5.4 2.8v3M12.6 2.8v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><rect x="3" y="4" width="12" height="11.5" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M6 8.6h6M6 11.4h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </span>
+            <span data-i18n="navEvents"></span>
+          </button>
+
+          <button class="nav-item" type="button" data-view="halls">
+            <span class="nav-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M2.5 15.2h13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M4 15V5.2c0-.7.5-1.2 1.2-1.2h7.6c.7 0 1.2.5 1.2 1.2V15" stroke="currentColor" stroke-width="1.6"/><path d="M6.4 7h1.2M10.4 7h1.2M6.4 10h1.2M10.4 10h1.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M7.2 15v-2.7h3.6V15" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+            </span>
+            <span data-i18n="navHalls"></span>
+          </button>
+
+          <button class="nav-item" type="button" data-view="calendar">
+            <span class="nav-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="3" y="4" width="12" height="11" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 7.4h12M6 2.6v2.8M12 2.6v2.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M6.2 10h.1M9 10h.1M11.8 10h.1M6.2 12.7h.1M9 12.7h.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </span>
+            <span data-i18n="navCalendar"></span>
+          </button>
+
+          <button class="nav-item" type="button" data-view="floorplan">
+            <span class="nav-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M6.2 3.6 2.8 5v9.4l3.4-1.4 5.6 1.4 3.4-1.4V3.6L11.8 5 6.2 3.6Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6.2 3.6V13M11.8 5v9.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M9 8.3c0 1.6-1.8 3.2-1.8 3.2S5.4 9.9 5.4 8.3a1.8 1.8 0 1 1 3.6 0Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+            </span>
+            <span data-i18n="navFloorPlan"></span>
+          </button>
+
+          <div class="nav-divider"></div>
+
+          <button class="nav-item" type="button" data-view="profile">
+            <span class="nav-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="9" cy="6.1" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M3.4 15.2c.6-3 2.8-4.8 5.6-4.8s5 1.8 5.6 4.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </span>
+            <span data-i18n="navProfile"></span>
+          </button>
+
+          <button class="nav-item" type="button" data-view="request" data-view-link="request">
+            <span class="nav-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4 3.2h10v11.6H4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6.4 6.1h5.2M6.4 8.8h5.2M6.4 11.5h2.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M13.4 12.9l1.6 1.6 2.1-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <span data-i18n="navRequest"></span>
+          </button>
+
+          <button class="nav-item" type="button" data-view="about">
+            <span class="nav-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="9" cy="9" r="6.2" stroke="currentColor" stroke-width="1.6"/><path d="M9 8.2v4.2M9 5.6h.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </span>
+            <span data-i18n="navAbout"></span>
+          </button>
+
+          <!-- ─── Admin Navigation Section ────────────────────────────── -->
+          <div class="nav-divider admin-only hidden"></div>
+          <div class="nav-section-label admin-only hidden" data-i18n="navAdminSection"></div>
+
+          <button class="nav-item admin-only hidden" type="button" data-view="admin">
+            <span class="nav-icon">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><rect x="2.8" y="3.2" width="12.4" height="11.6" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M5.5 6.2h3.2M5.5 9h7M5.5 11.8h4.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M12.3 6.1h.1" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+            </span>
+            <span data-i18n="navAdmin"></span>
+          </button>
+        </nav>
+
+        <div class="sidebar-note">
+          <span data-i18n="projectLabel"></span>
+          <p data-i18n="projectMeaning"></p>
+        </div>
+      </aside>
+
+      <!-- ── Main Content ──────────────────────────────────────────────────── -->
+      <main class="content">
+
+        <!-- ── Auth ─────────────────────────────────────────────────────── -->
+        <section id="authSection" class="auth-panel auth-modal hidden" data-portal-group="client" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+          <button id="authCloseBtn" class="icon-button modal-close secondary" type="button" data-i18n-aria-label="close">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </button>
+          <div>
+            <p class="eyebrow" data-i18n="accessLabel"></p>
+            <h2 id="authModalTitle" data-i18n="authTitle"></h2>
+            <p style="margin-top:10px" data-i18n="authText"></p>
+          </div>
+
+          <div class="auth-card">
+            <div class="tabs">
+              <button class="tab active" type="button" data-auth="login" data-i18n="login"></button>
+              <button class="tab" type="button" data-auth="register" data-i18n="register"></button>
+            </div>
+
+            <form id="loginForm" class="auth-form" novalidate>
+              <div class="field">
+                <label for="loginEmail" data-i18n="email"></label>
+                <input id="loginEmail" name="email" type="email" autocomplete="email" data-placeholder="email" required />
+              </div>
+              <div class="field">
+                <label for="loginPassword" data-i18n="password"></label>
+                <input id="loginPassword" name="password" type="password" autocomplete="current-password" data-placeholder="password" required />
+              </div>
+              <button type="submit" data-i18n="login"></button>
+            </form>
+
+            <form id="registerForm" class="auth-form hidden" novalidate>
+              <div class="field">
+                <label for="registerName" data-i18n="name"></label>
+                <input id="registerName" name="name" type="text" autocomplete="name" data-placeholder="name" required />
+              </div>
+              <div class="field">
+                <label for="registerEmail" data-i18n="email"></label>
+                <input id="registerEmail" name="email" type="email" autocomplete="email" data-placeholder="email" required />
+              </div>
+              <div class="field">
+                <label for="registerPassword" data-i18n="password"></label>
+                <input id="registerPassword" name="password" type="password" autocomplete="new-password" minlength="6" data-placeholder="passwordMin" required />
+              </div>
+              <button type="submit" data-i18n="createAccount"></button>
+            </form>
+          </div>
+        </section>
+
+        <p id="message" class="message hidden" role="status" aria-live="polite"></p>
+
+        <!-- ══════════════════════════════════════════════════════════════ -->
+        <!-- Dashboard View                                                 -->
+        <!-- ══════════════════════════════════════════════════════════════ -->
+        <section id="dashboardView" class="view active-view">
+          <div class="landing-page">
+            <section class="home-cover landing-hero">
+              <div class="landing-hero-content">
+                <p class="eyebrow" data-i18n="homeLandingBrand"></p>
+                <h1 data-i18n="homeLandingTitle"></h1>
+                <p class="lead" data-i18n="homeLandingText"></p>
+
+                <div class="hero-actions">
+                  <button type="button" data-view-link="events" data-i18n="homeLandingEventsCta"></button>
+                  <button class="secondary" type="button" data-view-link="halls" data-i18n="homeLandingHallsCta"></button>
+                  <button class="secondary" type="button" data-view-link="calendar" data-i18n="homeLandingCalendarCta"></button>
+                </div>
+              </div>
+
+              <aside class="landing-hero-card" data-i18n-aria-label="homeLandingPreviewAria">
+                <span data-i18n="homeLandingPreviewLabel"></span>
+                <strong data-i18n="homeLandingPreviewTitle"></strong>
+                <p data-i18n="homeLandingPreviewText"></p>
+                <div class="landing-stat-row">
+                  <div><b id="metricEvents">0</b><small data-i18n="metricEvents"></small></div>
+                  <div><b id="metricSeats">0</b><small data-i18n="metricSeats"></small></div>
+                  <div><b id="metricNext">-</b><small data-i18n="metricNext"></small></div>
+                </div>
+              </aside>
+            </section>
+
+            <nav class="landing-nav-strip" data-i18n-aria-label="homeLandingQuickNavAria">
+              <button type="button" data-view-link="events" data-i18n="homeQuickEvents"></button>
+              <button type="button" data-view-link="halls" data-i18n="homeQuickHalls"></button>
+              <button type="button" data-view-link="calendar" data-i18n="homeQuickCalendar"></button>
+              <button type="button" data-view-link="halls" data-i18n="homeQuickBooking"></button>
+              <button type="button" data-view-link="events" data-i18n="homeQuickUpcoming"></button>
+            </nav>
+
+            <section class="landing-showcase">
+              <article class="landing-photo-card landing-photo-forum">
+                <span data-i18n="homeShowcaseLabel"></span>
+                <h2 data-i18n="homeShowcaseTitle"></h2>
+              </article>
+
+              <div class="landing-benefit-stack">
+                <article>
+                  <span>01</span>
+                  <h3 data-i18n="homeBenefitFastTitle"></h3>
+                  <p data-i18n="homeBenefitFastText"></p>
+                </article>
+                <article>
+                  <span>02</span>
+                  <h3 data-i18n="homeBenefitProcessTitle"></h3>
+                  <p data-i18n="homeBenefitProcessText"></p>
+                </article>
+                <article>
+                  <span>03</span>
+                  <h3 data-i18n="homeBenefitReadyTitle"></h3>
+                  <p data-i18n="homeBenefitReadyText"></p>
+                </article>
+              </div>
+            </section>
+
+            <section class="landing-preview-section">
+              <div class="landing-section-head">
+                <p class="eyebrow" data-i18n="homePreviewLabel"></p>
+                <h2 data-i18n="homePreviewTitle"></h2>
+              </div>
+
+              <div class="landing-preview-grid">
+                <article class="landing-preview-card">
+                  <div class="landing-preview-head">
+                    <span data-i18n="homePreviewUpcomingLabel"></span>
+                    <button class="secondary" type="button" data-view-link="events" data-i18n="homeOpenButton"></button>
+                  </div>
+                  <h3 data-i18n="upcomingEvents"></h3>
+                  <div id="dashboardEvents" class="landing-mini-list"></div>
+                </article>
+
+                <article class="landing-preview-card landing-preview-photo">
+                  <div class="landing-preview-head">
+                    <span data-i18n="homePreviewHallsLabel"></span>
+                    <button class="secondary" type="button" data-view-link="halls" data-i18n="homeChooseButton"></button>
+                  </div>
+                  <h3 data-i18n="navHalls"></h3>
+                  <div id="dashboardHallLoad" class="landing-mini-list"></div>
+                </article>
+
+                <article class="landing-preview-card">
+                  <div class="landing-preview-head">
+                    <span data-i18n="homePreviewCalendarLabel"></span>
+                    <button class="secondary" type="button" data-view-link="calendar" data-i18n="homeWatchButton"></button>
+                  </div>
+                  <h3 data-i18n="homeScheduleTitle"></h3>
+                  <div id="dashboardCalendar" class="landing-mini-list"></div>
+                </article>
+              </div>
+            </section>
+
+            <section class="landing-process">
+              <div>
+                <p class="eyebrow" data-i18n="homeProcessLabel"></p>
+                <h2 data-i18n="homeProcessTitle"></h2>
+              </div>
+              <ol>
+                <li><span>1</span><strong data-i18n="homeStepFormatTitle"></strong><p data-i18n="homeStepFormatText"></p></li>
+                <li><span>2</span><strong data-i18n="homeStepVenueTitle"></strong><p data-i18n="homeStepVenueText"></p></li>
+                <li><span>3</span><strong data-i18n="homeStepScheduleTitle"></strong><p data-i18n="homeStepScheduleText"></p></li>
+              </ol>
+            </section>
+
+            <section class="home-final-cta landing-final">
+              <div>
+                <p class="eyebrow" data-i18n="homeFinalLabel"></p>
+                <h2 data-i18n="homeFinalTitle"></h2>
+                <p data-i18n="homeFinalText"></p>
+              </div>
+
+              <div class="home-cta-actions">
+                <button type="button" data-view-link="events" data-i18n="homeFinalEventsButton"></button>
+                <button class="secondary" type="button" data-view-link="halls" data-i18n="homeFinalHallsButton"></button>
+              </div>
+            </section>
+
+            <!-- Скрытый блок для app.js, чтобы сайт не ломался -->
+            <div class="hidden">
+              <input id="homeSearchInput" type="search" />
+              <button id="homeSearchBtn" type="button"></button>
+              <button id="seedBtn" type="button"></button>
+
+              <div id="featuredEventBanner"></div>
+              <h3 id="featuredTitle"></h3>
+              <div id="featuredMeta"></div>
+              <div id="featuredCountdown"></div>
+              <button id="featuredBookBtn" type="button"></button>
+              <b id="cdDays"></b>
+              <b id="cdHours"></b>
+              <b id="cdMins"></b>
+
+              <span id="metricBookings">0</span>
+              <p id="metricSeatsLabel"></p>
+              <p id="metricBookingsLabel"></p>
+
+              <div id="recentActionsList"></div>
+              <div id="adminNotificationsList"></div>
+              <section id="clientWorkspace"></section>
+              <section id="adminWorkspace"></section>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════════ -->
+        <!-- Events View                                                     -->
+        <!-- ══════════════════════════════════════════════════════════════ -->
+        <section id="eventsView" class="view">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow" data-i18n="catalogLabel"></p>
+              <h2 data-i18n="catalogTitle"></h2>
+            </div>
+            <div class="filters">
+              <input id="searchInput" type="search" data-placeholder="search" />
+              <select id="categoryFilter">
+                <option value="all"        data-i18n="allCategories"></option>
+                <option value="conference" data-i18n="catConference"></option>
+                <option value="forum"      data-i18n="catForum"></option>
+                <option value="meetup"     data-i18n="catMeetup"></option>
+                <option value="seminar"    data-i18n="catSeminar"></option>
+                <option value="briefing"   data-i18n="catBriefing"></option>
+              </select>
+              <select id="formatFilter">
+                <option value="all"     data-i18n="allFormats"></option>
+                <option value="offline" data-i18n="formatOffline"></option>
+                <option value="online"  data-i18n="formatOnline"></option>
+                <option value="hybrid"  data-i18n="formatHybrid"></option>
+              </select>
+            </div>
+          </div>
+
+          <!-- ── NEW: View Toggle (Grid / List) — Cvent style ── -->
+          <div class="view-toggle-bar">
+            <div class="view-toggle">
+              <button class="vt-btn active" id="viewGrid" type="button" data-i18n-title="viewGrid" data-i18n-aria-label="viewGridAria">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
+              </button>
+              <button class="vt-btn" id="viewList" type="button" data-i18n-title="viewList" data-i18n-aria-label="viewListAria">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 3h12M1 7h12M1 11h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+            <span id="eventsCount" class="results-count"></span>
+          </div>
+
+          <div id="eventsList" class="events-grid"></div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════════ -->
+        <!-- Halls View                                                      -->
+        <!-- ══════════════════════════════════════════════════════════════ -->
+        <section id="hallsView" class="view">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow" data-i18n="hallsLabel"></p>
+              <h2 data-i18n="hallsTitle"></h2>
+            </div>
+            <div class="filters hall-filters">
+              <input id="hallSearchInput" type="search" data-placeholder="hallSearch" />
+              <select id="hallCapacityFilter">
+                <option value="all"    data-i18n="hallCapacityAny"></option>
+                <option value="small"  data-i18n="hallCapacitySmall"></option>
+                <option value="medium" data-i18n="hallCapacityMedium"></option>
+                <option value="large"  data-i18n="hallCapacityLarge"></option>
+              </select>
+            </div>
+          </div>
+
+          <!-- ── NEW: Availability Strip (MeetingHand-style) ── -->
+          <div class="avail-strip panel" id="availStrip">
+            <span class="avail-label" data-i18n="availToday"></span>
+            <div id="availSlots" class="avail-slots"></div>
+          </div>
+
+          <div id="hallsList" class="halls-grid"></div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════════ -->
+        <!-- Calendar View                                                   -->
+        <!-- ══════════════════════════════════════════════════════════════ -->
+        <section id="calendarView" class="view">
+          <div class="calendar-hero">
+            <div>
+              <p class="eyebrow" data-i18n="calendarLabel"></p>
+              <h2 data-i18n="calendarTitle"></h2>
+              <p class="lead" data-i18n="calendarIntroText"></p>
+            </div>
+            <div class="calendar-hero-card">
+              <span data-i18n="calendarHeroLabel"></span>
+              <strong data-i18n="calendarHeroTitle"></strong>
+              <p data-i18n="calendarHeroText"></p>
+              <div class="calendar-hero-row">
+                <span data-i18n="calendarHeroDate"></span>
+                <span data-i18n="calendarHeroHall"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="calendar-toolbar panel">
+            <label>
+              <span data-i18n="calendarFilterSearch"></span>
+              <input id="calendarSearchInput" type="search" data-placeholder="search" />
+            </label>
+            <label>
+              <span data-i18n="calendarFilterType"></span>
+              <select id="calendarTypeFilter">
+                <option value="all" data-i18n="allCategories"></option>
+                <option value="conference" data-i18n="catConference"></option>
+                <option value="forum" data-i18n="catForum"></option>
+                <option value="meetup" data-i18n="catMeetup"></option>
+                <option value="seminar" data-i18n="catSeminar"></option>
+                <option value="briefing" data-i18n="catBriefing"></option>
+              </select>
+            </label>
+            <label>
+              <span data-i18n="calendarFilterHall"></span>
+              <select id="calendarHallFilter">
+                <option value="all" data-i18n="calendarAllHalls"></option>
+              </select>
+            </label>
+            <label>
+              <span data-i18n="calendarFilterStatus"></span>
+              <select id="calendarStatusFilter">
+                <option value="all" data-i18n="filterAllStatuses"></option>
+                <option value="published" data-i18n="statusPublished"></option>
+                <option value="draft" data-i18n="statusDraft"></option>
+                <option value="closed" data-i18n="statusClosed"></option>
+                <option value="pending" data-i18n="requestStatusPending"></option>
+                <option value="approved" data-i18n="requestStatusApproved"></option>
+                <option value="cancelled" data-i18n="requestStatusCancelled"></option>
+              </select>
+            </label>
+          </div>
+
+          <div class="calendar-insight-grid">
+            <article>
+              <span data-i18n="calendarInsightPlanning"></span>
+              <strong data-i18n="calendarInsightPlanningValue"></strong>
+            </article>
+            <article>
+              <span data-i18n="calendarInsightHalls"></span>
+              <strong data-i18n="calendarInsightHallsValue"></strong>
+            </article>
+            <article>
+              <span data-i18n="calendarInsightStatus"></span>
+              <strong data-i18n="calendarInsightStatusValue"></strong>
+            </article>
+          </div>
+
+          <div class="calendar-workbench">
+            <div class="full-calendar panel calendar-month-panel">
+              <div class="calendar-panel-head">
+                <div>
+                  <span data-i18n="calendarMonthOverview"></span>
+                  <strong id="calMonthLabel" class="cal-month-label"></strong>
+                </div>
+                <div class="cal-nav">
+                  <button class="secondary icon-button" id="calPrev" type="button" data-i18n-aria-label="previousMonth">
+                    <svg width="10" height="14" viewBox="0 0 10 14" fill="none" aria-hidden="true"><path d="M8 2L3 7l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+                  <button class="secondary icon-button" id="calNext" type="button" data-i18n-aria-label="nextMonth">
+                    <svg width="10" height="14" viewBox="0 0 10 14" fill="none" aria-hidden="true"><path d="M2 2l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="cal-header-row">
+                <span data-i18n="calMon"></span><span data-i18n="calTue"></span><span data-i18n="calWed"></span><span data-i18n="calThu"></span><span data-i18n="calFri"></span><span data-i18n="calSat"></span><span data-i18n="calSun"></span>
+              </div>
+              <div id="calGrid" class="cal-grid"></div>
+            </div>
+            <section class="panel calendar-agenda-panel">
+              <div class="calendar-agenda-head">
+                <span data-i18n="calendarAgendaLabel"></span>
+                <h3 data-i18n="calendarAgendaTitle"></h3>
+                <p data-i18n="calendarAgendaText"></p>
+              </div>
+              <div id="calendarAgendaList" class="mini-list"></div>
+            </section>
+          </div>
+
+          <div id="calDayEvents" class="cal-day-events hidden">
+            <div class="cal-day-events-head">
+              <span id="calDayTitle" class="cal-day-title"></span>
+              <button class="secondary icon-button" id="calDayClose" type="button" data-i18n-aria-label="close">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 1l8 8M9 1L1 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+            <div id="calDayList" class="mini-list"></div>
+          </div>
+          <div id="calendarList" class="hidden"></div>
+        </section>
+
+<section id="floorplanView" class="view">
+  <div class="map-hero">
+    <div>
+      <p class="eyebrow" data-i18n="mapLabel"></p>
+      <h2 data-i18n="mapTitle"></h2>
+      <p class="lead" data-i18n="mapDescription"></p>
+      <div class="map-legend">
+        <span class="legend-item"><span class="map-dot map-dot--free"></span><span data-i18n="mapLegendFree"></span></span>
+        <span class="legend-item"><span class="map-dot map-dot--soon"></span><span data-i18n="mapLegendSoon"></span></span>
+        <span class="legend-item"><span class="map-dot map-dot--busy"></span><span data-i18n="mapLegendBusy"></span></span>
+      </div>
+    </div>
+    <div class="map-hero-stats">
+      <article><strong>12</strong><span data-i18n="mapStatHalls"></span></article>
+      <article><strong>5</strong><span data-i18n="mapStatFloors"></span></article>
+      <article><strong>1800</strong><span data-i18n="mapStatCapacity"></span></article>
+    </div>
+  </div>
+
+  <div class="map-building-grid">
+    <section class="panel map-floor-selector">
+      <span data-i18n="mapFloorSelectorTitle"></span>
+      <button class="active" type="button" data-map-floor="all" data-i18n="mapFloorAll"></button>
+      <button type="button" data-map-floor="floor1" data-i18n="mapFloor1"></button>
+      <button type="button" data-map-floor="floor2" data-i18n="mapFloor2"></button>
+      <button type="button" data-map-floor="floor3" data-i18n="mapFloor3"></button>
+      <button type="button" data-map-floor="floor4" data-i18n="mapFloor4"></button>
+      <button type="button" data-map-floor="floor5" data-i18n="mapFloor5"></button>
+    </section>
+    <section class="panel map-building-visual">
+      <div class="building-visual-head">
+        <span data-i18n="mapBuildingPlanLabel"></span>
+        <strong data-i18n="mapBuildingPlanTitle"></strong>
+      </div>
+      <div class="building-plan">
+        <div class="building-zone zone-free"><b>Grand Hall A</b><span data-i18n="mapFloor1"></span></div>
+        <div class="building-zone zone-soon"><b>Orion Hall B</b><span data-i18n="mapFloor2"></span></div>
+        <div class="building-zone zone-free"><b>Workshop Hub C</b><span data-i18n="mapFloor2"></span></div>
+        <div class="building-zone zone-busy"><b>Silk Road Room</b><span data-i18n="mapFloor3"></span></div>
+        <div class="building-zone zone-free"><b>Nova Lab</b><span data-i18n="mapFloor4"></span></div>
+        <div class="building-zone zone-soon"><b>Skyline Lounge</b><span data-i18n="mapFloor5"></span></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="map-filters-bar panel">
+    <label class="map-filter-group">
+      <span class="map-filter-label" data-i18n="mapFilterFloor"></span>
+      <select id="mapCityFilter" class="map-filter-select">
+        <option value="all" data-i18n="mapFloorAll"></option>
+        <option value="floor1" data-i18n="mapFloor1"></option>
+        <option value="floor2" data-i18n="mapFloor2"></option>
+        <option value="floor3" data-i18n="mapFloor3"></option>
+        <option value="floor4" data-i18n="mapFloor4"></option>
+        <option value="floor5" data-i18n="mapFloor5"></option>
+      </select>
+    </label>
+    <label class="map-filter-group">
+      <span class="map-filter-label" data-i18n="mapFilterType"></span>
+      <select id="mapTypeFilter" class="map-filter-select">
+        <option value="all" data-i18n="mapTypeAll"></option>
+        <option value="conference" data-i18n="mapTypeConference"></option>
+        <option value="business" data-i18n="mapTypeBusiness"></option>
+        <option value="expo" data-i18n="mapTypeExpo"></option>
+        <option value="venue" data-i18n="mapTypeVenue"></option>
+      </select>
+    </label>
+    <label class="map-filter-group">
+      <span class="map-filter-label" data-i18n="mapFilterCapacity"></span>
+      <select id="mapCapacityFilter" class="map-filter-select">
+        <option value="all" data-i18n="mapCapacityAll"></option>
+        <option value="small" data-i18n="mapCapacitySmall"></option>
+        <option value="medium" data-i18n="mapCapacityMedium"></option>
+        <option value="large" data-i18n="mapCapacityLarge"></option>
+      </select>
+    </label>
+    <label class="map-filter-group">
+      <span class="map-filter-label" data-i18n="mapFilterStatus"></span>
+      <select id="mapStatusFilter" class="map-filter-select">
+        <option value="all" data-i18n="filterAllStatuses"></option>
+        <option value="free" data-i18n="mapLegendFree"></option>
+        <option value="soon" data-i18n="mapLegendSoon"></option>
+        <option value="busy" data-i18n="mapLegendBusy"></option>
+      </select>
+    </label>
+    <label class="map-filter-group map-filter-search">
+      <span class="map-filter-label" data-i18n="mapFilterSearch"></span>
+      <input id="mapSearchInput" type="search" class="map-filter-select" data-placeholder="mapFilterSearchPlaceholder" />
+    </label>
+    <button id="mapFilterReset" class="secondary map-reset-btn" type="button" data-i18n="mapFilterReset"></button>
+  </div>
+
+  <div class="map-layout">
+    <aside class="map-sidebar panel">
+      <div class="map-sidebar-head">
+        <div>
+          <span data-i18n="mapSidebarLabel"></span>
+          <h3 id="mapSidebarCount" class="map-sidebar-title"></h3>
+        </div>
+        <div class="map-view-toggle">
+          <button id="mapListBtn" class="map-vtbtn active" type="button" data-i18n-title="viewList">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 3h12M1 7h12M1 11h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+          <button id="mapGridBtn" class="map-vtbtn" type="button" data-i18n-title="viewGrid">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
+          </button>
+        </div>
+      </div>
+      <div id="mapVenueList" class="map-venue-list"></div>
+    </aside>
+
+    <div class="map-main">
+      <div class="map-canvas-shell">
+        <div id="mapContainer" class="map-canvas"></div>
+      </div>
+      <div class="map-ticker panel">
+        <span class="map-ticker-label">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M6 1l1.5 3H11l-2.5 2 1 3L6 7.5 2.5 9l1-3L1 4h3.5z" fill="currentColor"/></svg>
+          <span data-i18n="mapTickerLabel"></span>
+        </span>
+        <div id="mapTickerItems" class="map-ticker-items"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="mapDrawer" class="map-drawer hidden" role="dialog" aria-modal="true" data-i18n-aria-label="mapDrawerAria">
+    <div class="map-drawer-backdrop" id="mapDrawerBackdrop"></div>
+    <div class="map-drawer-panel">
+      <div class="map-drawer-header">
+        <div>
+          <span id="drawerType" class="tag map-drawer-tag"></span>
+          <h3 id="drawerName" class="map-drawer-name"></h3>
+          <p id="drawerAddress" class="map-drawer-address muted"></p>
+        </div>
+        <button id="mapDrawerClose" class="icon-button secondary" type="button" data-i18n-aria-label="close">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M1 1l8 8M9 1L1 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+
+      <div id="drawerImageWrap" class="map-drawer-image"></div>
+
+      <div class="map-drawer-status-bar">
+        <span id="drawerStatusBadge" class="map-status-badge"></span>
+        <span id="drawerCapacity" class="map-drawer-capacity">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><circle cx="6.5" cy="4.5" r="2.2" stroke="currentColor" stroke-width="1.3"/><path d="M1.5 11.5c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          <span id="drawerCapacityText"></span>
+        </span>
+        <span id="drawerNextEvent" class="map-drawer-next">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><rect x="1" y="2.5" width="11" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M1 6h11M4 1v2M9 1v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          <span id="drawerNextEventText"></span>
+        </span>
+      </div>
+
+      <div class="map-drawer-tabs">
+        <button class="map-drawer-tab active" type="button" data-drawer-tab="info" data-i18n="mapDrawerTabInfo"></button>
+        <button class="map-drawer-tab" type="button" data-drawer-tab="events" data-i18n="mapDrawerTabEvents"></button>
+        <button class="map-drawer-tab" type="button" data-drawer-tab="dates" data-i18n="mapDrawerTabDates"></button>
+      </div>
+
+      <div id="drawerTabInfo" class="map-drawer-tabpanel">
+        <p id="drawerDesc" class="map-drawer-desc"></p>
+        <div id="drawerEquipList" class="map-equip-list"></div>
+      </div>
+      <div id="drawerTabEvents" class="map-drawer-tabpanel hidden">
+        <div id="drawerEventsList" class="map-drawer-events"></div>
+      </div>
+      <div id="drawerTabDates" class="map-drawer-tabpanel hidden">
+        <div id="drawerDatesList" class="map-drawer-dates"></div>
+      </div>
+
+      <div class="map-drawer-actions">
+        <button id="drawerBookBtn" type="button" class="map-drawer-book-btn" data-i18n="mapDrawerBook"></button>
+        <button id="drawerHallsBtn" class="secondary" type="button" data-i18n="mapDrawerHalls"></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+        <section id="aboutView" class="view">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow" data-i18n="aboutLabel"></p>
+              <h2 data-i18n="aboutTitle"></h2>
+            </div>
+          </div>
+          <div class="about-grid">
+            <section class="panel about-main">
+              <h3 data-i18n="aboutMissionTitle"></h3>
+              <p data-i18n="aboutMissionText"></p>
+              <h3 data-i18n="aboutForWhomTitle"></h3>
+              <p data-i18n="aboutForWhomText"></p>
+            </section>
+            <section class="panel about-list">
+              <h3 data-i18n="aboutFeaturesTitle"></h3>
+              <ul>
+                <li data-i18n="aboutFeature1"></li>
+                <li data-i18n="aboutFeature2"></li>
+                <li data-i18n="aboutFeature3"></li>
+                <li data-i18n="aboutFeature4"></li>
+              </ul>
+            </section>
+          </div>
+          <div class="about-capability-grid">
+            <section class="panel capability-panel">
+              <span>01</span>
+              <h3 data-i18n="homeCardEventsTitle"></h3>
+              <p data-i18n="homeCardEventsText"></p>
+            </section>
+            <section class="panel capability-panel">
+              <span>02</span>
+              <h3 data-i18n="homeCardHallsTitle"></h3>
+              <p data-i18n="homeCardHallsText"></p>
+            </section>
+            <section class="panel capability-panel">
+              <span>03</span>
+              <h3 data-i18n="homeCardCalendarTitle"></h3>
+              <p data-i18n="homeCardCalendarText"></p>
+            </section>
+            <section class="panel capability-panel">
+              <span>04</span>
+              <h3 data-i18n="homeCardSupportTitle"></h3>
+              <p data-i18n="homeCardSupportText"></p>
+            </section>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════════ -->
+        <!-- Profile View  (Client Personal Cabinet)                        -->
+        <!-- ══════════════════════════════════════════════════════════════ -->
+        <section id="profileView" class="view">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow" data-i18n="profileLabel"></p>
+              <h2 data-i18n="profileTitle"></h2>
+            </div>
+          </div>
+
+          <div class="cabinet-tabs">
+            <button class="cabinet-tab active" type="button" data-cabinet="profile-data" data-i18n="profileData"></button>
+            <button class="cabinet-tab" type="button" data-cabinet="my-events" data-i18n="myRegistrations"></button>
+            <button class="cabinet-tab" type="button" data-cabinet="my-halls" data-i18n="myHallRequests"></button>
+            <button class="cabinet-tab" type="button" data-cabinet="notifications" data-i18n="clientNotificationsTitle"></button>
+          </div>
+
+          <div id="cabinet-profile-data" class="cabinet-panel">
+            <div class="profile-grid">
+              <form id="profileForm" class="panel form-panel">
+                <h3 data-i18n="profileData"></h3>
+                <input name="name"         type="text" data-placeholder="name"         required />
+                <input name="phone"        type="text" data-placeholder="phone" />
+                <input name="organization" type="text" data-placeholder="organization" />
+                <input name="city"         type="text" data-placeholder="city" />
+                <button type="submit" data-i18n="saveProfile"></button>
+              </form>
+              <section class="panel">
+                <h3 data-i18n="myRegistrations"></h3>
+                <div id="myBookingsList" class="booking-list"></div>
+              </section>
+            </div>
+          </div>
+
+          <div id="cabinet-my-events" class="cabinet-panel hidden">
+            <section class="panel">
+              <h3 data-i18n="myRegistrations"></h3>
+              <div id="myBookingsListFull" class="booking-list"></div>
+            </section>
+          </div>
+
+          <div id="cabinet-my-halls" class="cabinet-panel hidden">
+            <section class="panel">
+              <h3 data-i18n="myHallRequests"></h3>
+              <div id="myHallBookingsList" class="booking-list"></div>
+            </section>
+          </div>
+
+          <div id="cabinet-notifications" class="cabinet-panel hidden">
+            <section class="panel">
+              <h3 data-i18n="clientNotificationsTitle"></h3>
+              <div id="myNotificationsList" class="booking-list"></div>
+            </section>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════════ -->
+        <!-- Request View                                                   -->
+        <!-- ══════════════════════════════════════════════════════════════ -->
+        <section id="requestView" class="view">
+          <div class="request-hero panel">
+            <div>
+              <p class="eyebrow" data-i18n="requestLabel"></p>
+              <h2 data-i18n="requestTitle"></h2>
+              <p class="muted" data-i18n="requestIntro"></p>
+            </div>
+            <div class="request-hero-steps">
+              <span data-i18n="requestStepHall"></span>
+              <span data-i18n="requestStepSlot"></span>
+              <span data-i18n="requestStepForm"></span>
+              <span data-i18n="requestStepPay"></span>
+            </div>
+          </div>
+
+          <div class="request-layout">
+            <section class="panel request-picker">
+              <div class="request-section-head">
+                <div>
+                  <p class="eyebrow" data-i18n="requestChooseHallLabel"></p>
+                  <h3 data-i18n="requestChooseHallTitle"></h3>
+                </div>
+              </div>
+              <div id="requestHallGrid" class="request-hall-grid"></div>
+
+              <div class="request-date-card">
+                <div class="field">
+                  <label for="requestDate" data-i18n="requestDateLabel"></label>
+                  <input id="requestDate" type="date" />
+                </div>
+                <div>
+                  <p class="eyebrow" data-i18n="requestSlotsLabel"></p>
+                  <div id="requestSlotGrid" class="request-slot-grid"></div>
+                </div>
+              </div>
+            </section>
+
+            <aside class="panel request-summary-card">
+              <p class="eyebrow" data-i18n="requestSummaryLabel"></p>
+              <h3 data-i18n="requestSummaryTitle"></h3>
+              <div id="requestSelectedSummary" class="request-selected-summary"></div>
+              <div class="request-price-line">
+                <span data-i18n="requestRentTotal"></span>
+                <strong id="requestRentPreview">0 ₸</strong>
+              </div>
+            </aside>
+          </div>
+
+          <form id="customRequestForm" class="panel request-form hidden" novalidate>
+            <div class="request-section-head">
+              <div>
+                <p class="eyebrow" data-i18n="requestFormLabel"></p>
+                <h3 data-i18n="requestFormTitle"></h3>
+              </div>
+            </div>
+
+            <div class="request-form-grid">
+              <div class="field">
+                <label for="requestEventTitle" data-i18n="requestEventTitle"></label>
+                <input id="requestEventTitle" name="eventTitle" type="text" data-placeholder="requestEventTitle" required />
+              </div>
+
+              <div class="field">
+                <label for="requestCategory" data-i18n="category"></label>
+                <select id="requestCategory" name="category" required>
+                  <option value="" data-i18n="category"></option>
+                  <option value="conference" data-i18n="catConference"></option>
+                  <option value="forum" data-i18n="catForum"></option>
+                  <option value="seminar" data-i18n="catSeminar"></option>
+                  <option value="presentation" data-i18n="requestTypePresentation"></option>
+                  <option value="meeting" data-i18n="requestTypeBusinessMeeting"></option>
+                  <option value="other" data-i18n="requestTypeOther"></option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="requestFormat" data-i18n="requestEventType"></label>
+                <select id="requestFormat" name="format" required>
+                  <option value="conference" data-i18n="catConference"></option>
+                  <option value="forum" data-i18n="catForum"></option>
+                  <option value="seminar" data-i18n="catSeminar"></option>
+                  <option value="presentation" data-i18n="requestTypePresentation"></option>
+                  <option value="meeting" data-i18n="requestTypeBusinessMeeting"></option>
+                  <option value="other" data-i18n="requestTypeOther"></option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="requestAttendees" data-i18n="hallGuests"></label>
+                <input id="requestAttendees" name="attendees" type="text" inputmode="numeric" pattern="[0-9]+" data-placeholder="hallGuests" required />
+              </div>
+
+              <div class="field">
+                <label for="requestTicketPrice" data-i18n="requestTicketPrice"></label>
+                <input id="requestTicketPrice" name="ticketPrice" type="text" inputmode="numeric" pattern="[0-9]*" value="0" data-placeholder="requestTicketPrice" />
+              </div>
+
+              <div class="field">
+                <label for="requestContactName" data-i18n="requestContactPerson"></label>
+                <input id="requestContactName" name="contactName" type="text" data-placeholder="requestContactPerson" required />
+              </div>
+
+              <div class="field">
+                <label for="requestPhone" data-i18n="phone"></label>
+                <input id="requestPhone" name="phone" type="tel" data-placeholder="phone" required />
+              </div>
+
+              <div class="field">
+                <label for="requestEmail" data-i18n="email"></label>
+                <input id="requestEmail" name="email" type="text" inputmode="email" data-placeholder="email" required />
+              </div>
+
+              <div class="field request-field-wide">
+                <label for="requestDescription" data-i18n="description"></label>
+                <textarea id="requestDescription" name="description" rows="3" data-placeholder="requestDescriptionPlaceholder" required></textarea>
+              </div>
+
+              <div class="field request-field-wide">
+                <label for="requestNotes" data-i18n="requestAdminNotes"></label>
+                <textarea id="requestNotes" name="notes" rows="3" data-placeholder="requestAdminNotes"></textarea>
+              </div>
+            </div>
+
+            <section class="request-services">
+              <div>
+                <p class="eyebrow" data-i18n="requestServicesLabel"></p>
+                <h3 data-i18n="requestServicesTitle"></h3>
+              </div>
+              <div class="request-services-grid">
+                <label><input type="checkbox" name="services" value="projector" data-price="10000" /><span data-i18n="serviceProjector"></span></label>
+                <label><input type="checkbox" name="services" value="tv" data-price="15000" /><span data-i18n="serviceTv"></span></label>
+                <label><input type="checkbox" name="services" value="microphones" data-price="8000" /><span data-i18n="serviceMicrophones"></span></label>
+                <label><input type="checkbox" name="services" value="audio" data-price="12000" /><span data-i18n="serviceAudio"></span></label>
+                <label><input type="checkbox" name="services" value="wifi" data-price="5000" /><span data-i18n="serviceWifi"></span></label>
+                <label><input type="checkbox" name="services" value="laptop" data-price="7000" /><span data-i18n="serviceLaptop"></span></label>
+                <label><input type="checkbox" name="services" value="flipchart" data-price="4000" /><span data-i18n="serviceFlipchart"></span></label>
+                <label><input type="checkbox" name="services" value="coffee" data-price="25000" /><span data-i18n="serviceCoffee"></span></label>
+                <label><input type="checkbox" name="services" value="tech" data-price="18000" /><span data-i18n="serviceTech"></span></label>
+                <label><input type="checkbox" name="services" value="photo" data-price="35000" /><span data-i18n="servicePhoto"></span></label>
+                <label><input type="checkbox" name="services" value="registration" data-price="9000" /><span data-i18n="serviceRegistration"></span></label>
+              </div>
+            </section>
+
+            <div class="request-form-actions">
+              <div>
+                <span data-i18n="requestTotalLabel"></span>
+                <strong id="requestTotalPreview">0 ₸</strong>
+              </div>
+              <button type="submit" data-i18n="requestPayAndSubmit"></button>
+            </div>
+          </form>
+        </section>
+
+       <!-- ═════════════════════════════════════ -->
+       <!-- Admin Panel -->
+       <!-- ═════════════════════════════════════ -->
+        
+       <section id="adminView" class="view" data-portal-group="admin">
+  <div class="section-head">
+    <div>
+      <p class="eyebrow">Панель администратора</p>
+      <h2>Администрирование системы</h2>
+      <p class="muted">
+        Рабочая зона администратора для контроля мероприятий, конференц-залов, заявок, расписания и технического состояния площадок.
+      </p>
+    </div>
+    <button id="exportBookingsBtn" class="secondary" type="button" data-i18n="exportBookings"></button>
+  </div>
+
+  <div class="admin-command-center panel">
+    <div>
+      <p class="eyebrow">Текущая ситуация на сайте</p>
+      <h3>Оперативный обзор площадки</h3>
+      <p class="muted">
+        Здесь администратор видит, какие мероприятия активны, сколько заявок поступило, какие залы свободны,
+        какие даты заняты и какие помещения требуют проверки перед проведением мероприятий.
+      </p>
+    </div>
+    <div class="admin-command-actions">
+      <button type="button" data-view-link="calendar">Проверить календарь</button>
+      <button class="secondary" type="button" data-view-link="halls">Состояние залов</button>
+      <button class="secondary" type="button" data-view-link="events">Каталог мероприятий</button>
+    </div>
+  </div>
+
+  <div class="metric-grid admin-metrics">
+    <article>
+      <span id="adminStatEvents">0</span>
+      <p>Мероприятий на сайте</p>
+    </article>
+    <article>
+      <span id="adminStatBookings">0</span>
+      <p>Заявок от клиентов</p>
+    </article>
+    <article>
+      <span id="adminStatUsers">0</span>
+      <p>Пользователей</p>
+    </article>
+    <article>
+      <span id="adminStatCheckedIn">0</span>
+      <p>Прошли check-in</p>
+    </article>
+    <article>
+      <span id="adminStatPaidTickets">0</span>
+      <p>Оплаченных билетов</p>
+    </article>
+    <article>
+      <span id="adminStatHallApproved">0</span>
+      <p>Одобренных броней залов</p>
+    </article>
+  </div>
+
+  <div class="admin-analytics-grid">
+    <section class="panel">
+      <h3>Загруженность площадки</h3>
+      <p class="muted">
+        Контроль занятых дат, активных заявок и свободных ресурсов здания.
+      </p>
+      <div class="analytics-bars">
+        <div>
+          <span>Занятые даты календаря</span>
+          <b>72%</b>
+          <i style="width:72%"></i>
+        </div>
+        <div>
+          <span>Подтвержденные бронирования залов</span>
+          <b>58%</b>
+          <i style="width:58%"></i>
+        </div>
+        <div>
+          <span>Заявки на рассмотрении</span>
+          <b>24%</b>
+          <i style="width:24%"></i>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h3>Уведомления и ошибки</h3>
+      <p class="muted">
+        Системные сообщения, новые заявки, отмены, технические предупреждения и действия клиентов.
+      </p>
+      <div id="adminNotificationsFeed" class="mini-list"></div>
+    </section>
+  </div>
+
+  <div class="admin-nav-grid">
+    <button class="admin-nav-card" type="button" data-view-link="events">
+      <strong>Редактировать мероприятия</strong>
+      <span>Изменение объявлений, дат, времени, описания, формата, цены и локации мероприятий.</span>
+    </button>
+
+    <button class="admin-nav-card" type="button" data-view-link="halls">
+      <strong>Управлять конференц-залами</strong>
+      <span>Проверка доступности залов, этажей, вместимости, оснащения и технического состояния.</span>
+    </button>
+
+    <button class="admin-nav-card" type="button" data-view-link="calendar">
+      <strong>Контролировать расписание</strong>
+      <span>Просмотр занятых дат, времени проведения мероприятий, бронирований и пересечений.</span>
+    </button>
+
+    <button class="admin-nav-card" type="button" data-view-link="admin">
+      <strong>Обработать заявки</strong>
+      <span>Одобрение, отклонение и проверка заявок клиентов на мероприятия и бронирование залов.</span>
+    </button>
+  </div>
+
+  <div class="admin-layout">
+    <section class="panel admin-users-panel">
+      <h3>Пользователи и активность</h3>
+      <p class="muted">
+        Список клиентов, которые зарегистрировались в системе или оставили заявки.
+      </p>
+      <div id="adminUsersList" class="booking-list"></div>
+    </section>
+
+    <form id="eventForm" class="panel form-panel">
+      <input type="hidden" name="id" />
+      <h3 id="eventFormTitle">Редактирование мероприятия</h3>
+
+      <input name="title" type="text" data-placeholder="eventTitle" required />
+
+      <div class="split">
+        <input name="date" type="date" required />
+        <input name="time" type="time" value="10:00" required />
+      </div>
+
+      <div class="split">
+        <select name="category" required>
+          <option value="" data-i18n="category"></option>
+          <option value="conference" data-i18n="catConference"></option>
+          <option value="forum" data-i18n="catForum"></option>
+          <option value="meetup" data-i18n="catMeetup"></option>
+          <option value="seminar" data-i18n="catSeminar"></option>
+          <option value="briefing" data-i18n="catBriefing"></option>
+        </select>
+
+        <select name="status" required>
+          <option value="published" data-i18n="statusPublished"></option>
+          <option value="draft" data-i18n="statusDraft"></option>
+          <option value="closed" data-i18n="statusClosed"></option>
+        </select>
+      </div>
+
+      <input name="location" type="text" data-placeholder="location" required />
+      <input name="organizer" type="text" value="ORDA" data-placeholder="organizer" />
+
+      <div class="split">
+        <select name="format" required>
+          <option value="offline" data-i18n="formatOffline"></option>
+          <option value="online" data-i18n="formatOnline"></option>
+          <option value="hybrid" data-i18n="formatHybrid"></option>
+        </select>
+        <input name="meetingUrl" type="url" data-placeholder="meetingUrl" />
+      </div>
+
+      <div class="split">
+        <input name="capacity" type="number" min="1" value="80" data-placeholder="capacity" required />
+        <input name="price" type="number" min="0" value="0" data-placeholder="price" />
+      </div>
+
+      <input name="tags" type="text" data-placeholder="tags" />
+
+      <label class="checkbox-row">
+        <input name="featured" type="checkbox" />
+        <span data-i18n="featured"></span>
+      </label>
+
+      <textarea name="description" rows="4" data-placeholder="description"></textarea>
+      <textarea name="agenda" rows="4" data-placeholder="agenda"></textarea>
+
+      <div class="form-actions">
+        <button type="submit" data-i18n="saveEvent"></button>
+        <button id="resetEventForm" class="secondary" type="button" data-i18n="clear"></button>
+      </div>
+    </form>
+
+    <section class="panel form-panel">
+      <form id="hallForm" class="form-panel" style="padding:0;border:0;box-shadow:none;background:transparent;">
+        <input type="hidden" name="id" />
+        <h3 id="hallFormTitle">Редактирование конференц-зала</h3>
+
+        <input name="name" type="text" data-placeholder="hallNamePlaceholder" required />
+
+        <div class="split">
+          <input name="floor" type="text" data-placeholder="hallFloorPlaceholder" required />
+          <input name="location" type="text" data-placeholder="hallLocationPlaceholder" required />
+        </div>
+
+        <div class="split">
+          <input name="capacity" type="number" min="1" value="50" data-placeholder="hallCapacityPlaceholder" required />
+          <input name="pricePerHour" type="number" min="0" value="15000" data-placeholder="hallPricePlaceholder" required />
+        </div>
+
+        <input name="equipment" type="text" data-placeholder="hallEquipmentPlaceholder" />
+
+        <select name="status" required>
+          <option value="available" data-i18n="hallStatusAvailable"></option>
+          <option value="maintenance" data-i18n="hallStatusMaintenance"></option>
+          <option value="busy" data-i18n="hallStatusBusy"></option>
+        </select>
+
+        <textarea name="description" rows="3" data-placeholder="hallDescriptionPlaceholder"></textarea>
+
+        <div class="form-actions">
+          <button type="submit" data-i18n="saveHall"></button>
+          <button id="resetHallForm" class="secondary" type="button" data-i18n="clear"></button>
+        </div>
+      </form>
+
+      <div style="margin-top:16px">
+        <h3>Состояние залов</h3>
+        <p class="muted">
+          Здесь отображаются залы, которые свободны, заняты, находятся на обслуживании или временно не готовы к мероприятиям.
+        </p>
+      </div>
+
+      <div id="adminHallsList" class="booking-list" style="margin-top:12px;"></div>
+    </section>
+
+    <section class="panel admin-requests-panel">
+      <div class="admin-requests-head">
+        <div>
+          <h3 data-i18n="adminEventRequestsTitle"></h3>
+          <p class="muted" data-i18n="adminEventRequestsText"></p>
+        </div>
+
+        <div class="admin-request-filters">
+          <select id="adminRequestTypeFilter">
+            <option value="all" data-i18n="filterAllRequests"></option>
+            <option value="event" data-i18n="filterEventRequests"></option>
+            <option value="hall" data-i18n="filterHallRequests"></option>
+            <option value="custom-event" data-i18n="filterCustomEventRequests"></option>
+          </select>
+
+          <select id="adminRequestStatusFilter">
+            <option value="all" data-i18n="filterAllStatuses"></option>
+            <option value="new" data-i18n="requestStatusNew"></option>
+            <option value="review" data-i18n="requestStatusReview"></option>
+            <option value="pending" data-i18n="requestStatusPending"></option>
+            <option value="approved" data-i18n="requestStatusApproved"></option>
+            <option value="rejected" data-i18n="requestStatusRejected"></option>
+            <option value="cancelled" data-i18n="requestStatusCancelled"></option>
+          </select>
+        </div>
+      </div>
+
+      <div id="adminBookingsList" class="booking-list"></div>
+    </section>
+  </div>
+</section>
+
+      </main>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- MODAL: Event Detail (enhanced with agenda timeline + speakers)      -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <div id="eventModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="eventModalTitle">
+      <div class="modal-card modal-wide">
+        <button id="closeModal" class="icon-button modal-close secondary" type="button" data-i18n-aria-label="close">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+        <div id="eventDetails"></div>
+
+        <!-- ── NEW: Agenda Timeline (Whova-style) ── -->
+        <div id="agendaSection" class="agenda-section hidden">
+          <h4 class="agenda-title" data-i18n="agendaTitle"></h4>
+          <div id="agendaTimeline" class="agenda-timeline"></div>
+        </div>
+
+        <!-- ── NEW: Speakers (Swapcard-style) ── -->
+        <div id="speakersSection" class="speakers-section hidden">
+          <h4 class="speakers-title" data-i18n="speakersTitle"></h4>
+          <div id="speakersList" class="speakers-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- MODAL: Hall Booking                                                  -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <div id="hallModal" class="modal hidden" role="dialog" aria-modal="true">
+      <div class="modal-card">
+        <button id="closeHallModal" class="icon-button modal-close secondary" type="button" data-i18n-aria-label="close">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+        <form id="hallBookingForm" class="form-panel hall-booking-form">
+          <input type="hidden" name="hallId" />
+          <h3 id="hallBookingTitle" data-i18n="hallBookingModalTitle"></h3>
+          <p id="hallBookingSubtitle" class="muted"></p>
+
+          <div class="split">
+            <div class="field">
+              <label for="hallDate" data-i18n="date"></label>
+              <input id="hallDate" type="date" name="date" required />
+            </div>
+            <div class="field">
+              <label for="hallTime" data-i18n="startTime"></label>
+              <input id="hallTime" type="time" name="time" value="09:00" required />
+            </div>
+          </div>
+
+          <div class="split">
+            <div class="field">
+              <label for="hallDuration" data-i18n="hallDuration"></label>
+              <input id="hallDuration" type="number" name="duration" value="2" min="1" max="12" required />
+            </div>
+            <div class="field">
+              <label for="hallGuests" data-i18n="hallGuests"></label>
+              <input id="hallGuests" type="number" name="attendees" value="30" min="1" required />
+            </div>
+          </div>
+
+          <!-- ── NEW: Equipment checklist ── -->
+          <div class="field">
+            <label data-i18n="equipment"></label>
+            <div class="equipment-checks">
+              <label class="eq-check"><input type="checkbox" name="eq_projector" /><span data-i18n="eqProjector"></span></label>
+              <label class="eq-check"><input type="checkbox" name="eq_mic" /><span data-i18n="eqMic"></span></label>
+              <label class="eq-check"><input type="checkbox" name="eq_webcast" /><span data-i18n="eqWebcast"></span></label>
+              <label class="eq-check"><input type="checkbox" name="eq_catering" /><span data-i18n="eqCatering"></span></label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="hallPurpose" data-i18n="hallPurpose"></label>
+            <input id="hallPurpose" type="text" name="purpose" data-placeholder="hallPurposePlaceholder" required />
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" data-i18n="submitRequest"></button>
+            <button id="cancelHallBooking" class="secondary" type="button" data-i18n="cancel"></button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- MODAL: Payment                                                      -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <div id="paymentModal" class="modal hidden" role="dialog" aria-modal="true">
+      <div class="modal-card">
+        <button id="closePaymentModal" class="icon-button modal-close secondary" type="button" data-i18n-aria-label="close">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+        <form id="paymentForm" class="form-panel">
+          <input type="hidden" name="eventId" />
+          <input type="hidden" name="bookingId" />
+          <input type="hidden" name="bookingType" value="event" />
+          <h3 data-i18n="paymentTitle"></h3>
+          <p class="muted"><strong id="paymentEventTitle">—</strong></p>
+          <p class="muted"><span data-i18n="paymentAmountLabel"></span>: <strong id="paymentAmount">—</strong></p>
+
+          <div id="paymentMethodSwitch" class="pay-methods">
+            <label class="pay-method-chip"><input type="radio" name="paymentMethod" value="card" checked /><span data-i18n="payMethodCard"></span></label>
+            <label class="pay-method-chip"><input type="radio" name="paymentMethod" value="kaspi" /><span data-i18n="payMethodKaspi"></span></label>
+            <label class="pay-method-chip"><input type="radio" name="paymentMethod" value="applepay" /><span data-i18n="payMethodApple"></span></label>
+            <label class="pay-method-chip"><input type="radio" name="paymentMethod" value="googlepay" /><span data-i18n="payMethodGoogle"></span></label>
+          </div>
+
+          <div id="payCardFields" class="pay-method-panel">
+            <input name="cardHolder" type="text" data-placeholder="cardHolderPlaceholder" required />
+            <input name="cardNumber" type="text" data-placeholder="cardNumberPlaceholder" minlength="12" maxlength="19" required />
+            <div class="split">
+              <input name="cardExp" type="text" data-placeholder="cardExpiryPlaceholder" minlength="4" maxlength="5" required />
+              <input name="cardCvc" type="password" data-placeholder="cardCvcPlaceholder" minlength="3" maxlength="4" required />
+            </div>
+          </div>
+
+          <div id="payKaspiFields" class="pay-method-panel hidden">
+            <input name="kaspiPhone" type="tel" data-placeholder="kaspiPhonePlaceholder" />
+            <input name="kaspiCode" type="text" data-placeholder="kaspiCodePlaceholder" maxlength="6" />
+          </div>
+
+          <div id="payWalletFields" class="pay-method-panel hidden">
+            <p class="muted" data-i18n="walletHint"></p>
+          </div>
+
+          <div class="payment-review">
+            <div><span data-i18n="paymentMethodLabel"></span><strong id="paymentMethodPreview">Card</strong></div>
+            <div><span data-i18n="paymentOrderStatus"></span><strong id="paymentOrderStatus" data-i18n="paymentStatusAwaiting"></strong></div>
+          </div>
+
+          <p id="paymentProcessText" class="muted payment-process hidden" data-i18n="paymentProcessing"></p>
+
+          <div class="form-actions payment-actions">
+            <button id="payLaterBtn" class="secondary" type="button" data-i18n="paymentLater"></button>
+            <button type="submit" data-i18n="paymentSubmit"></button>
+            <button id="cancelPayment" class="secondary" type="button" data-i18n="cancel"></button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- MODAL: Custom Event Request Payment                                 -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <div id="requestPaymentModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="requestPaymentTitle">
+      <div class="modal-card request-payment-card">
+        <button id="closeRequestPaymentModal" class="icon-button modal-close secondary" type="button" data-i18n-aria-label="close">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+        <div class="request-payment-head">
+          <p class="eyebrow" data-i18n="requestPaymentLabel"></p>
+          <h3 id="requestPaymentTitle" data-i18n="requestPaymentTitle"></h3>
+          <p class="muted" data-i18n="requestPaymentText"></p>
+        </div>
+
+        <div id="requestPaymentSummary" class="request-payment-summary"></div>
+
+        <form id="requestPaymentForm" class="request-payment-form" novalidate>
+          <div class="field">
+            <label for="requestCardName" data-i18n="cardHolderPlaceholder"></label>
+            <input id="requestCardName" name="cardName" type="text" data-placeholder="cardHolderPlaceholder" required />
+          </div>
+          <div class="field">
+            <label for="requestCardNumber" data-i18n="cardNumberPlaceholder"></label>
+            <input id="requestCardNumber" name="cardNumber" type="text" inputmode="numeric" minlength="12" maxlength="19" data-placeholder="cardNumberPlaceholder" required />
+          </div>
+          <div class="split">
+            <div class="field">
+              <label for="requestCardExp" data-i18n="cardExpiryPlaceholder"></label>
+              <input id="requestCardExp" name="cardExp" type="text" minlength="4" maxlength="5" data-placeholder="cardExpiryPlaceholder" required />
+            </div>
+            <div class="field">
+              <label for="requestCardCvc" data-i18n="cardCvcPlaceholder"></label>
+              <input id="requestCardCvc" name="cardCvc" type="password" minlength="3" maxlength="4" data-placeholder="cardCvcPlaceholder" required />
+            </div>
+          </div>
+          <p id="requestPaymentProcessText" class="muted payment-process hidden" data-i18n="paymentProcessing"></p>
+          <div class="form-actions">
+            <button class="secondary" id="cancelRequestPayment" type="button" data-i18n="cancel"></button>
+            <button type="submit" data-i18n="requestConfirmPayment"></button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- MODAL: Admin Request Edit                                           -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <div id="adminRequestModal" class="modal hidden" role="dialog" aria-modal="true">
+      <div class="modal-card">
+        <button id="closeAdminRequestModal" class="icon-button modal-close secondary" type="button" data-i18n-aria-label="close">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+        <form id="adminRequestForm" class="form-panel">
+          <input type="hidden" name="id" />
+          <input type="hidden" name="type" />
+          <h3 data-i18n="editRequestTitle"></h3>
+          <select name="status" required>
+            <option value="new" data-i18n="requestStatusNew"></option>
+            <option value="review" data-i18n="requestStatusReview"></option>
+            <option value="pending" data-i18n="requestStatusPending"></option>
+            <option value="approved" data-i18n="requestStatusApproved"></option>
+            <option value="rejected" data-i18n="requestStatusRejected"></option>
+            <option value="cancelled" data-i18n="requestStatusCancelled"></option>
+          </select>
+          <div class="split">
+            <input name="date" type="date" />
+            <input name="time" type="time" />
+          </div>
+          <div class="split">
+            <input name="duration" type="number" min="1" data-placeholder="hallDuration" />
+            <input name="attendees" type="number" min="1" data-placeholder="hallGuests" />
+          </div>
+          <input name="purpose" type="text" data-placeholder="hallPurpose" />
+          <textarea name="adminReason" rows="2" data-placeholder="adminReasonPlaceholder"></textarea>
+          <div class="form-actions">
+            <button type="submit" data-i18n="saveChanges"></button>
+            <button id="cancelAdminRequestEdit" class="secondary" type="button" data-i18n="cancel"></button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- MODAL: QR Ticket (NEW — Eventbrite-style)                           -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <div id="ticketModal" class="modal hidden" role="dialog" aria-modal="true">
+      <div class="modal-card ticket-card">
+        <button id="closeTicketModal" class="icon-button modal-close secondary" type="button" data-i18n-aria-label="close">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+        <div class="ticket-header">
+          <div class="ticket-logo">O</div>
+          <div>
+            <p class="eyebrow" data-i18n="yourTicket"></p>
+            <h3 id="ticketEventTitle">—</h3>
+          </div>
+        </div>
+        <div class="ticket-divider">
+          <span></span><span data-i18n="admit"></span><span></span>
+        </div>
+        <div class="ticket-body">
+          <div class="ticket-qr" id="ticketQr" data-i18n-aria-label="ticketQrLabel"></div>
+          <div class="ticket-details">
+            <div class="ticket-field"><span data-i18n="ticketHolder"></span><strong id="ticketHolder">—</strong></div>
+            <div class="ticket-field"><span data-i18n="date"></span><strong id="ticketDate">—</strong></div>
+            <div class="ticket-field"><span data-i18n="time"></span><strong id="ticketTime">—</strong></div>
+            <div class="ticket-field"><span data-i18n="location"></span><strong id="ticketLocation">—</strong></div>
+            <div class="ticket-field"><span data-i18n="ticketNumber"></span><strong id="ticketNumber">—</strong></div>
+          </div>
+        </div>
+        <div class="ticket-receipt">
+          <h4 data-i18n="ticketPurchaseTitle"></h4>
+          <div class="ticket-receipt-grid">
+            <div class="ticket-field"><span data-i18n="ticketPaymentMethod"></span><strong id="ticketPaymentMethod">—</strong></div>
+            <div class="ticket-field"><span data-i18n="ticketPaymentStatus"></span><strong id="ticketPaymentStatus">—</strong></div>
+            <div class="ticket-field"><span data-i18n="ticketPaymentAmount"></span><strong id="ticketPaymentAmount">—</strong></div>
+            <div class="ticket-field"><span data-i18n="ticketPaymentTime"></span><strong id="ticketPaymentTime">—</strong></div>
+            <div class="ticket-field"><span data-i18n="ticketOrderId"></span><strong id="ticketOrderId">—</strong></div>
+          </div>
+        </div>
+        <div class="ticket-actions">
+          <button id="downloadTicketBtn" class="secondary" type="button" data-i18n="downloadTicket"></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Notification Panel (NEW) ──────────────────────────────────────── -->
+    <aside id="notifPanel" class="notif-panel hidden" data-i18n-aria-label="notifications">
+      <div class="notif-head">
+        <strong data-i18n="notifications"></strong>
+        <button id="closeNotif" class="icon-button secondary" type="button" data-i18n-aria-label="close">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 1l8 8M9 1L1 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div id="notifList" class="notif-list"></div>
+    </aside>
+
+    <!-- ── Toasts ──────────────────────────────────────────────────────────── -->
+    <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+    <!-- ── Scripts ──────────────────────────────────────────────────────────── -->
+    <script src="./config.js"></script>
+    <script src="./js/core/namespace.js"></script>
+    <script src="./js/core/http.js"></script>
+    <script src="./js/core/toast.js"></script>
+    <script src="./js/core/theme.js"></script>
+    <script src="./js/core/i18n.js"></script>
+    <script src="./js/core/format.js"></script>
+    <script src="./js/core/session.js"></script>
+    <script src="./js/core/domain.js"></script>
+    <script src="./js/core/eventTemplates.js"></script>
+    <script src="./app.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- ── Inline enhancement scripts (no external deps) ──────────────────── -->
+    <script>
+    /* ── Global ⌘K search shortcut ── */
+    document.addEventListener('keydown', function(e) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        const inp = document.getElementById('globalSearchInput');
+        if (inp) { inp.focus(); inp.select(); }
+      }
+    });
+
+    /* ── Floor plan interactive tooltips ── */
+    (function() {
+      const svg = document.getElementById('floorplanSvg');
+      const tip = document.getElementById('floorplanTooltip');
+      if (!svg || !tip) return;
+
+      function t(key) {
+        const lang = (window.ORDA && window.ORDA.lang) || 'ru';
+        return (window.ORDA && window.ORDA.i18n && window.ORDA.i18n.translate(lang, key)) || key;
+      }
+
+      const statusLabel = {
+        free: () => t('legendFree'),
+        busy: () => t('legendBusy'),
+        partial: () => t('legendPartial'),
+      };
+
+      document.querySelectorAll('[data-floor-button]').forEach(function(button) {
+        button.addEventListener('click', function() {
+          document.querySelectorAll('[data-floor-button]').forEach(function(item) {
+            item.classList.toggle('active', item === button);
+          });
+          const info = document.getElementById('floorplanLevelInfo');
+          if (info) info.textContent = t('floor' + button.dataset.floorButton + 'Text');
+        });
+      });
+
+      svg.querySelectorAll('.fp-hall').forEach(function(el) {
+        el.addEventListener('mouseenter', function(e) {
+          const cls = Array.from(el.classList).find(c => ['free','busy','partial'].includes(c)) || 'free';
+          const hallLabelKey = el.dataset.labelKey || '';
+          const hallLabel = hallLabelKey ? t(hallLabelKey) : (el.dataset.label || '');
+          tip.textContent = hallLabel + ' - ' + statusLabel[cls]();
+          tip.classList.remove('hidden');
+        });
+        el.addEventListener('mousemove', function(e) {
+          const rect = svg.closest('.floorplan-wrap').getBoundingClientRect();
+          tip.style.left = (e.clientX - rect.left + 14) + 'px';
+          tip.style.top  = (e.clientY - rect.top  - 8)  + 'px';
+        });
+        el.addEventListener('mouseleave', function() {
+          tip.classList.add('hidden');
+        });
+        el.addEventListener('click', function() {
+          const hallLabelKey = el.dataset.labelKey || '';
+          const hallName = hallLabelKey ? t(hallLabelKey) : (el.dataset.label || '');
+          if (window.ORDA && window.ORDA.toast) {
+            window.ORDA.toast.show(t('hallSelected') + ': ' + hallName);
+          }
+        });
+        el.style.cursor = 'pointer';
+      });
+    })();
+
+    /* ── View toggle Grid / List ── */
+    (function() {
+      const gridBtn = document.getElementById('viewGrid');
+      const listBtn = document.getElementById('viewList');
+      const list    = document.getElementById('eventsList');
+      if (!gridBtn || !listBtn || !list) return;
+      gridBtn.addEventListener('click', function() {
+        list.classList.remove('events-list-view');
+        gridBtn.classList.add('active'); listBtn.classList.remove('active');
+      });
+      listBtn.addEventListener('click', function() {
+        list.classList.add('events-list-view');
+        listBtn.classList.add('active'); gridBtn.classList.remove('active');
+      });
+    })();
+
+    /* ── Notification panel ── */
+    (function() {
+      const btn   = document.getElementById('notifBtn');
+      const panel = document.getElementById('notifPanel');
+      const close = document.getElementById('closeNotif');
+      if (!btn || !panel) return;
+      const notifList = document.getElementById('notifList');
+      const dot = document.getElementById('notifDot');
+
+      function t(key) {
+        const lang = (window.ORDA && window.ORDA.lang) || 'ru';
+        return (window.ORDA && window.ORDA.i18n && window.ORDA.i18n.translate(lang, key)) || key;
+      }
+
+      function renderNotifications(items) {
+        if (!notifList) return;
+        notifList.innerHTML = '';
+        const list = Array.isArray(items) ? items : [];
+        if (!list.length) {
+          const d = document.createElement('div');
+          d.className = 'notif-item notif-info';
+          d.innerHTML = '<span>' + t('noNotifications') + '</span><small>—</small>';
+          notifList.appendChild(d);
+          if (dot) dot.classList.add('hidden');
+          return;
+        }
+
+        list.slice(0, 12).forEach(function(n) {
+          const d = document.createElement('div');
+          d.className = 'notif-item notif-' + (n.type || 'info');
+          d.innerHTML = '<span>' + String(n.text || '') + '</span><small>' + String(n.sub || '') + '</small>';
+          notifList.appendChild(d);
+        });
+        if (dot) dot.classList.remove('hidden');
+      }
+
+      window.ORDA = window.ORDA || {};
+      window.ORDA.refreshHeaderNotifications = function(items) {
+        renderNotifications(items || window.ORDA._notifications || []);
+      };
+      renderNotifications(window.ORDA._notifications || []);
+
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (window.ORDA && typeof window.ORDA.refreshHeaderNotifications === 'function') {
+          window.ORDA.refreshHeaderNotifications(window.ORDA._notifications || []);
+        }
+        panel.classList.toggle('hidden');
+      });
+      close && close.addEventListener('click', function() { panel.classList.add('hidden'); });
+      document.addEventListener('click', function(e) {
+        if (!panel.contains(e.target) && e.target !== btn) panel.classList.add('hidden');
+      });
+    })();
+
+    /* ── Simple QR code generator (pure CSS squares) ── */
+    function renderQR(container, text) {
+      // Minimal visual QR placeholder using SVG pattern
+      container.innerHTML = '';
+      const size = 120;
+      const cell = 6;
+      const cols = Math.floor(size / cell);
+      // Deterministic pseudo-random from text
+      let hash = 0;
+      for (let i = 0; i < text.length; i++) hash = ((hash << 5) - hash) + text.charCodeAt(i);
+      const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+      svg.setAttribute('viewBox', '0 0 ' + size + ' ' + size);
+      svg.setAttribute('width', size); svg.setAttribute('height', size);
+      svg.style.display = 'block';
+      // Draw cells
+      for (let r = 0; r < cols; r++) {
+        for (let c = 0; c < cols; c++) {
+          const bit = (hash ^ (r * 17 + c * 31)) & 1;
+          if (bit || (r < 3 && c < 3) || (r < 3 && c >= cols-3) || (r >= cols-3 && c < 3)) {
+            const rect = document.createElementNS('http://www.w3.org/2000/svg','rect');
+            rect.setAttribute('x', c * cell); rect.setAttribute('y', r * cell);
+            rect.setAttribute('width', cell-1); rect.setAttribute('height', cell-1);
+            rect.setAttribute('fill', 'var(--text)');
+            svg.appendChild(rect);
+          }
+        }
+      }
+      container.appendChild(svg);
+    }
+
+    /* Expose for app.js to call when showing ticket modal */
+    window.ORDA = window.ORDA || {};
+    window.ORDA.showTicket = function(event, userName, paymentMeta) {
+      const modal = document.getElementById('ticketModal');
+      if (!modal) return;
+      document.getElementById('ticketEventTitle').textContent = event.title || '—';
+      document.getElementById('ticketHolder').textContent = userName || '—';
+      document.getElementById('ticketDate').textContent = event.date || '—';
+      document.getElementById('ticketTime').textContent = event.time || '—';
+      document.getElementById('ticketLocation').textContent = event.location || '—';
+      const num = 'TK-' + (event._id || '').toString().slice(-6).toUpperCase();
+      document.getElementById('ticketNumber').textContent = num;
+      renderQR(document.getElementById('ticketQr'), num + event.title);
+      const meta = paymentMeta || {};
+      const set = (id, value) => {
+        const node = document.getElementById(id);
+        if (node) node.textContent = value || '—';
+      };
+      set('ticketPaymentMethod', meta.method || '—');
+      set('ticketPaymentStatus', meta.status || '—');
+      set('ticketPaymentAmount', meta.amount || '—');
+      set('ticketPaymentTime', meta.time || '—');
+      set('ticketOrderId', meta.orderId || num);
+      modal.classList.remove('hidden');
+    };
+
+    document.getElementById('closeTicketModal') &&
+      document.getElementById('closeTicketModal').addEventListener('click', function() {
+        document.getElementById('ticketModal').classList.add('hidden');
+      });
+
+    /* ── Calendar renderer ── */
+    (function() {
+      let current = new Date();
+      current.setDate(1);
+
+      function renderCal() {
+        const grid = document.getElementById('calGrid');
+        const label = document.getElementById('calMonthLabel');
+        if (!grid || !label) return;
+
+        const lang = (window.ORDA && window.ORDA.lang) || 'ru';
+        const locale = lang === 'kk' ? 'kk-KZ' : lang === 'en' ? 'en-US' : 'ru-RU';
+        label.textContent = current.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
+
+        const year = current.getFullYear();
+        const month = current.getMonth();
+        const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
+        const startOffset = (firstDay === 0) ? 6 : firstDay - 1; // Mon-based
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        grid.innerHTML = '';
+        // Empty cells
+        for (let i = 0; i < startOffset; i++) {
+          const el = document.createElement('div'); el.className = 'cal-cell empty';
+          grid.appendChild(el);
+        }
+        const today = new Date();
+        const items = (window.ORDA && window.ORDA._calendarItems) || [];
+
+        for (let d = 1; d <= daysInMonth; d++) {
+          const cell = document.createElement('div');
+          const isToday = (today.getFullYear() === year && today.getMonth() === month && today.getDate() === d);
+          const dayStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+          const dayEvents = items.filter(ev => ev.date === dayStr);
+
+          cell.className = 'cal-cell' + (isToday ? ' today' : '') + (dayEvents.length ? ' has-events' : '');
+          const dots = dayEvents.slice(0, 3).map(function(ev) {
+            const status = ['approved', 'published'].includes(ev.status) ? 'free' :
+              ['pending', 'draft'].includes(ev.status) ? 'soon' :
+              ['closed', 'cancelled', 'rejected'].includes(ev.status) ? 'busy' : 'planned';
+            return '<i class="cal-dot cal-dot--' + status + '"></i>';
+          }).join('');
+          cell.innerHTML =
+            '<span class="cal-date-number">' + d + '</span>' +
+            (dayEvents.length ? '<div class="cal-dot-row">' + dots + '</div><small>' + dayEvents.length + '</small>' : '');
+          cell.dataset.date = dayStr;
+
+          if (dayEvents.length) {
+            cell.addEventListener('click', function() {
+              showDayEvents(dayStr, dayEvents, locale);
+            });
+          }
+          grid.appendChild(cell);
+        }
+      }
+
+      function showDayEvents(dateStr, events, locale) {
+        const panel = document.getElementById('calDayEvents');
+        const title = document.getElementById('calDayTitle');
+        const list  = document.getElementById('calDayList');
+        if (!panel || !list) return;
+        const d = new Date(dateStr + 'T00:00:00');
+        if (title) title.textContent = d.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
+        list.innerHTML = '';
+        events.forEach(function(ev) {
+          const item = document.createElement('button');
+          item.className = 'mini-item';
+          item.type = 'button';
+          item.innerHTML =
+            '<strong>' + (ev.title || '') + '</strong>' +
+            '<p>' + (ev.time || '') + ' · ' + (ev.location || '') + '</p>' +
+            '<p><span class="calendar-inline-status">' + (ev.statusLabel || ev.status || '') + '</span>' + (ev.attendees ? ' · ' + ev.attendees : '') + '</p>';
+          item.addEventListener('click', function() {
+            if (window.ORDA && typeof window.ORDA.openCalendarItem === 'function') {
+              window.ORDA.openCalendarItem(ev);
+            }
+          });
+          list.appendChild(item);
+        });
+        panel.classList.remove('hidden');
+      }
+
+      document.getElementById('calPrev') && document.getElementById('calPrev').addEventListener('click', function() {
+        current.setMonth(current.getMonth() - 1); renderCal();
+      });
+      document.getElementById('calNext') && document.getElementById('calNext').addEventListener('click', function() {
+        current.setMonth(current.getMonth() + 1); renderCal();
+      });
+      document.getElementById('calDayClose') && document.getElementById('calDayClose').addEventListener('click', function() {
+        document.getElementById('calDayEvents').classList.add('hidden');
+      });
+
+      // Render on load; also expose re-render for app.js
+      window.ORDA = window.ORDA || {};
+      window.ORDA.renderCalendar = renderCal;
+      setTimeout(renderCal, 200);
+    })();
+
+    /* ── Availability strip ── */
+    (function() {
+      const strip = document.getElementById('availSlots');
+      if (!strip) return;
+      window.ORDA = window.ORDA || {};
+
+      window.ORDA.renderAvailStrip = function(slots) {
+        const list = Array.isArray(slots) ? slots : [];
+        strip.innerHTML = '';
+        list.forEach(function(s) {
+          const el = document.createElement('div');
+          el.className = 'avail-slot ' + (s.free ? 'avail-free' : 'avail-busy');
+          el.innerHTML = '<strong>' + (s.hall || '') + '</strong><span>' + (s.time || '') + '</span>';
+          strip.appendChild(el);
+        });
+      };
+
+      window.ORDA.renderAvailStrip(window.ORDA._availSlots || []);
+    })();
+    </script>
+
+    <script src="./js/core/map.js"></script>
+
+  </body>
+</html>
