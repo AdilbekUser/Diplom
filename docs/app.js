@@ -22,6 +22,7 @@ const state = {
   adminUsers: [],
   adminNotifications: [],
   clientNotifications: [],
+  supportMessages: [],
   profile: null,
   dataMode: API_BASE_URL ? "remote" : "local",
   currentView: localStorage.getItem(STORAGE_KEYS.currentView) || "dashboard",
@@ -74,7 +75,10 @@ const els = {
   myBookingsListFull: document.querySelector("#myBookingsListFull"),
   myHallBookingsList: document.querySelector("#myHallBookingsList"),
   myNotificationsList: document.querySelector("#myNotificationsList"),
+  supportForm: document.querySelector("#supportForm"),
+  supportMessageText: document.querySelector("#supportMessageText"),
   adminBookingsList: document.querySelector("#adminBookingsList"),
+  adminSupportList: document.querySelector("#adminSupportList"),
   exportBookingsBtn: document.querySelector("#exportBookingsBtn"),
   eventForm: document.querySelector("#eventForm"),
   eventFormTitle: document.querySelector("#eventFormTitle"),
@@ -129,17 +133,22 @@ const els = {
   cancelAdminRequestEdit: document.querySelector("#cancelAdminRequestEdit"),
   adminRequestForm: document.querySelector("#adminRequestForm"),
   requestHallGrid: document.querySelector("#requestHallGrid"),
+  requestHallPlanner: document.querySelector("#requestHallPlanner"),
+  ownEventFields: document.querySelector("#ownEventFields"),
   requestDate: document.querySelector("#requestDate"),
   requestSlotGrid: document.querySelector("#requestSlotGrid"),
   requestSelectedSummary: document.querySelector("#requestSelectedSummary"),
   requestRentPreview: document.querySelector("#requestRentPreview"),
   customRequestForm: document.querySelector("#customRequestForm"),
+  requestServicesSection: document.querySelector("#requestServicesSection"),
   requestTotalPreview: document.querySelector("#requestTotalPreview"),
   requestPaymentModal: document.querySelector("#requestPaymentModal"),
   closeRequestPaymentModal: document.querySelector("#closeRequestPaymentModal"),
   cancelRequestPayment: document.querySelector("#cancelRequestPayment"),
   requestPaymentSummary: document.querySelector("#requestPaymentSummary"),
   requestPaymentForm: document.querySelector("#requestPaymentForm"),
+  requestAnnouncementPayment: document.querySelector("#requestAnnouncementPayment"),
+  requestCardPaymentFields: document.querySelector("#requestCardPaymentFields"),
   requestPaymentProcessText: document.querySelector("#requestPaymentProcessText"),
   clientWorkspace: document.querySelector("#clientWorkspace"),
   adminWorkspace: document.querySelector("#adminWorkspace"),
@@ -155,20 +164,44 @@ const requestSlots = [
   { id: "afternoon", start: "15:00", end: "18:00" },
 ];
 const requestServiceConfig = [
-  { id: "projector", key: "serviceProjector", price: 10000 },
-  { id: "tv", key: "serviceTv", price: 15000 },
-  { id: "microphones", key: "serviceMicrophones", price: 8000 },
-  { id: "audio", key: "serviceAudio", price: 12000 },
-  { id: "wifi", key: "serviceWifi", price: 5000 },
-  { id: "laptop", key: "serviceLaptop", price: 7000 },
-  { id: "flipchart", key: "serviceFlipchart", price: 4000 },
-  { id: "coffee", key: "serviceCoffee", price: 25000 },
-  { id: "tech", key: "serviceTech", price: 18000 },
-  { id: "photo", key: "servicePhoto", price: 35000 },
   { id: "registration", key: "serviceRegistration", price: 9000 },
+  { id: "assistants", label: "Ассистенты / координаторы", price: 22000 },
+  { id: "tech", label: "Технический специалист", price: 18000 },
+  { id: "projector", key: "serviceProjector", price: 10000 },
+  { id: "microphones", key: "serviceMicrophones", price: 8000 },
+  { id: "audio", label: "Звуковая система", price: 12000 },
+  { id: "led", label: "Экран / LED-панель", price: 16000 },
+  { id: "coffee", key: "serviceCoffee", price: 25000 },
+  { id: "badges", label: "Бейджи участников", price: 6000 },
+  { id: "security", label: "Охрана", price: 30000 },
+  { id: "cleaning", label: "Уборка после мероприятия", price: 12000 },
+  { id: "streaming", label: "Онлайн-трансляция", price: 35000 },
+  { id: "translator", label: "Переводчик", price: 28000 },
 ];
+const announcementRequestPrice = 10000;
+const hallImageFallbacks = {
+  h_grand: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80",
+  h_orion: "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
+  h_workshop: "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1200&q=80",
+  h_board: "https://images.unsplash.com/photo-1431540015161-0bf868a2d407?auto=format&fit=crop&w=1200&q=80",
+  h_atrium: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=1200&q=80",
+  h_silk: "https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=1200&q=80",
+  h_nova: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80",
+  h_sky: "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1200&q=80",
+  "Grand Hall A": "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80",
+  "Orion Hall B": "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80",
+  "Workshop Hub C": "https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1200&q=80",
+  "Boardroom D": "https://images.unsplash.com/photo-1431540015161-0bf868a2d407?auto=format&fit=crop&w=1200&q=80",
+  "Atrium Expo Space": "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=1200&q=80",
+  "Silk Road Conference Room": "https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=1200&q=80",
+  "Nova Training Lab": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&q=80",
+  "Skyline Networking Lounge": "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1200&q=80",
+  default: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=80",
+};
 let requestSelection = { hallId: "", date: "", slotId: "" };
 let pendingCustomRequest = null;
+let calendarAgendaExpanded = false;
+let requestMode = "hall";
 const persistentControlKeys = [
   "homeSearchInput",
   "searchInput",
@@ -429,6 +462,10 @@ function showMessage(text, type = "success") {
   window.ORDA?.toast?.show(text, type);
 }
 
+function supportStatusLabel(status) {
+  return status === "read" ? "Прочитано" : "Новое";
+}
+
 function setAuthTab(authTab = "login") {
   document.querySelectorAll(".tab").forEach((node) => {
     const active = node.dataset.auth === authTab;
@@ -479,6 +516,30 @@ function responseMessage(result) {
   if (!result) return "";
   if (result.messageKey) return tr(result.messageKey, result.messageVars);
   return result.message || "";
+}
+
+function shouldResetSession(error, path) {
+  const message = String(error?.message || error?.data?.message || "").toLowerCase();
+  const status = Number(error?.status || error?.responseStatus || 0);
+  const authRoute = path === "/login" || path === "/register";
+  return (
+    Boolean(state.token) &&
+    !authRoute &&
+    (status === 401 || message.includes("authorization token is invalid") || message.includes("jwt expired"))
+  );
+}
+
+function resetExpiredSession() {
+  clearSession();
+  state.portal = "client";
+  state.currentTicketId = "";
+  state.hallBookings = [];
+  state.clientNotifications = [];
+  state.adminUsers = [];
+  state.adminBookings = [];
+  applyPortalVisibility();
+  updateShell();
+  renderAll();
 }
 
 function currentUser(db) {
@@ -1033,6 +1094,33 @@ function addClientNotification(db, payload = {}) {
   });
 }
 
+function publishLocalCustomEvent(db, request) {
+  if (!request || request.type !== "custom-event" || request.eventId) return;
+  const event = {
+    _id: uid("e"),
+    title: request.eventTitle || request.purpose || "Client event",
+    date: request.date,
+    time: request.time || request.startTime || "10:00",
+    category: request.category || "conference",
+    description: request.description || request.purpose || "",
+    agenda: `Длительность: ${request.duration || 1} ч. ${request.adminNotes || ""}`.trim(),
+    organizer: request.organization || request.userName || "Client",
+    location: request.location || request.hallName || "",
+    city: request.city || "",
+    format: ["offline", "online", "hybrid"].includes(request.format) ? request.format : "offline",
+    meetingUrl: "",
+    price: Number(request.ticketPrice || 0),
+    currency: "KZT",
+    featured: false,
+    tags: [request.category, "client-event"].filter(Boolean),
+    capacity: Number(request.attendees || 80),
+    status: "published",
+    image: hallImageFallbacks.default,
+  };
+  db.events.push(event);
+  request.eventId = event._id;
+}
+
 function applyAdminDecision(db, request, nextStatus, reason = "") {
   const normalizedReason = String(reason || "").trim();
   request.status = nextStatus;
@@ -1077,6 +1165,7 @@ function applyAdminDecision(db, request, nextStatus, reason = "") {
   if (nextStatus === "approved") {
     request.adminReason = "";
     request.decidedAt = new Date().toISOString();
+    publishLocalCustomEvent(db, request);
   }
 
   if (nextStatus === "pending") {
@@ -1087,9 +1176,9 @@ function applyAdminDecision(db, request, nextStatus, reason = "") {
 }
 
 function ensureSessionValidity() {
-  const db = ensureDemoDb();
   if (!state.token) return;
-  if (isLocalSessionToken(state.token) && !currentUser(db)) {
+  const db = readDemoDb();
+  if (isLocalSessionToken(state.token) && (!db || !currentUser(ensureDbShape(db)))) {
     clearSession();
   }
 }
@@ -1381,9 +1470,9 @@ async function localApi(url, options = {}) {
       type: "event",
       status: "pending",
       userId: user._id,
-      userName: user.name,
-      userEmail: user.email,
-      userPhone: user.phone || "",
+      userName: String(body.userName || body.contactName || user.name || "").trim(),
+      userEmail: String(body.userEmail || body.email || user.email || "").trim(),
+      userPhone: String(body.userPhone || body.phone || user.phone || "").trim(),
       organization: user.organization || "",
       eventId: event._id,
       eventTitle: event.title,
@@ -1520,51 +1609,69 @@ async function localApi(url, options = {}) {
   if (path === "/hall-bookings" && method === "POST") {
     if (!user) throw createError("loginRequired", 401);
 
-    const hall = db.halls.find((item) => item._id === String(body.hallId || ""));
-    if (!hall) throw createError("errHallNotFound", 404);
+    const type = String(body.type || "hall") === "custom-event" ? "custom-event" : "hall";
+    const hall = type === "hall" ? db.halls.find((item) => item._id === String(body.hallId || "")) : null;
+    if (type === "hall" && !hall) throw createError("errHallNotFound", 404);
 
     const date = String(body.date || "").trim();
     const time = String(body.time || "").trim();
     const duration = Number(body.duration || 0);
     const attendees = Number(body.attendees || 0);
     const purpose = String(body.purpose || "").trim();
-    const pricePerHour = Number(hall.pricePerHour || 0);
-    const amount = pricePerHour * duration;
+    const location = String(body.location || "").trim();
+    const city = String(body.city || "").trim();
+    const pricePerHour = Number(hall?.pricePerHour || 0);
+    const amount = Number(body.amount || (type === "custom-event" ? announcementRequestPrice : pricePerHour * duration) || 0);
 
     if (!date || !time || !duration || !attendees || !purpose) throw createError("errHallFieldsRequired");
-    if (attendees > hall.capacity) throw createError("errHallCapacityExceeded", 400, { hall: hall.name, capacity: hall.capacity });
+    if (type === "custom-event" && (!body.eventTitle || !location || !city)) throw createError("errHallFieldsRequired");
+    if (hall && attendees > hall.capacity) throw createError("errHallCapacityExceeded", 400, { hall: hall.name, capacity: hall.capacity });
 
-    db.requests.push({
+    const request = {
       _id: uid("r"),
-      type: "hall",
+      type,
       status: "pending",
       userId: user._id,
       userName: user.name,
       userEmail: user.email,
       userPhone: user.phone || "",
       organization: user.organization || "",
-      hallId: hall._id,
-      hallName: hall.name,
+      eventTitle: String(body.eventTitle || "").trim(),
+      category: String(body.category || "").trim(),
+      format: String(body.format || "offline").trim(),
+      description: String(body.description || purpose).trim(),
+      hallId: hall?._id || "",
+      hallName: hall?.name || "",
+      location: type === "custom-event" ? location : hall?.name || "",
+      city,
       date,
       time,
+      startTime: String(body.startTime || time).trim(),
+      endTime: String(body.endTime || "").trim(),
       duration,
       attendees,
       purpose,
+      adminNotes: String(body.adminNotes || "").trim(),
+      services: Array.isArray(body.services) ? body.services : [],
+      ticketPrice: Number(body.ticketPrice || 0),
       pricePerHour,
       amount,
-      paymentStatus: amount > 0 ? "unpaid" : "free",
+      paymentStatus: String(body.paymentStatus || (amount > 0 ? "unpaid" : "free")),
+      paymentMethod: String(body.paymentMethod || "").trim(),
+      paidAt: body.paymentStatus === "paid" ? new Date().toISOString() : null,
       createdAt: new Date().toISOString(),
       checkedIn: false,
-    });
+    };
+    db.requests.push(request);
 
     writeDemoDb(db);
-    return success("msgHallRequestSent");
+    return { ...success("msgHallRequestSent"), booking: request, data: request };
   }
 
   if (path === "/my-hall-bookings" && method === "GET") {
     if (!user) throw createError("loginRequired", 401);
     return db.requests
-      .filter((request) => request.type === "hall" && request.userId === user._id)
+      .filter((request) => ["hall", "custom-event"].includes(request.type) && request.userId === user._id)
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   }
 
@@ -1572,7 +1679,7 @@ async function localApi(url, options = {}) {
   if (myHallBookingMatch && method === "PATCH") {
     if (!user) throw createError("loginRequired", 401);
     const request = db.requests.find(
-      (item) => item._id === myHallBookingMatch[1] && item.type === "hall" && item.userId === user._id
+      (item) => item._id === myHallBookingMatch[1] && ["hall", "custom-event"].includes(item.type) && item.userId === user._id
     );
     if (!request) throw createError("errRequestNotFound", 404);
     if (isInactiveRequest(request.status)) throw createError("errRequestStatusInvalid", 400);
@@ -1588,7 +1695,7 @@ async function localApi(url, options = {}) {
   if (myHallBookingMatch && method === "DELETE") {
     if (!user) throw createError("loginRequired", 401);
     const request = db.requests.find(
-      (item) => item._id === myHallBookingMatch[1] && item.type === "hall" && item.userId === user._id
+      (item) => item._id === myHallBookingMatch[1] && ["hall", "custom-event"].includes(item.type) && item.userId === user._id
     );
     if (!request) throw createError("errRequestNotFound", 404);
     request.status = "cancelled";
@@ -1674,13 +1781,13 @@ async function localApi(url, options = {}) {
     if (!["new", "review", "pending", "approved", "rejected", "cancelled"].includes(nextStatus)) throw createError("errRequestStatusInvalid");
     const reason = String(body.reason || body.adminReason || "").trim();
 
-    if (request.type === "hall") {
+    if (request.type === "hall" || request.type === "custom-event") {
       if (body.date) request.date = String(body.date);
       if (body.time) request.time = String(body.time);
       if (Number(body.duration) > 0) request.duration = Number(body.duration);
       if (Number(body.attendees) > 0) request.attendees = Number(body.attendees);
       if (typeof body.purpose === "string") request.purpose = String(body.purpose).trim();
-      request.amount = Number(request.pricePerHour || 0) * Number(request.duration || 0);
+      request.amount = Number(request.pricePerHour || 0) * Number(request.duration || 0) || Number(request.amount || 0);
     }
 
     const { refunded } = applyAdminDecision(db, request, nextStatus, reason);
@@ -1724,27 +1831,64 @@ async function localApi(url, options = {}) {
   throw createError("errRouteNotFound", 404);
 }
 
+async function localApiTranslated(url, options = {}) {
+  try {
+    return await localApi(url, options);
+  } catch (error) {
+    if (error?.i18nKey) {
+      const translated = new Error(tr(error.i18nKey, error.i18nVars));
+      translated.status = error.status;
+      throw translated;
+    }
+    throw error;
+  }
+}
+
+function isBackendOnlyPath(path) {
+  const pathname = String(path || "").split("?")[0];
+  return /^(\/login|\/register|\/me|\/users|\/stats|\/events|\/halls|\/book|\/bookings|\/my-bookings|\/support-messages)(\/|$)/.test(pathname);
+}
+
 async function api(url, options = {}) {
+  const path = url.startsWith("/") ? url : `/${url}`;
+  const { localFallback = true, ...requestOptions } = options;
+  const backendOnly = isBackendOnlyPath(path);
+
+  if (!backendOnly && isLocalSessionToken(state.token) && path !== "/login" && path !== "/register") {
+    state.dataMode = "local";
+    updateDataModeBadge();
+    return await localApiTranslated(path, requestOptions);
+  }
+
   if (API_BASE_URL && window.ORDA?.http?.request) {
-    const path = url.startsWith("/") ? url : `/${url}`;
     try {
-      return await window.ORDA.http.request(`${API_BASE_URL}${path}`, options);
+      const result = await window.ORDA.http.request(`${API_BASE_URL}${path}`, requestOptions);
+      state.dataMode = "remote";
+      updateDataModeBadge();
+      return result;
     } catch (error) {
+      if (shouldResetSession(error, path)) {
+        resetExpiredSession();
+        throw new Error(t("errSessionExpired"));
+      }
+
       const canFallback =
-        LOCAL_FALLBACK_ENABLED && (!error.status || [404, 405, 501, 503].includes(Number(error.status)));
+        localFallback !== false &&
+        !backendOnly &&
+        LOCAL_FALLBACK_ENABLED &&
+        (!error.status || [404, 405, 501, 503].includes(Number(error.status)));
       if (!canFallback) throw error;
       console.warn(`Remote API fallback for ${path}: ${error.message}`);
     }
   }
 
-  try {
-    return await localApi(url, options);
-  } catch (error) {
-    if (error?.i18nKey) {
-      throw new Error(tr(error.i18nKey, error.i18nVars));
-    }
-    throw error;
+  if (backendOnly) {
+    throw new Error("Backend API is unavailable for this action.");
   }
+
+  state.dataMode = "local";
+  updateDataModeBadge();
+  return await localApiTranslated(path, requestOptions);
 }
 
 function applyTheme() {
@@ -1912,6 +2056,14 @@ function setView(view) {
   if (view === "halls") {
     loadHalls().catch((error) => showMessage(error.message, "error"));
   }
+
+  if (view === "calendar") {
+    requestAnimationFrame(() => {
+      renderCalendar();
+      if (typeof window.ORDA.renderCalendar === "function") window.ORDA.renderCalendar();
+      syncCalendarAgendaHeight();
+    });
+  }
 }
 
 function downloadTextFile(filename, text, type = "text/plain;charset=utf-8") {
@@ -1930,7 +2082,43 @@ function csvCell(value) {
   return `"${String(value ?? "").replaceAll('"', '""')}"`;
 }
 
+function normalizeRequestStatus(status) {
+  return status === "registered" ? "pending" : status || "pending";
+}
+
+function normalizeAdminBooking(request) {
+  const id = String(request._id || request.id || "");
+  return {
+    ...request,
+    _id: id,
+    type: request.type || "event",
+    status: normalizeRequestStatus(request.status),
+  };
+}
+
+async function adminBookingApi(requestId, suffix = "", options = {}) {
+  const id = String(requestId || "");
+  return await api(`/bookings/${id}${suffix}`, { ...options, localFallback: false });
+}
+
+async function updateAdminBookingStatus(requestId, payload) {
+  const options = {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  };
+
+  try {
+    return await adminBookingApi(requestId, "/status", options);
+  } catch (error) {
+    if ([404, 405].includes(Number(error.status))) {
+      return await adminBookingApi(requestId, "", options);
+    }
+    throw error;
+  }
+}
+
 function statusLabel(status) {
+  status = normalizeRequestStatus(status);
   if (status === "new") return t("requestStatusNew");
   if (status === "review") return t("requestStatusReview");
   if (status === "approved") return t("requestStatusApproved");
@@ -1940,6 +2128,7 @@ function statusLabel(status) {
 }
 
 function statusClass(status) {
+  status = normalizeRequestStatus(status);
   const map = {
     new: "status-pill-pending",
     review: "status-pill-pending",
@@ -1954,6 +2143,30 @@ function statusClass(status) {
 function requestTypeLabel(type) {
   if (type === "custom-event") return t("requestTypeCustomEvent");
   return type === "hall" ? t("requestTypeHall") : t("requestTypeEvent");
+}
+
+function hallTranslation(hall) {
+  return hall?.translations?.[state.lang] || hall?.translations?.ru || hall?.translations?.en || {};
+}
+
+function hallText(hall, field) {
+  const translated = hallTranslation(hall);
+  return translated[field] || hall?.[field] || "";
+}
+
+function hallList(hall, field) {
+  const translated = hallTranslation(hall);
+  const value = translated[field] || hall?.[field] || [];
+  if (Array.isArray(value)) return value;
+  return String(value || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function hallImage(hall) {
+  const name = hall?.name || hallText(hall, "name");
+  return hall?.image || hallImageFallbacks[hall?._id] || hallImageFallbacks[name] || hallImageFallbacks.default;
 }
 
 function canManageRequest(request) {
@@ -1971,6 +2184,13 @@ function requestSlotDuration(slot) {
 
 function requestSlotLabel(slot) {
   return `${slot.start}-${slot.end}`;
+}
+
+function addHoursToTime(time, duration) {
+  const total = minutesFromTime(time) + Number(duration || 0) * 60;
+  const hours = Math.floor(total / 60) % 24;
+  const minutes = total % 60;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 }
 
 function selectedRequestHall() {
@@ -2000,9 +2220,9 @@ function requestBlocksSlot(request, hall, date, slot) {
 
 function isRequestSlotBusy(hall, date, slot) {
   if (!hall || !date || !slot) return false;
-  const db = ensureDemoDb();
-  const requestBusy = db.requests.some((request) => requestBlocksSlot(request, hall, date, slot));
-  const eventBusy = db.events.some((event) => {
+  const requests = [...state.adminBookings, ...state.hallBookings];
+  const requestBusy = requests.some((request) => requestBlocksSlot(request, hall, date, slot));
+  const eventBusy = state.events.some((event) => {
     if (event.status && !["published", "draft"].includes(event.status)) return false;
     if (event.date !== date) return false;
     if ((event.location || "") !== hall.name && (event.hallName || "") !== hall.name) return false;
@@ -2016,20 +2236,22 @@ function isRequestSlotBusy(hall, date, slot) {
 }
 
 function requestBaseRent() {
+  if (requestMode !== "hall") return requestMode === "event" ? announcementRequestPrice : 0;
   const hall = selectedRequestHall();
-  const slot = selectedRequestSlot();
-  if (!hall || !slot) return 0;
-  return Number(hall.pricePerHour || 0) * requestSlotDuration(slot);
+  const duration = Number(els.customRequestForm?.elements.namedItem("duration")?.value || 0);
+  if (!hall || duration <= 0) return 0;
+  return Number(hall.pricePerHour || 0) * duration;
 }
 
 function selectedRequestServices() {
+  if (requestMode !== "hall") return [];
   if (!els.customRequestForm) return [];
   return Array.from(els.customRequestForm.querySelectorAll('input[name="services"]:checked')).map((input) => {
     const config = requestServiceConfig.find((item) => item.id === input.value);
     return {
       id: input.value,
       key: config?.key || input.value,
-      name: t(config?.key || input.value),
+      name: config?.label || t(config?.key || input.value),
       price: Number(input.dataset.price || config?.price || 0),
     };
   });
@@ -2045,8 +2267,35 @@ function updateRequestTotals() {
   if (els.requestTotalPreview) els.requestTotalPreview.textContent = formatCurrency(amount);
 }
 
+function setRequestMode(mode = "hall") {
+  requestMode = mode === "event" ? "event" : "hall";
+  document.querySelectorAll("[data-request-mode]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.requestMode === requestMode);
+  });
+  els.requestHallPlanner?.classList.toggle("hidden", requestMode !== "hall");
+  els.ownEventFields?.classList.toggle("hidden", requestMode !== "event");
+  els.requestServicesSection?.classList.toggle("hidden", requestMode !== "hall");
+
+  ["ownDate", "ownTime", "ownLocation", "ownCity"].forEach((name) => {
+    const field = els.customRequestForm?.elements.namedItem(name);
+    if (field) field.required = requestMode === "event";
+  });
+
+  renderRequestSummary();
+}
+
 function renderRequestSummary() {
   if (!els.requestSelectedSummary) return;
+  if (requestMode === "event") {
+    els.requestSelectedSummary.innerHTML = `
+      <div><span>Сценарий</span><strong>Собственное мероприятие</strong></div>
+      <div><span>Публикация</span><strong>После модерации</strong></div>
+    `;
+    els.customRequestForm?.classList.remove("hidden");
+    updateRequestTotals();
+    return;
+  }
+
   const hall = selectedRequestHall();
   const slot = selectedRequestSlot();
   if (!hall || !requestSelection.date || !slot) {
@@ -2057,10 +2306,10 @@ function renderRequestSummary() {
   }
 
   els.requestSelectedSummary.innerHTML = `
-    <div><span>${escapeHtml(t("navHalls"))}</span><strong>${escapeHtml(hall.name || "-")}</strong></div>
+    <div><span>${escapeHtml(t("navHalls"))}</span><strong>${escapeHtml(hallText(hall, "name") || "-")}</strong></div>
     <div><span>${escapeHtml(t("date"))}</span><strong>${escapeHtml(formatDate(requestSelection.date))}</strong></div>
     <div><span>${escapeHtml(t("time"))}</span><strong>${escapeHtml(requestSlotLabel(slot))}</strong></div>
-    <div><span>${escapeHtml(t("hallDuration"))}</span><strong>${escapeHtml(`${requestSlotDuration(slot)} ${t("hourShort")}`)}</strong></div>
+    <div><span>${escapeHtml(t("hallDuration"))}</span><strong>${escapeHtml(`${els.customRequestForm?.elements.namedItem("duration")?.value || requestSlotDuration(slot)} ${t("hourShort")}`)}</strong></div>
   `;
   els.customRequestForm?.classList.remove("hidden");
   updateRequestTotals();
@@ -2098,11 +2347,14 @@ function renderRequestHalls() {
         .map((hall) => {
           const available = hall.status === "available";
           const active = requestSelection.hallId === hall._id;
+          const name = hallText(hall, "name") || "-";
+          const floor = hallText(hall, "floor") || "-";
+          const description = hallText(hall, "description") || hallText(hall, "location") || "-";
           return `
             <button class="request-hall-card ${active ? "active" : ""}" type="button" data-request-hall="${escapeHtml(hall._id)}" ${available ? "" : "disabled"}>
-              <span>${escapeHtml(hall.floor || "-")}</span>
-              <strong>${escapeHtml(hall.name || "-")}</strong>
-              <p>${escapeHtml(hall.description || hall.location || "-")}</p>
+              <span>${escapeHtml(floor)}</span>
+              <strong>${escapeHtml(name)}</strong>
+              <p>${escapeHtml(description)}</p>
               <div>
                 <small>${escapeHtml(`${hall.capacity || 0} ${t("mapPeopleShort")}`)}</small>
                 <small>${escapeHtml(formatCurrency(hall.pricePerHour || 0))} / ${escapeHtml(t("hourShort"))}</small>
@@ -2123,6 +2375,11 @@ function renderRequestView() {
     if (!els.requestDate.value) els.requestDate.value = requestSelection.date || today;
     requestSelection.date = els.requestDate.value;
   }
+  const ownDate = els.customRequestForm?.elements.namedItem("ownDate");
+  if (ownDate) {
+    ownDate.min = today;
+    if (!ownDate.value) ownDate.value = today;
+  }
   if (!requestSelection.hallId && state.halls.length) {
     const firstAvailable = state.halls.find((hall) => hall.status === "available") || state.halls[0];
     requestSelection.hallId = firstAvailable?._id || "";
@@ -2132,19 +2389,25 @@ function renderRequestView() {
 }
 
 function buildCustomRequestPayload() {
-  const hall = selectedRequestHall();
-  const slot = selectedRequestSlot();
-  if (!hall || !requestSelection.date || !slot) throw createError("requestPickSlotHint");
   const payload = Object.fromEntries(new FormData(els.customRequestForm));
   const services = selectedRequestServices();
-  const user = currentUser(ensureDemoDb());
-  const duration = requestSlotDuration(slot);
+  const user = state.profile || {};
+  const duration = Number(payload.duration || 0);
+  const hall = selectedRequestHall();
+  const slot = selectedRequestSlot();
+  const isOwnEvent = requestMode === "event";
+  const date = isOwnEvent ? String(payload.ownDate || "").trim() : requestSelection.date;
+  const time = isOwnEvent ? String(payload.ownTime || "").trim() : slot?.start || "";
+
+  if (!duration || !date || !time) throw createError("errHallFieldsRequired");
+  if (!isOwnEvent && (!hall || !slot)) throw createError("requestPickSlotHint");
+  if (isOwnEvent && (!payload.ownLocation || !payload.ownCity)) throw createError("errHallFieldsRequired");
+
   return {
-    _id: uid("cr"),
-    type: "custom-event",
+    type: isOwnEvent ? "custom-event" : "hall",
     status: "new",
     paymentStatus: "paid",
-    paymentMethod: "card",
+    paymentMethod: isOwnEvent ? "announcement-demo" : "card",
     paidAt: new Date().toISOString(),
     userId: user?._id || "",
     userName: String(payload.contactName || user?.name || state.name || "").trim(),
@@ -2153,20 +2416,22 @@ function buildCustomRequestPayload() {
     organization: user?.organization || "",
     eventTitle: String(payload.eventTitle || "").trim(),
     category: String(payload.category || "").trim(),
-    format: String(payload.format || "").trim(),
+    format: "offline",
     description: String(payload.description || "").trim(),
     purpose: String(payload.description || "").trim(),
     adminNotes: String(payload.notes || "").trim(),
     ticketPrice: Number(payload.ticketPrice || 0),
-    hallId: hall._id,
-    hallName: hall.name,
-    date: requestSelection.date,
-    time: slot.start,
-    startTime: slot.start,
-    endTime: slot.end,
+    hallId: isOwnEvent ? "" : hall._id,
+    hallName: isOwnEvent ? "" : hall.name,
+    location: isOwnEvent ? String(payload.ownLocation || "").trim() : hall.name,
+    city: isOwnEvent ? String(payload.ownCity || "").trim() : "",
+    date,
+    time,
+    startTime: time,
+    endTime: addHoursToTime(time, duration),
     duration,
     attendees: Number(payload.attendees || 0),
-    pricePerHour: Number(hall.pricePerHour || 0),
+    pricePerHour: isOwnEvent ? 0 : Number(hall.pricePerHour || 0),
     rentAmount: requestBaseRent(),
     services,
     amount: requestTotalAmount(),
@@ -2176,22 +2441,36 @@ function buildCustomRequestPayload() {
 
 function renderRequestPaymentSummary(request) {
   if (!els.requestPaymentSummary || !request) return;
+  const hall = state.halls.find((item) => item._id === request.hallId);
+  const hallName = hall ? hallText(hall, "name") : request.hallName;
+  const isAnnouncement = request.type === "custom-event";
   const serviceText = request.services.length
     ? request.services.map((service) => `${service.name} (${formatCurrency(service.price)})`).join(", ")
     : t("requestNoServices");
   els.requestPaymentSummary.innerHTML = `
-    <div><span>${escapeHtml(t("requestRentTotal"))}</span><strong>${escapeHtml(formatCurrency(request.amount))}</strong></div>
-    <div><span>${escapeHtml(t("navHalls"))}</span><strong>${escapeHtml(request.hallName)}</strong></div>
+    <div><span>${escapeHtml(isAnnouncement ? "Стоимость объявления" : t("requestRentTotal"))}</span><strong>${escapeHtml(formatCurrency(request.amount))}</strong></div>
+    <div><span>${escapeHtml(isAnnouncement ? t("location") : t("navHalls"))}</span><strong>${escapeHtml(isAnnouncement ? request.location : hallName)}</strong></div>
     <div><span>${escapeHtml(t("date"))}</span><strong>${escapeHtml(formatDate(request.date))}</strong></div>
     <div><span>${escapeHtml(t("time"))}</span><strong>${escapeHtml(`${request.startTime}-${request.endTime}`)}</strong></div>
-    <div class="request-payment-services"><span>${escapeHtml(t("requestServicesTitle"))}</span><strong>${escapeHtml(serviceText)}</strong></div>
+    ${isAnnouncement ? `<div><span>Способ оплаты</span><strong>Имитация оплаты публикации</strong></div>` : `<div class="request-payment-services"><span>${escapeHtml(t("requestServicesTitle"))}</span><strong>${escapeHtml(serviceText)}</strong></div>`}
   `;
+}
+
+function setRequestPaymentMode(request) {
+  const isAnnouncement = request?.type === "custom-event";
+  els.requestAnnouncementPayment?.classList.toggle("hidden", !isAnnouncement);
+  els.requestCardPaymentFields?.classList.toggle("hidden", isAnnouncement);
+  els.requestCardPaymentFields?.querySelectorAll("input").forEach((input) => {
+    input.required = !isAnnouncement;
+    input.disabled = isAnnouncement;
+  });
 }
 
 function openRequestPaymentModal(request) {
   pendingCustomRequest = request;
   renderRequestPaymentSummary(request);
   els.requestPaymentForm?.reset();
+  setRequestPaymentMode(request);
   els.requestPaymentModal?.classList.remove("hidden");
 }
 
@@ -2200,18 +2479,23 @@ function closeRequestPaymentModal() {
   pendingCustomRequest = null;
 }
 
-function saveCustomEventRequest(request) {
-  const db = ensureDemoDb();
-  db.requests.unshift(request);
-  addClientNotification(db, {
-    userId: request.userId,
-    type: "success",
-    messageKey: "requestSubmitSuccess",
-    requestId: request._id,
-    requestType: request.type,
-  });
-  writeDemoDb(db);
-  state.adminBookings = db.requests.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+async function saveCustomEventRequest(request) {
+  const options = {
+    method: "POST",
+    body: JSON.stringify(request),
+  };
+
+  try {
+    return await api("/hall-bookings", options);
+  } catch (error) {
+    if (request?.type === "custom-event" && ![401, 403].includes(Number(error.status || 0))) {
+      state.dataMode = "local";
+      updateDataModeBadge();
+      const result = await localApiTranslated("/hall-bookings", options);
+      return { ...result, localFallback: true };
+    }
+    throw error;
+  }
 }
 
 function eventCard(event) {
@@ -2227,28 +2511,31 @@ function eventCard(event) {
 }
 
 function hallCard(hall) {
-  const features = (hall.equipment || []).slice(0, 4);
-  const advantages = (hall.advantages || []).slice(0, 3);
+  const name = hallText(hall, "name");
+  const floor = hallText(hall, "floor");
+  const location = hallText(hall, "location");
+  const description = hallText(hall, "description");
+  const features = hallList(hall, "equipment").slice(0, 4);
+  const advantages = hallList(hall, "advantages").slice(0, 3);
+  const image = hallImage(hall);
   return `
     <article class="hall-card">
-      ${hall.image ? `
-        <div class="card-media hall-media">
-          <img src="${escapeHtml(hall.image)}" alt="${escapeHtml(hall.name)}" loading="lazy" />
-          <span>${escapeHtml(hall.status === "available" ? t("hallStatusAvailable") : hall.status === "busy" ? t("hallStatusBusy") : t("hallStatusMaintenance"))}</span>
-        </div>
-      ` : ""}
+      <div class="card-media hall-media">
+        <img src="${escapeHtml(image)}" alt="${escapeHtml(name)}" loading="lazy" />
+        <span>${escapeHtml(hall.status === "available" ? t("hallStatusAvailable") : hall.status === "busy" ? t("hallStatusBusy") : t("hallStatusMaintenance"))}</span>
+      </div>
       <div class="event-top">
         <div>
-          <h3>${escapeHtml(hall.name)}</h3>
+          <h3>${escapeHtml(name)}</h3>
           <div class="hall-meta">
-            <span>${escapeHtml(hall.floor)}</span>
+            <span>${escapeHtml(floor)}</span>
             <span>-</span>
-            <span>${escapeHtml(hall.location)}</span>
+            <span>${escapeHtml(location)}</span>
           </div>
         </div>
         <span class="tag">${escapeHtml(tr("hallCapacityNumber", { count: hall.capacity }))}</span>
       </div>
-      <p class="event-description">${escapeHtml(hall.description || "")}</p>
+      <p class="event-description">${escapeHtml(description || "")}</p>
       <div class="hall-features">
         ${features.map((item) => `<span class="hall-pill">${escapeHtml(item)}</span>`).join("")}
       </div>
@@ -2347,7 +2634,7 @@ function renderDashboard() {
             return `
               <div class="hall-load-item">
                 <div class="hall-load-head">
-                  <strong>${escapeHtml(hall.name || "-")}</strong>
+                  <strong>${escapeHtml(hallText(hall, "name") || "-")}</strong>
                   <span>${escapeHtml(`${req} ${t("activeRequestsShort")}`)}</span>
                 </div>
                 <div class="hall-load-bar"><span style="width:${load}%"></span></div>
@@ -2436,16 +2723,22 @@ function syncCalendarHallFilterOptions() {
   if (!select) return;
 
   const current = select.value || "all";
-  const locations = [
-    ...state.events.map((event) => event.location).filter(Boolean),
-    ...state.halls.map((hall) => hall.name).filter(Boolean),
-  ];
-  const unique = [...new Set(locations)].sort((a, b) => String(a).localeCompare(String(b)));
+  const options = [];
+  state.events
+    .map((event) => event.location)
+    .filter(Boolean)
+    .forEach((location) => options.push({ value: location, label: location }));
+  state.halls
+    .filter((hall) => hall.name)
+    .forEach((hall) => options.push({ value: hall.name, label: hallText(hall, "name") || hall.name }));
+  const unique = [...new Map(options.map((item) => [item.value, item])).values()].sort((a, b) =>
+    String(a.label).localeCompare(String(b.label))
+  );
   select.innerHTML = [
     `<option value="all">${escapeHtml(t("calendarAllHalls"))}</option>`,
-    ...unique.map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`),
+    ...unique.map((item) => `<option value="${escapeHtml(item.value)}">${escapeHtml(item.label)}</option>`),
   ].join("");
-  select.value = current === "all" || unique.includes(current) ? current : "all";
+  select.value = current === "all" || unique.some((item) => item.value === current) ? current : "all";
 }
 
 function calendarFilterValues() {
@@ -2492,6 +2785,67 @@ function requestMatchesCalendarFilters(request, filters = calendarFilterValues()
   return haystack.includes(filters.search);
 }
 
+function calendarAgendaToggleText(expanded) {
+  const labels = {
+    ru: { more: "Показать полностью", less: "Свернуть" },
+    kk: { more: "Толық көрсету", less: "Жинау" },
+    en: { more: "Show full list", less: "Collapse" },
+  };
+  const pack = labels[state.lang] || labels.ru;
+  return expanded ? pack.less : pack.more;
+}
+
+function ensureCalendarAgendaToggle(total) {
+  if (!els.calendarAgendaList) return;
+  const panel = els.calendarAgendaList.closest(".calendar-agenda-panel");
+  if (!panel) return;
+
+  let button = panel.querySelector("#calendarAgendaToggle");
+  if (!button) {
+    button = document.createElement("button");
+    button.id = "calendarAgendaToggle";
+    button.className = "secondary calendar-agenda-toggle";
+    button.type = "button";
+    panel.appendChild(button);
+  }
+
+  if (total <= 5) calendarAgendaExpanded = false;
+  panel.classList.toggle("calendar-agenda-expanded", calendarAgendaExpanded);
+  button.hidden = total <= 5;
+  button.textContent = calendarAgendaToggleText(calendarAgendaExpanded);
+  button.setAttribute("aria-expanded", String(calendarAgendaExpanded));
+  button.onclick = () => {
+    calendarAgendaExpanded = !calendarAgendaExpanded;
+    renderCalendar();
+  };
+}
+
+function syncCalendarAgendaHeight() {
+  if (!els.calendarAgendaList) return;
+  const panel = els.calendarAgendaList.closest(".calendar-agenda-panel");
+  const calendar = document.querySelector(".calendar-month-panel");
+  if (!panel || !calendar) return;
+
+  if (window.matchMedia("(max-width: 980px)").matches) {
+    panel.style.height = "";
+    els.calendarAgendaList.style.maxHeight = "";
+    return;
+  }
+
+  const height = calendar.offsetHeight;
+  if (height < 100) {
+    panel.style.height = "";
+    els.calendarAgendaList.style.maxHeight = "";
+    return;
+  }
+
+  const head = panel.querySelector(".calendar-agenda-head");
+  const toggle = panel.querySelector("#calendarAgendaToggle");
+  const available = height - (head?.offsetHeight || 0) - (toggle && !toggle.hidden ? toggle.offsetHeight : 0) - 34;
+  panel.style.height = `${height}px`;
+  els.calendarAgendaList.style.maxHeight = `${Math.max(180, available)}px`;
+}
+
 function renderCalendar() {
   syncCalendarHallFilterOptions();
   const filters = calendarFilterValues();
@@ -2529,9 +2883,9 @@ function renderCalendar() {
     : `<div class="empty">${escapeHtml(t("noEvents"))}</div>`;
 
   if (els.calendarAgendaList) {
-    els.calendarAgendaList.innerHTML = events.length
-      ? events
-          .slice(0, 8)
+    const visibleAgenda = calendarAgendaExpanded ? events : events.slice(0, 5);
+    els.calendarAgendaList.innerHTML = visibleAgenda.length
+      ? visibleAgenda
           .map(
             (event) => `
         <button class="calendar-agenda-card" type="button" data-details="${escapeHtml(event._id)}">
@@ -2545,6 +2899,8 @@ function renderCalendar() {
           )
           .join("")
       : `<div class="empty">${escapeHtml(t("noEvents"))}</div>`;
+    ensureCalendarAgendaToggle(events.length);
+    requestAnimationFrame(syncCalendarAgendaHeight);
   }
 }
 
@@ -2612,7 +2968,7 @@ function buildCalendarItems() {
 
 function renderAvailabilitySlots() {
   const slots = state.halls.slice(0, 6).map((hall) => ({
-    hall: hall.name,
+    hall: hallText(hall, "name") || hall.name,
     time: hall.activeRequests ? `${hall.activeRequests} ${t("activeRequestsShort")}` : t("availableToday"),
     free: Number(hall.activeRequests || 0) < 2,
   }));
@@ -2735,7 +3091,7 @@ function renderHallBookings() {
             return `
       <article class="booking-row">
         <div>
-          <strong>${escapeHtml(booking.hallName || "-")}</strong>
+          <strong>${escapeHtml(booking.type === "custom-event" ? booking.eventTitle || "-" : booking.hallName || "-")}</strong>
           <p>${escapeHtml(
             tr("hallBookingSummary", {
               date: formatDate(booking.date),
@@ -2743,6 +3099,7 @@ function renderHallBookings() {
               duration: booking.duration || 0,
             })
           )}</p>
+          ${booking.type === "custom-event" ? `<p>${escapeHtml(booking.location || "")}${booking.city ? `, ${escapeHtml(booking.city)}` : ""}</p>` : ""}
           ${paymentLabel(booking)
             ? `<span class="status-pill ${paymentClass(booking)}">${escapeHtml(paymentLabel(booking))}</span>`
             : ""}
@@ -2803,8 +3160,10 @@ function renderClientNotifications() {
 }
 
 function renderAdminBookings() {
-  const typeFilter = els.adminRequestTypeFilter.value;
-  const statusFilter = els.adminRequestStatusFilter.value;
+  if (!els.adminBookingsList) return;
+
+  const typeFilter = els.adminRequestTypeFilter?.value || "all";
+  const statusFilter = els.adminRequestStatusFilter?.value || "all";
 
   const list = state.adminBookings.filter((request) => {
     if (typeFilter !== "all" && request.type !== typeFilter) return false;
@@ -2818,7 +3177,7 @@ function renderAdminBookings() {
           const sourceEvent = request.type === "event" ? state.events.find((event) => event._id === request.eventId) : null;
           const scheduleDate = request.date || sourceEvent?.date || "-";
           const scheduleTime = request.endTime ? `${request.time || request.startTime}-${request.endTime}` : request.time || sourceEvent?.time || "-";
-          const hallLabel = request.hallName || sourceEvent?.location || "-";
+          const hallLabel = request.location || request.hallName || sourceEvent?.location || "-";
           const attendees = request.attendees || sourceEvent?.booked || "-";
           const amount = request.amount ?? request.price ?? sourceEvent?.price ?? 0;
           const details =
@@ -2848,6 +3207,8 @@ function renderAdminBookings() {
                   <span><b>${escapeHtml(t("date"))}:</b> ${escapeHtml(formatDate(scheduleDate))}</span>
                   <span><b>${escapeHtml(t("time"))}:</b> ${escapeHtml(scheduleTime)}</span>
                   <span><b>${escapeHtml(t("location"))}:</b> ${escapeHtml(hallLabel)}</span>
+                  ${request.city ? `<span><b>${escapeHtml(t("city"))}:</b> ${escapeHtml(request.city)}</span>` : ""}
+                  ${request.duration ? `<span><b>${escapeHtml(t("hallDuration"))}:</b> ${escapeHtml(`${request.duration} ${t("hourShort")}`)}</span>` : ""}
                   <span><b>${escapeHtml(t("hallGuests"))}:</b> ${escapeHtml(String(attendees))}</span>
                   <span><b>${escapeHtml(t("price"))}:</b> ${escapeHtml(formatCurrency(amount))}</span>
                   ${request.ticketPrice !== undefined ? `<span><b>${escapeHtml(t("requestTicketPrice"))}:</b> ${escapeHtml(formatCurrency(request.ticketPrice))}</span>` : ""}
@@ -2902,6 +3263,36 @@ function renderAdminBookings() {
     : `<div class="empty">${escapeHtml(t("adminRequestsEmpty"))}</div>`;
 }
 
+function renderAdminSupportMessages() {
+  if (!els.adminSupportList) return;
+
+  els.adminSupportList.innerHTML = state.supportMessages.length
+    ? state.supportMessages
+        .map(
+          (item) => `
+      <article class="support-row">
+        <div>
+          <strong>${escapeHtml(item.userName || item.userEmail || "Клиент")}</strong>
+          <p>${escapeHtml(item.userEmail || "-")} · ${escapeHtml(dateTimeText(item.createdAt))}</p>
+          <p>${escapeHtml(item.text || "")}</p>
+        </div>
+        <div class="row-actions">
+          <span class="status-pill ${item.status === "read" ? "status-pill-approved" : "status-pill-pending"}">${escapeHtml(
+            supportStatusLabel(item.status)
+          )}</span>
+          ${
+            item.status !== "read"
+              ? `<button class="secondary" type="button" data-support-read="${escapeHtml(item._id)}">Прочитано</button>`
+              : ""
+          }
+        </div>
+      </article>
+    `
+        )
+        .join("")
+    : `<div class="empty">Сообщений от клиентов пока нет.</div>`;
+}
+
 function renderAdminHalls() {
   if (!els.adminHallsList) return;
 
@@ -2911,8 +3302,8 @@ function renderAdminHalls() {
           (hall) => `
       <article class="hall-admin-row">
         <div>
-          <strong>${escapeHtml(hall.name)}</strong>
-          <p>${escapeHtml(`${hall.floor} - ${hall.location}`)}</p>
+          <strong>${escapeHtml(hallText(hall, "name") || "-")}</strong>
+          <p>${escapeHtml(`${hallText(hall, "floor") || "-"} - ${hallText(hall, "location") || "-"}`)}</p>
         </div>
         <div>
           <strong>${escapeHtml(tr("hallCapacityNumber", { count: hall.capacity }))}</strong>
@@ -2969,6 +3360,7 @@ function renderAll() {
   renderAdminBookings();
   renderAdminHalls();
   renderAdminUsers();
+  renderAdminSupportMessages();
 }
 
 async function loadEvents() {
@@ -3043,6 +3435,13 @@ async function loadMyNotifications() {
   renderAll();
 }
 
+async function loadSupportMessages() {
+  if (state.role !== "admin") return;
+  const messages = await api("/support-messages", { localFallback: false });
+  state.supportMessages = Array.isArray(messages) ? messages : [];
+  renderAdminSupportMessages();
+}
+
 async function loadProfile() {
   if (!state.token) {
     showMessage(t("loginRequired"), "error");
@@ -3060,21 +3459,36 @@ async function loadProfile() {
 async function loadAdmin() {
   if (state.role !== "admin") return;
 
-  els.adminBookingsList.innerHTML = '<div class="skeleton-list"><span></span><span></span><span></span></div>';
+  if (els.adminBookingsList) els.adminBookingsList.innerHTML = '<div class="skeleton-list"><span></span><span></span><span></span></div>';
   if (els.adminUsersList) els.adminUsersList.innerHTML = '<div class="skeleton-list"><span></span><span></span></div>';
-  const [stats, bookings, users] = await Promise.all([api("/stats"), api("/bookings"), api("/users")]);
-  state.adminBookings = bookings;
-  state.adminUsers = users;
+  const needsStats = [
+    els.adminStatEvents,
+    els.adminStatBookings,
+    els.adminStatUsers,
+    els.adminStatCheckedIn,
+    els.adminStatPaidTickets,
+    els.adminStatHallApproved,
+  ].some(Boolean);
+  const [statsRaw, bookings, users, supportMessages] = await Promise.all([
+    needsStats ? api("/stats", { localFallback: false }) : Promise.resolve({}),
+    api("/bookings", { localFallback: false }),
+    api("/users", { localFallback: false }).catch(() => []),
+    api("/support-messages", { localFallback: false }).catch(() => []),
+  ]);
+  state.adminBookings = Array.isArray(bookings) ? bookings.map(normalizeAdminBooking) : [];
+  state.adminUsers = Array.isArray(users) ? users : [];
+  state.supportMessages = Array.isArray(supportMessages) ? supportMessages : [];
 
-  els.adminStatEvents.textContent = stats.events ?? stats.data?.events ?? 0;
-  els.adminStatBookings.textContent = stats.bookings ?? stats.data?.bookings ?? 0;
-  els.adminStatUsers.textContent = stats.users ?? stats.data?.users ?? 0;
-  els.adminStatCheckedIn.textContent = stats.checkedIn ?? stats.data?.checkedIn ?? 0;
+  const stats = statsRaw.data || statsRaw;
+  if (els.adminStatEvents) els.adminStatEvents.textContent = stats.events ?? 0;
+  if (els.adminStatBookings) els.adminStatBookings.textContent = stats.bookings ?? 0;
+  if (els.adminStatUsers) els.adminStatUsers.textContent = stats.users ?? 0;
+  if (els.adminStatCheckedIn) els.adminStatCheckedIn.textContent = stats.checkedIn ?? 0;
   if (els.adminStatPaidTickets) {
-    els.adminStatPaidTickets.textContent = stats.paidTickets ?? stats.data?.paidTickets ?? 0;
+    els.adminStatPaidTickets.textContent = stats.paidTickets ?? 0;
   }
   if (els.adminStatHallApproved) {
-    els.adminStatHallApproved.textContent = stats.approvedHallBookings ?? stats.data?.approvedHallBookings ?? 0;
+    els.adminStatHallApproved.textContent = stats.approvedHallBookings ?? 0;
   }
 
   renderAll();
@@ -3180,7 +3594,7 @@ function resetHallForm() {
   fields.namedItem("capacity").value = 50;
   fields.namedItem("pricePerHour").value = 15000;
   fields.namedItem("status").value = "available";
-  els.hallFormTitle.textContent = t("hallFormNewTitle");
+  els.hallFormTitle.textContent = "Залы";
 }
 
 function openHallBookingModal(hallId) {
@@ -3193,10 +3607,10 @@ function openHallBookingModal(hallId) {
   els.hallBookingForm.elements.namedItem("attendees").value = Math.min(hall.capacity, 30);
   els.hallBookingForm.elements.namedItem("time").value = "09:00";
 
-  els.hallBookingTitle.textContent = tr("hallBookingTitleWithName", { name: hall.name });
+  els.hallBookingTitle.textContent = tr("hallBookingTitleWithName", { name: hallText(hall, "name") || hall.name });
   const baseSubtitle = tr("hallBookingSubtitle", {
-    floor: hall.floor,
-    location: hall.location,
+    floor: hallText(hall, "floor") || hall.floor,
+    location: hallText(hall, "location") || hall.location,
     capacity: hall.capacity,
   });
   const priceSubtitle = ` - ${formatCurrency(hall.pricePerHour || 0)} / ${t("hourShort")}`;
@@ -3265,7 +3679,7 @@ function openAdminRequestModal(requestId) {
   fields.namedItem("purpose").value = request.purpose || "";
   fields.namedItem("adminReason").value = request.adminReason || "";
 
-  const isHall = request.type === "hall";
+  const isHall = request.type === "hall" || request.type === "custom-event";
   ["date", "time", "duration", "attendees", "purpose"].forEach((name) => {
     const field = fields.namedItem(name);
     if (!field) return;
@@ -3286,11 +3700,11 @@ function showHallDetails(hallId) {
 
   els.eventDetails.innerHTML = `
     <p class="eyebrow">${escapeHtml(t("hallDetailsEyebrow"))}</p>
-    <h2>${escapeHtml(hall.name)}</h2>
-    <p class="lead">${escapeHtml(hall.description || "")}</p>
+    <h2>${escapeHtml(hallText(hall, "name") || "-")}</h2>
+    <p class="lead">${escapeHtml(hallText(hall, "description") || "")}</p>
     <div class="detail-grid">
-      <div class="detail-box"><span>${escapeHtml(t("location"))}</span><strong>${escapeHtml(hall.location)}</strong></div>
-      <div class="detail-box"><span>${escapeHtml(t("hallFloor"))}</span><strong>${escapeHtml(hall.floor)}</strong></div>
+      <div class="detail-box"><span>${escapeHtml(t("location"))}</span><strong>${escapeHtml(hallText(hall, "location") || "-")}</strong></div>
+      <div class="detail-box"><span>${escapeHtml(t("hallFloor"))}</span><strong>${escapeHtml(hallText(hall, "floor") || "-")}</strong></div>
       <div class="detail-box"><span>${escapeHtml(t("capacity"))}</span><strong>${escapeHtml(
         tr("hallCapacityNumber", { count: hall.capacity })
       )}</strong></div>
@@ -3302,7 +3716,7 @@ function showHallDetails(hallId) {
       )}</strong></div>
     </div>
     <h3>${escapeHtml(t("hallEquipmentTitle"))}</h3>
-    <p class="event-description">${escapeHtml((hall.equipment || []).join(", "))}</p>
+    <p class="event-description">${escapeHtml(hallList(hall, "equipment").join(", "))}</p>
   `;
 
   els.eventModal.classList.remove("hidden");
@@ -3493,6 +3907,7 @@ els.authSection?.addEventListener("click", (event) => {
   if (event.target === els.authSection) closeAuth();
 });
 els.themeToggle.addEventListener("click", () => window.ORDA?.theme?.toggle(els.themeToggle));
+window.addEventListener("resize", syncCalendarAgendaHeight);
 
 // Portal switcher buttons (visible to admins only)
 els.portalClientBtn?.addEventListener("click", () => {
@@ -3518,6 +3933,10 @@ document.querySelectorAll("[data-view-link]").forEach((button) => {
   button.addEventListener("click", () => setView(button.dataset.viewLink));
 });
 
+document.querySelectorAll("[data-request-mode]").forEach((button) => {
+  button.addEventListener("click", () => setRequestMode(button.dataset.requestMode));
+});
+
 els.requestHallGrid?.addEventListener("click", (event) => {
   const button = event.target.closest("[data-request-hall]");
   if (!button || button.disabled) return;
@@ -3540,11 +3959,18 @@ els.requestSlotGrid?.addEventListener("click", (event) => {
 });
 
 els.customRequestForm?.addEventListener("change", (event) => {
-  if (event.target?.name === "services") updateRequestTotals();
+  if (event.target?.name === "services" || event.target?.name === "duration") {
+    renderRequestSummary();
+    updateRequestTotals();
+  }
 });
 
 els.customRequestForm?.addEventListener("submit", (event) => {
   event.preventDefault();
+  if (!state.token) {
+    showMessage(t("loginRequired"), "error");
+    return;
+  }
   if (!els.customRequestForm.reportValidity()) return;
   try {
     openRequestPaymentModal(buildCustomRequestPayload());
@@ -3562,18 +3988,28 @@ els.requestPaymentModal?.addEventListener("click", (event) => {
 els.requestPaymentForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!pendingCustomRequest || !els.requestPaymentForm.reportValidity()) return;
-  Array.from(els.requestPaymentForm.elements).forEach((field) => (field.disabled = true));
-  els.requestPaymentProcessText?.classList.remove("hidden");
-  await new Promise((resolve) => setTimeout(resolve, 650));
-  saveCustomEventRequest(pendingCustomRequest);
-  els.requestPaymentProcessText?.classList.add("hidden");
-  Array.from(els.requestPaymentForm.elements).forEach((field) => (field.disabled = false));
-  closeRequestPaymentModal();
-  els.customRequestForm.reset();
-  requestSelection.slotId = "";
-  renderRequestView();
-  renderAdminBookings();
-  showMessage(t("requestSubmitSuccess"));
+  try {
+    Array.from(els.requestPaymentForm.elements).forEach((field) => (field.disabled = true));
+    els.requestPaymentProcessText?.classList.remove("hidden");
+    await new Promise((resolve) => setTimeout(resolve, 650));
+    const result = await saveCustomEventRequest(pendingCustomRequest);
+    closeRequestPaymentModal();
+    els.customRequestForm.reset();
+    requestSelection.slotId = "";
+    renderRequestView();
+    if (result.localFallback) {
+      state.hallBookings = await localApiTranslated("/my-hall-bookings");
+      renderAll();
+    } else {
+      await Promise.all([loadMyHallBookings(), state.role === "admin" ? loadAdmin() : Promise.resolve()]);
+    }
+    showMessage(responseMessage(result) || t("requestSubmitSuccess"));
+  } catch (error) {
+    showMessage(error.message, "error");
+  } finally {
+    els.requestPaymentProcessText?.classList.add("hidden");
+    Array.from(els.requestPaymentForm.elements).forEach((field) => (field.disabled = false));
+  }
 });
 
 els.languageSelect.addEventListener("change", () => {
@@ -3702,8 +4138,8 @@ els.calendarTypeFilter?.addEventListener("change", () => {
 els.calendarHallFilter?.addEventListener("change", () => {
   refreshCalendarView();
 });
-els.adminRequestTypeFilter.addEventListener("change", renderAdminBookings);
-els.adminRequestStatusFilter.addEventListener("change", renderAdminBookings);
+els.adminRequestTypeFilter?.addEventListener("change", renderAdminBookings);
+els.adminRequestStatusFilter?.addEventListener("change", renderAdminBookings);
 
 document.body.addEventListener("click", async (event) => {
   const detailsBtn = event.target.closest("[data-details]");
@@ -3726,6 +4162,7 @@ document.body.addEventListener("click", async (event) => {
   const rejectBtn = event.target.closest("[data-reject]");
   const cancelRequestBtn = event.target.closest("[data-cancel-request]");
   const markNotificationBtn = event.target.closest("[data-mark-notification]");
+  const supportReadBtn = event.target.closest("[data-support-read]");
 
   try {
     if (detailsBtn) {
@@ -3800,7 +4237,7 @@ document.body.addEventListener("click", async (event) => {
     }
 
     if (deleteRequestBtn) {
-      const result = await api(`/bookings/${deleteRequestBtn.dataset.deleteRequest}`, { method: "DELETE" });
+      const result = await adminBookingApi(deleteRequestBtn.dataset.deleteRequest, "", { method: "DELETE" });
       showMessage(responseMessage(result));
       await Promise.all([loadEvents(), loadHalls(), loadMyBookings(), loadMyHallBookings(), loadMyNotifications()]);
       await loadAdmin();
@@ -3849,17 +4286,14 @@ document.body.addEventListener("click", async (event) => {
     }
 
     if (checkInBtn) {
-      const result = await api(`/bookings/${checkInBtn.dataset.checkin}/check-in`, { method: "PATCH" });
+      const result = await adminBookingApi(checkInBtn.dataset.checkin, "/check-in", { method: "PATCH" });
       showMessage(responseMessage(result));
       await loadAdmin();
       return;
     }
 
     if (approveBtn) {
-      const result = await api(`/bookings/${approveBtn.dataset.approve}/status`, {
-        method: "PATCH",
-        body: JSON.stringify({ status: "approved" }),
-      });
+      const result = await updateAdminBookingStatus(approveBtn.dataset.approve, { status: "approved" });
       showMessage(responseMessage(result));
       await Promise.all([loadEvents(), loadHalls(), loadMyBookings(), loadMyHallBookings(), loadMyNotifications()]);
       await loadAdmin();
@@ -3869,9 +4303,9 @@ document.body.addEventListener("click", async (event) => {
     if (rejectBtn) {
       const reasonRaw = window.prompt(t("adminRejectReasonPrompt"), "");
       if (reasonRaw === null) return;
-      const result = await api(`/bookings/${rejectBtn.dataset.reject}/status`, {
-        method: "PATCH",
-        body: JSON.stringify({ status: "rejected", reason: String(reasonRaw || "").trim() }),
+      const result = await updateAdminBookingStatus(rejectBtn.dataset.reject, {
+        status: "rejected",
+        reason: String(reasonRaw || "").trim(),
       });
       showMessage(responseMessage(result));
       await Promise.all([loadEvents(), loadHalls(), loadMyBookings(), loadMyHallBookings(), loadMyNotifications()]);
@@ -3882,9 +4316,9 @@ document.body.addEventListener("click", async (event) => {
     if (cancelRequestBtn) {
       const reasonRaw = window.prompt(t("adminCancelReasonPrompt"), "");
       if (reasonRaw === null) return;
-      const result = await api(`/bookings/${cancelRequestBtn.dataset.cancelRequest}/status`, {
-        method: "PATCH",
-        body: JSON.stringify({ status: "cancelled", reason: String(reasonRaw || "").trim() }),
+      const result = await updateAdminBookingStatus(cancelRequestBtn.dataset.cancelRequest, {
+        status: "cancelled",
+        reason: String(reasonRaw || "").trim(),
       });
       showMessage(responseMessage(result));
       await Promise.all([loadEvents(), loadHalls(), loadMyBookings(), loadMyHallBookings(), loadMyNotifications()]);
@@ -3898,6 +4332,16 @@ document.body.addEventListener("click", async (event) => {
       });
       showMessage(responseMessage(result));
       await loadMyNotifications();
+      return;
+    }
+
+    if (supportReadBtn) {
+      const result = await api(`/support-messages/${supportReadBtn.dataset.supportRead}/read`, {
+        method: "PATCH",
+        localFallback: false,
+      });
+      await loadSupportMessages();
+      showMessage(responseMessage(result) || "Сообщение отмечено как прочитанное.");
       return;
     }
   } catch (error) {
@@ -3919,6 +4363,33 @@ els.profileForm.addEventListener("submit", async (event) => {
 
     updateShell();
     showMessage(responseMessage(result));
+  } catch (error) {
+    showMessage(error.message, "error");
+  }
+});
+
+els.supportForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!state.token) {
+    showMessage(t("loginRequired"), "error");
+    return;
+  }
+
+  const message = String(els.supportMessageText?.value || "").trim();
+  if (!message) {
+    showMessage("Введите текст сообщения.", "error");
+    return;
+  }
+
+  try {
+    const result = await api("/support-messages", {
+      method: "POST",
+      body: JSON.stringify({ message }),
+      localFallback: false,
+    });
+    els.supportForm.reset();
+    if (state.role === "admin") await loadSupportMessages();
+    showMessage(responseMessage(result) || "Сообщение отправлено администратору.");
   } catch (error) {
     showMessage(error.message, "error");
   }
@@ -3970,9 +4441,17 @@ els.hallBookingForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   try {
     const payload = Object.fromEntries(new FormData(els.hallBookingForm));
+    const hall = state.halls.find((item) => item._id === payload.hallId);
+    const duration = Number(payload.duration || 0);
+    const pricePerHour = Number(hall?.pricePerHour || 0);
+    payload.hallName = hall?.name || "";
+    payload.pricePerHour = pricePerHour;
+    payload.amount = pricePerHour * duration;
+    payload.paymentStatus = payload.amount > 0 ? "unpaid" : "free";
     const result = await api("/hall-bookings", {
       method: "POST",
       body: JSON.stringify(payload),
+      localFallback: false,
     });
 
     closeHallBookingModal();
@@ -3986,7 +4465,7 @@ els.hallBookingForm.addEventListener("submit", async (event) => {
 
 els.resetEventForm.addEventListener("click", resetEventForm);
 els.resetHallForm?.addEventListener("click", resetHallForm);
-els.exportBookingsBtn.addEventListener("click", exportBookings);
+els.exportBookingsBtn?.addEventListener("click", exportBookings);
 els.closeModal.addEventListener("click", () => els.eventModal.classList.add("hidden"));
 
 els.eventModal.addEventListener("click", (event) => {
@@ -4106,7 +4585,7 @@ els.adminRequestForm?.addEventListener("submit", async (event) => {
   if (!requestId) return;
 
   try {
-    const result = await api(`/bookings/${requestId}`, {
+    const result = await adminBookingApi(requestId, "", {
       method: "PATCH",
       body: JSON.stringify(payload),
     });
@@ -4120,7 +4599,6 @@ els.adminRequestForm?.addEventListener("submit", async (event) => {
 });
 
 function bootstrap() {
-  ensureDemoDb();
   ensureSessionValidity();
   window.ORDA._events = [];
   window.ORDA.lang = state.lang;
@@ -4136,6 +4614,7 @@ function bootstrap() {
   restoreCabinetTab();
   resetEventForm();
   resetHallForm();
+  setRequestMode("hall");
 
   Promise.all([loadEvents(), loadHalls(), loadMyBookings(), loadMyHallBookings(), loadMyNotifications()])
     .then(async () => {

@@ -38,8 +38,8 @@
       city: 'floor1',
       cityKey: 'mapFloor1',
       address: '1 этаж · Central Wing · вход A',
-      lat: 51.0907,
-      lng: 71.4190,
+      lat: 51.08733,
+      lng: 71.41502,
       capacity: 420,
       status: 'soon',
       statusKey: 'mapLegendSoon',
@@ -62,8 +62,8 @@
       city: 'floor1',
       cityKey: 'mapFloor1',
       address: '1 этаж · Main Atrium · зона регистрации',
-      lat: 51.0903,
-      lng: 71.4197,
+      lat: 51.08710,
+      lng: 71.41531,
       capacity: 650,
       status: 'busy',
       statusKey: 'mapLegendBusy',
@@ -85,8 +85,8 @@
       city: 'floor2',
       cityKey: 'mapFloor2',
       address: '2 этаж · North Wing · секционный блок',
-      lat: 51.0910,
-      lng: 71.4200,
+      lat: 51.08748,
+      lng: 71.41556,
       capacity: 180,
       status: 'free',
       statusKey: 'mapLegendFree',
@@ -108,8 +108,8 @@
       city: 'floor2',
       cityKey: 'mapFloor2',
       address: '2 этаж · South Wing · учебный кластер',
-      lat: 51.0906,
-      lng: 71.4205,
+      lat: 51.08686,
+      lng: 71.41503,
       capacity: 90,
       status: 'free',
       statusKey: 'mapLegendFree',
@@ -131,8 +131,8 @@
       city: 'floor3',
       cityKey: 'mapFloor3',
       address: '3 этаж · Executive Zone · переговорная',
-      lat: 51.0914,
-      lng: 71.4194,
+      lat: 51.12197,
+      lng: 71.42793,
       capacity: 36,
       status: 'free',
       statusKey: 'mapLegendFree',
@@ -154,8 +154,8 @@
       city: 'floor3',
       cityKey: 'mapFloor3',
       address: '3 этаж · East Wing · пресс-зона',
-      lat: 51.0916,
-      lng: 71.4201,
+      lat: 51.12218,
+      lng: 71.42764,
       capacity: 120,
       status: 'busy',
       statusKey: 'mapLegendBusy',
@@ -177,8 +177,8 @@
       city: 'floor4',
       cityKey: 'mapFloor4',
       address: '4 этаж · Education Cluster · лаборатория',
-      lat: 51.0920,
-      lng: 71.4198,
+      lat: 51.08671,
+      lng: 71.41558,
       capacity: 54,
       status: 'free',
       statusKey: 'mapLegendFree',
@@ -200,8 +200,8 @@
       city: 'floor5',
       cityKey: 'mapFloor5',
       address: '5 этаж · Panorama Zone · lounge',
-      lat: 51.0923,
-      lng: 71.4203,
+      lat: 51.12173,
+      lng: 71.42822,
       capacity: 110,
       status: 'soon',
       statusKey: 'mapLegendSoon',
@@ -258,8 +258,10 @@
     buildTicker();
     bindFilters();
     bindFloorSelector();
+    bindBuildingPlan();
     bindDrawer();
     bindViewToggle();
+    updateBuildingPlan();
   }
 
   /* ── Карта Leaflet ────────────────────────────────────────────────────── */
@@ -267,8 +269,8 @@
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
 
     map = L.map('mapContainer', {
-      center: [51.0914, 71.4198],
-      zoom: 16,
+      center: [51.1045, 71.4217],
+      zoom: 13,
       zoomControl: false,
       attributionControl: true,
     });
@@ -478,13 +480,14 @@
     document.querySelectorAll('.map-venue-card').forEach(el => {
       el.classList.toggle('active', String(el.dataset.venueId) === String(id));
     });
+    highlightPlanVenue(id);
     const active = document.querySelector('.map-venue-card.active');
     if (active) active.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   function flyToVenue(venue) {
     if (!map) return;
-    map.flyTo([venue.lat, venue.lng], 14, { duration: 1.2 });
+    map.flyTo([venue.lat, venue.lng], 16, { duration: 1.2 });
     setTimeout(() => {
       if (markers[venue.id]) markers[venue.id].openPopup();
     }, 1300);
@@ -695,9 +698,47 @@
     }
   }
 
+  function bindBuildingPlan() {
+    document.querySelectorAll('[data-map-venue]').forEach(zone => {
+      zone.addEventListener('click', () => {
+        const venue = VENUES.find(v => v.id === zone.dataset.mapVenue);
+        if (!venue) return;
+
+        filters.city = venue.city;
+        const select = document.getElementById('mapCityFilter');
+        if (select) select.value = venue.city;
+        updateFloorButtons(venue.city);
+        applyFilters();
+        flyToVenue(venue);
+        openDrawer(venue.id);
+      });
+    });
+  }
+
   function updateFloorButtons(value) {
     document.querySelectorAll('[data-map-floor]').forEach(btn => {
       btn.classList.toggle('active', (btn.dataset.mapFloor || 'all') === value);
+    });
+    updateBuildingPlan();
+  }
+
+  function updateBuildingPlan(filtered = getFiltered()) {
+    const activeFloor = filters.city || 'all';
+    const visibleIds = new Set(filtered.map(venue => venue.id));
+
+    document.querySelectorAll('[data-building-floor]').forEach(floor => {
+      const floorId = floor.dataset.buildingFloor || 'all';
+      floor.classList.toggle('is-dimmed', activeFloor !== 'all' && floorId !== activeFloor);
+    });
+
+    document.querySelectorAll('[data-map-venue]').forEach(zone => {
+      zone.classList.toggle('is-filtered-out', !visibleIds.has(zone.dataset.mapVenue));
+    });
+  }
+
+  function highlightPlanVenue(id) {
+    document.querySelectorAll('[data-map-venue]').forEach(zone => {
+      zone.classList.toggle('active', String(zone.dataset.mapVenue) === String(id));
     });
   }
 
@@ -718,11 +759,12 @@
 
     // Update list
     buildVenueList();
+    updateBuildingPlan(filtered);
 
     // Fit bounds to visible
     if (filtered.length > 0) {
       const bounds = L.latLngBounds(filtered.map(v => [v.lat, v.lng]));
-      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 10 });
+      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 16 });
     }
   }
 

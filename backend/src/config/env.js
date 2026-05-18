@@ -28,18 +28,31 @@ function loadEnvFile() {
 
 loadEnvFile();
 
+function isPlaceholderMongoUri(value) {
+  return (
+    !value ||
+    /username:password/i.test(value) ||
+    /cluster\.mongodb\.net/i.test(value) ||
+    /<your-mongodb-atlas-uri>/i.test(value)
+  );
+}
+
+const mongodbUri = process.env.MONGODB_URI || "";
+const nodeEnv = process.env.NODE_ENV || "development";
+
 const config = {
   port: process.env.PORT || 3000,
-  nodeEnv: process.env.NODE_ENV || "development",
+  nodeEnv,
   jwtSecret: process.env.JWT_SECRET,
-  mongodbUri: process.env.MONGODB_URI,
+  mongodbUri,
+  mongodbEnabled: !isPlaceholderMongoUri(mongodbUri),
   frontendOrigin: process.env.FRONTEND_ORIGIN || process.env.CORS_ORIGIN || "",
 };
 
 function validateConfig() {
   const missing = [];
   if (!config.jwtSecret) missing.push("JWT_SECRET");
-  if (!config.mongodbUri) missing.push("MONGODB_URI");
+  if (config.nodeEnv === "production" && !config.mongodbEnabled) missing.push("MONGODB_URI");
 
   if (missing.length) {
     throw new Error(`Missing required environment variables: ${missing.join(", ")}`);

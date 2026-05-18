@@ -1,7 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-const { isDbReady } = require("./config/db");
+const { dbStatus } = require("./config/db");
 const { config } = require("./config/env");
 const createApiRouter = require("./routes");
 const { notFound, errorHandler } = require("./middleware/errorHandler");
@@ -50,7 +50,7 @@ app.get("/health", (req, res) => {
   res.json({
     status: "ok",
     brand: "ORDA Smart Event System",
-    database: isDbReady() ? "connected" : "connecting",
+    database: dbStatus(),
   });
 });
 
@@ -58,7 +58,8 @@ app.use(createApiRouter());
 app.use("/api", createApiRouter());
 
 app.use((req, res, next) => {
-  if (req.method === "GET" && req.accepts("html")) {
+  const accept = String(req.get("accept") || "");
+  if (req.method === "GET" && accept.includes("text/html")) {
     return res.sendFile(path.join(staticDir, "index.html"));
   }
 

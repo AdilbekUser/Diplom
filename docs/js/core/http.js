@@ -15,7 +15,20 @@
     }
 
     const response = await fetch(url, { ...options, headers });
-    const data = await response.json().catch(() => ({}));
+    const raw = await response.text();
+    let data = {};
+
+    if (raw) {
+      try {
+        data = JSON.parse(raw);
+      } catch (parseError) {
+        const error = new Error("Unexpected response from server.");
+        if (!response.ok) error.status = response.status;
+        error.responseStatus = response.status;
+        error.data = { preview: raw.slice(0, 200) };
+        throw error;
+      }
+    }
 
     if (!response.ok) {
       const error = new Error(getErrorMessage(response, data));

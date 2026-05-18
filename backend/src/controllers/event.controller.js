@@ -2,8 +2,10 @@ const Event = require("../models/Event");
 const Booking = require("../models/Booking");
 const ApiError = require("../utils/apiError");
 
+const activeBookingStatuses = ["registered", "new", "review", "pending", "approved"];
+
 function eventPayload(body) {
-  return {
+  const payload = {
     title: String(body.title || "").trim(),
     date: String(body.date || "").trim(),
     time: String(body.time || "10:00").trim(),
@@ -24,6 +26,12 @@ function eventPayload(body) {
     capacity: Number(body.capacity || 80),
     status: String(body.status || "published").trim(),
   };
+
+  if (Object.prototype.hasOwnProperty.call(body, "endDate")) payload.endDate = String(body.endDate || "").trim();
+  if (Object.prototype.hasOwnProperty.call(body, "city")) payload.city = String(body.city || "").trim();
+  if (Object.prototype.hasOwnProperty.call(body, "image")) payload.image = String(body.image || "").trim();
+
+  return payload;
 }
 
 function validateEventPayload(data) {
@@ -42,8 +50,8 @@ function validateEventPayload(data) {
 
 async function eventWithBookingCount(event, userEmail) {
   const [booked, userBooking] = await Promise.all([
-    Booking.countDocuments({ eventId: event._id, status: "registered" }),
-    userEmail ? Booking.findOne({ eventId: event._id, userEmail, status: "registered" }) : null,
+    Booking.countDocuments({ eventId: event._id, status: { $in: activeBookingStatuses } }),
+    userEmail ? Booking.findOne({ eventId: event._id, userEmail, status: { $in: activeBookingStatuses } }) : null,
   ]);
 
   return {
@@ -69,6 +77,7 @@ async function getEvents(req, res) {
       { title: new RegExp(search, "i") },
       { description: new RegExp(search, "i") },
       { location: new RegExp(search, "i") },
+      { city: new RegExp(search, "i") },
       { organizer: new RegExp(search, "i") },
       { tags: new RegExp(search, "i") },
     ];

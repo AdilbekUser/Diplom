@@ -8,7 +8,7 @@
     logout: "Выйти",
     demoModeBadge: "Демо режим: localStorage",
 
-    projectLabel: "Назначение проекта",
+    projectLabel: " ",
     projectMeaning: "Веб-система для регистрации на мероприятия и управления конференц-залами.",
     platformLabel: "Платформа управления событиями",
     heroTitle: "ORDA Smart Event System",
@@ -287,7 +287,7 @@
     logout: "Шығу",
     demoModeBadge: "Demo режим: localStorage",
 
-    projectLabel: "Жобаның мақсаты",
+    projectLabel: " ",
     projectMeaning: "Іс-шараларға тіркеу және конференц-залдарды басқаруға арналған веб-жүйе.",
     platformLabel: "Іс-шараларды басқару платформасы",
     heroTitle: "ORDA Smart Event System",
@@ -566,7 +566,7 @@
     logout: "Logout",
     demoModeBadge: "Demo mode: localStorage",
 
-    projectLabel: "Project purpose",
+    projectLabel: "",
     projectMeaning: "Web system for event registration and conference-hall management.",
     platformLabel: "Event operations platform",
     heroTitle: "ORDA Smart Event System",
@@ -1645,6 +1645,16 @@
     mapEmptyTitle: "Залы не найдены",
     mapEmptyText: "Измените этаж, тип зала или статус занятости.",
     mapChooseInCatalog: "Выберите зал в каталоге",
+    mapPlanPanorama: "Панорама и нетворкинг",
+    mapPlanTraining: "Учебная зона",
+    mapPlanBusiness: "Переговоры и пресса",
+    mapPlanSessions: "Секции и воркшопы",
+    mapPlanEntrance: "Главный вход",
+    mapPlanReception: "Ресепшен",
+    mapPlanLift: "Лифт",
+    mapPlanCafe: "Кофе-зона",
+    mapPlanView: "вид на город",
+    mapPlanMainCorridor: "главный коридор",
   });
 
   Object.assign(kk, {
@@ -1795,6 +1805,16 @@
     mapEmptyTitle: "Залдар табылмады",
     mapEmptyText: "Қабатты, зал түрін немесе бос емес статусын өзгертіңіз.",
     mapChooseInCatalog: "Залды каталогтан таңдаңыз",
+    mapPlanPanorama: "Панорама және нетворкинг",
+    mapPlanTraining: "Оқу аймағы",
+    mapPlanBusiness: "Келіссөздер және баспасөз",
+    mapPlanSessions: "Секциялар және воркшоптар",
+    mapPlanEntrance: "Басты кіру",
+    mapPlanReception: "Ресепшен",
+    mapPlanLift: "Лифт",
+    mapPlanCafe: "Кофе аймағы",
+    mapPlanView: "қала көрінісі",
+    mapPlanMainCorridor: "негізгі дәліз",
   });
 
   Object.assign(en, {
@@ -1945,6 +1965,16 @@
     mapEmptyTitle: "No halls found",
     mapEmptyText: "Change the floor, hall type, or occupancy status.",
     mapChooseInCatalog: "Choose the hall in the catalog",
+    mapPlanPanorama: "Panorama and networking",
+    mapPlanTraining: "Training zone",
+    mapPlanBusiness: "Meetings and press",
+    mapPlanSessions: "Breakouts and workshops",
+    mapPlanEntrance: "Main entrance",
+    mapPlanReception: "Reception",
+    mapPlanLift: "Lift",
+    mapPlanCafe: "Coffee zone",
+    mapPlanView: "city view",
+    mapPlanMainCorridor: "main corridor",
   });
 
   Object.assign(ru, {

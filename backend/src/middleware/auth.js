@@ -13,7 +13,7 @@ function auth(req, res, next) {
     req.user = jwt.verify(token, config.jwtSecret);
     return next();
   } catch (err) {
-    return next(new ApiError(403, "Authorization token is invalid or expired."));
+    return next(new ApiError(401, "Authorization token is invalid or expired."));
   }
 }
 

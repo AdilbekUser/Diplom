@@ -553,9 +553,9 @@
       </div>
     </div>
     <div class="map-hero-stats">
-      <article><strong>12</strong><span data-i18n="mapStatHalls"></span></article>
+      <article><strong>8</strong><span data-i18n="mapStatHalls"></span></article>
       <article><strong>5</strong><span data-i18n="mapStatFloors"></span></article>
-      <article><strong>1800</strong><span data-i18n="mapStatCapacity"></span></article>
+      <article><strong>1660</strong><span data-i18n="mapStatCapacity"></span></article>
     </div>
   </div>
 
@@ -575,12 +575,98 @@
         <strong data-i18n="mapBuildingPlanTitle"></strong>
       </div>
       <div class="building-plan">
-        <div class="building-zone zone-free"><b>Grand Hall A</b><span data-i18n="mapFloor1"></span></div>
-        <div class="building-zone zone-soon"><b>Orion Hall B</b><span data-i18n="mapFloor2"></span></div>
-        <div class="building-zone zone-free"><b>Workshop Hub C</b><span data-i18n="mapFloor2"></span></div>
-        <div class="building-zone zone-busy"><b>Silk Road Room</b><span data-i18n="mapFloor3"></span></div>
-        <div class="building-zone zone-free"><b>Nova Lab</b><span data-i18n="mapFloor4"></span></div>
-        <div class="building-zone zone-soon"><b>Skyline Lounge</b><span data-i18n="mapFloor5"></span></div>
+        <div class="building-floor" data-building-floor="floor5">
+          <button class="building-floor-label" type="button" data-map-floor="floor5">
+            <span data-i18n="mapFloor5"></span>
+            <small data-i18n="mapPlanPanorama"></small>
+          </button>
+          <div class="building-floor-body building-floor-body--top">
+            <div class="building-service building-service--view"><b data-i18n="mapPlanCafe"></b><span data-i18n="mapPlanView"></span></div>
+            <button class="building-zone building-zone--wide zone-soon" type="button" data-map-venue="h_sky">
+              <span class="building-zone-code">L5-01</span>
+              <b>Skyline Networking Lounge</b>
+              <small>110 <span data-i18n="mapPeopleShort"></span></small>
+            </button>
+            <div class="building-core"><b data-i18n="mapPlanLift"></b><span>05</span></div>
+          </div>
+        </div>
+
+        <div class="building-floor" data-building-floor="floor4">
+          <button class="building-floor-label" type="button" data-map-floor="floor4">
+            <span data-i18n="mapFloor4"></span>
+            <small data-i18n="mapPlanTraining"></small>
+          </button>
+          <div class="building-floor-body">
+            <button class="building-zone building-zone--medium zone-free" type="button" data-map-venue="h_nova">
+              <span class="building-zone-code">L4-01</span>
+              <b>Nova Training Lab</b>
+              <small>54 <span data-i18n="mapPeopleShort"></span></small>
+            </button>
+            <div class="building-route"><span data-i18n="mapPlanMainCorridor"></span></div>
+            <div class="building-core"><b data-i18n="mapPlanLift"></b><span>04</span></div>
+          </div>
+        </div>
+
+        <div class="building-floor" data-building-floor="floor3">
+          <button class="building-floor-label" type="button" data-map-floor="floor3">
+            <span data-i18n="mapFloor3"></span>
+            <small data-i18n="mapPlanBusiness"></small>
+          </button>
+          <div class="building-floor-body">
+            <button class="building-zone building-zone--small zone-free" type="button" data-map-venue="h_board">
+              <span class="building-zone-code">L3-01</span>
+              <b>Boardroom D</b>
+              <small>36 <span data-i18n="mapPeopleShort"></span></small>
+            </button>
+            <button class="building-zone building-zone--medium zone-busy" type="button" data-map-venue="h_silk">
+              <span class="building-zone-code">L3-02</span>
+              <b>Silk Road Conference Room</b>
+              <small>120 <span data-i18n="mapPeopleShort"></span></small>
+            </button>
+            <div class="building-core"><b data-i18n="mapPlanLift"></b><span>03</span></div>
+          </div>
+        </div>
+
+        <div class="building-floor" data-building-floor="floor2">
+          <button class="building-floor-label" type="button" data-map-floor="floor2">
+            <span data-i18n="mapFloor2"></span>
+            <small data-i18n="mapPlanSessions"></small>
+          </button>
+          <div class="building-floor-body">
+            <button class="building-zone building-zone--medium zone-free" type="button" data-map-venue="h_orion">
+              <span class="building-zone-code">L2-01</span>
+              <b>Orion Hall B</b>
+              <small>180 <span data-i18n="mapPeopleShort"></span></small>
+            </button>
+            <button class="building-zone building-zone--small zone-free" type="button" data-map-venue="h_workshop">
+              <span class="building-zone-code">L2-02</span>
+              <b>Workshop Hub C</b>
+              <small>90 <span data-i18n="mapPeopleShort"></span></small>
+            </button>
+            <div class="building-core"><b data-i18n="mapPlanLift"></b><span>02</span></div>
+          </div>
+        </div>
+
+        <div class="building-floor building-floor--ground" data-building-floor="floor1">
+          <button class="building-floor-label" type="button" data-map-floor="floor1">
+            <span data-i18n="mapFloor1"></span>
+            <small data-i18n="mapPlanEntrance"></small>
+          </button>
+          <div class="building-floor-body building-floor-body--ground">
+            <div class="building-entry"><b data-i18n="mapPlanReception"></b><span data-i18n="mapPlanEntrance"></span></div>
+            <button class="building-zone building-zone--large zone-soon" type="button" data-map-venue="h_grand">
+              <span class="building-zone-code">L1-01</span>
+              <b>Grand Hall A</b>
+              <small>420 <span data-i18n="mapPeopleShort"></span></small>
+            </button>
+            <button class="building-zone building-zone--expo zone-busy" type="button" data-map-venue="h_atrium">
+              <span class="building-zone-code">L1-02</span>
+              <b>Atrium Expo Space</b>
+              <small>650 <span data-i18n="mapPeopleShort"></span></small>
+            </button>
+            <div class="building-core"><b data-i18n="mapPlanLift"></b><span>01</span></div>
+          </div>
+        </div>
       </div>
     </section>
   </div>
@@ -721,47 +807,47 @@
         <section id="aboutView" class="view">
           <div class="section-head">
             <div>
-              <p class="eyebrow" data-i18n="aboutLabel"></p>
-              <h2 data-i18n="aboutTitle"></h2>
+              <p class="eyebrow">О платформе</p>
+              <h2>ORDA Smart Event System</h2>
             </div>
           </div>
           <div class="about-grid">
             <section class="panel about-main">
-              <h3 data-i18n="aboutMissionTitle"></h3>
-              <p data-i18n="aboutMissionText"></p>
-              <h3 data-i18n="aboutForWhomTitle"></h3>
-              <p data-i18n="aboutForWhomText"></p>
+              <h3>Краткое описание</h3>
+              <p>ORDA Smart Event System — цифровая платформа для публикации мероприятий, регистрации участников, бронирования конференц-залов и обработки клиентских заявок.</p>
+              <h3>Как работает платформа</h3>
+              <p>Клиент выбирает мероприятие или зал, оформляет заявку, проходит демонстрационную оплату и отслеживает статус в личном кабинете. Администратор проверяет заявки, управляет каталогом, расписанием и уведомлениями.</p>
             </section>
             <section class="panel about-list">
-              <h3 data-i18n="aboutFeaturesTitle"></h3>
+              <h3>Контакты</h3>
               <ul>
-                <li data-i18n="aboutFeature1"></li>
-                <li data-i18n="aboutFeature2"></li>
-                <li data-i18n="aboutFeature3"></li>
-                <li data-i18n="aboutFeature4"></li>
+                <li>Офис: г. Астана, район EXPO, Mangilik El Avenue</li>
+                <li>Email: adilbek.zhanuzak@gmail.com</li>
+                <li>Время обработки заявок: ежедневно, 09:00–18:00</li>
+                <li>Техническая поддержка: через форму в личном кабинете</li>
               </ul>
             </section>
           </div>
           <div class="about-capability-grid">
             <section class="panel capability-panel">
               <span>01</span>
-              <h3 data-i18n="homeCardEventsTitle"></h3>
-              <p data-i18n="homeCardEventsText"></p>
+              <h3>Каталог мероприятий</h3>
+              <p>Публикация одобренных событий, карточки с датой, залом, ценой и регистрацией участников.</p>
             </section>
             <section class="panel capability-panel">
               <span>02</span>
-              <h3 data-i18n="homeCardHallsTitle"></h3>
-              <p data-i18n="homeCardHallsText"></p>
+              <h3>Заявки и модерация</h3>
+              <p>Заявки клиентов попадают администратору, проходят проверку и меняют статус с уведомлением клиента.</p>
             </section>
             <section class="panel capability-panel">
               <span>03</span>
-              <h3 data-i18n="homeCardCalendarTitle"></h3>
-              <p data-i18n="homeCardCalendarText"></p>
+              <h3>Календарь</h3>
+              <p>Расписание показывает мероприятия и занятость площадок, чтобы быстро видеть свободные даты.</p>
             </section>
             <section class="panel capability-panel">
               <span>04</span>
-              <h3 data-i18n="homeCardSupportTitle"></h3>
-              <p data-i18n="homeCardSupportText"></p>
+              <h3>Техническая поддержка</h3>
+              <p>Пользователь может отправить сообщение администратору, а администратор отметить обращение как обработанное.</p>
             </section>
           </div>
         </section>
@@ -798,6 +884,11 @@
                 <h3 data-i18n="myRegistrations"></h3>
                 <div id="myBookingsList" class="booking-list"></div>
               </section>
+              <form id="supportForm" class="panel form-panel client-support-panel">
+                <h3>Тех-поддержка</h3>
+                <textarea id="supportMessageText" name="message" rows="3" placeholder="Напишите сообщение администратору" required></textarea>
+                <button type="submit">Отправить администратору</button>
+              </form>
             </div>
           </div>
 
@@ -841,7 +932,12 @@
             </div>
           </div>
 
-          <div class="request-layout">
+          <div class="request-mode-toggle panel">
+            <button class="active" type="button" data-request-mode="hall">Бронирование конференц-зала</button>
+            <button type="button" data-request-mode="event">Объявление для своего мероприятия</button>
+          </div>
+
+          <div id="requestHallPlanner" class="request-layout">
             <section class="panel request-picker">
               <div class="request-section-head">
                 <div>
@@ -924,6 +1020,30 @@
               </div>
 
               <div class="field">
+                <label for="requestDurationHours">Длительность мероприятия</label>
+                <input id="requestDurationHours" name="duration" type="number" min="1" max="24" value="2" required />
+              </div>
+
+              <div id="ownEventFields" class="request-own-event-fields request-field-wide hidden">
+                <div class="field">
+                  <label for="requestOwnDate">Дата</label>
+                  <input id="requestOwnDate" name="ownDate" type="date" />
+                </div>
+                <div class="field">
+                  <label for="requestOwnTime">Время начала</label>
+                  <input id="requestOwnTime" name="ownTime" type="time" value="10:00" />
+                </div>
+                <div class="field">
+                  <label for="requestOwnLocation">Место проведения</label>
+                  <input id="requestOwnLocation" name="ownLocation" type="text" placeholder="Например, БЦ Abu Dhabi Plaza, зал переговоров" />
+                </div>
+                <div class="field">
+                  <label for="requestOwnCity">Город</label>
+                  <input id="requestOwnCity" name="ownCity" type="text" placeholder="Астана" />
+                </div>
+              </div>
+
+              <div class="field">
                 <label for="requestContactName" data-i18n="requestContactPerson"></label>
                 <input id="requestContactName" name="contactName" type="text" data-placeholder="requestContactPerson" required />
               </div>
@@ -949,23 +1069,25 @@
               </div>
             </div>
 
-            <section class="request-services">
+            <section id="requestServicesSection" class="request-services">
               <div>
                 <p class="eyebrow" data-i18n="requestServicesLabel"></p>
                 <h3 data-i18n="requestServicesTitle"></h3>
               </div>
               <div class="request-services-grid">
-                <label><input type="checkbox" name="services" value="projector" data-price="10000" /><span data-i18n="serviceProjector"></span></label>
-                <label><input type="checkbox" name="services" value="tv" data-price="15000" /><span data-i18n="serviceTv"></span></label>
-                <label><input type="checkbox" name="services" value="microphones" data-price="8000" /><span data-i18n="serviceMicrophones"></span></label>
-                <label><input type="checkbox" name="services" value="audio" data-price="12000" /><span data-i18n="serviceAudio"></span></label>
-                <label><input type="checkbox" name="services" value="wifi" data-price="5000" /><span data-i18n="serviceWifi"></span></label>
-                <label><input type="checkbox" name="services" value="laptop" data-price="7000" /><span data-i18n="serviceLaptop"></span></label>
-                <label><input type="checkbox" name="services" value="flipchart" data-price="4000" /><span data-i18n="serviceFlipchart"></span></label>
-                <label><input type="checkbox" name="services" value="coffee" data-price="25000" /><span data-i18n="serviceCoffee"></span></label>
-                <label><input type="checkbox" name="services" value="tech" data-price="18000" /><span data-i18n="serviceTech"></span></label>
-                <label><input type="checkbox" name="services" value="photo" data-price="35000" /><span data-i18n="servicePhoto"></span></label>
                 <label><input type="checkbox" name="services" value="registration" data-price="9000" /><span data-i18n="serviceRegistration"></span></label>
+                <label><input type="checkbox" name="services" value="assistants" data-price="22000" /><span>Ассистенты / координаторы</span></label>
+                <label><input type="checkbox" name="services" value="tech" data-price="18000" /><span>Технический специалист</span></label>
+                <label><input type="checkbox" name="services" value="projector" data-price="10000" /><span data-i18n="serviceProjector"></span></label>
+                <label><input type="checkbox" name="services" value="microphones" data-price="8000" /><span data-i18n="serviceMicrophones"></span></label>
+                <label><input type="checkbox" name="services" value="audio" data-price="12000" /><span>Звуковая система</span></label>
+                <label><input type="checkbox" name="services" value="led" data-price="16000" /><span>Экран / LED-панель</span></label>
+                <label><input type="checkbox" name="services" value="coffee" data-price="25000" /><span data-i18n="serviceCoffee"></span></label>
+                <label><input type="checkbox" name="services" value="badges" data-price="6000" /><span>Бейджи участников</span></label>
+                <label><input type="checkbox" name="services" value="security" data-price="30000" /><span>Охрана</span></label>
+                <label><input type="checkbox" name="services" value="cleaning" data-price="12000" /><span>Уборка после мероприятия</span></label>
+                <label><input type="checkbox" name="services" value="streaming" data-price="35000" /><span>Онлайн-трансляция</span></label>
+                <label><input type="checkbox" name="services" value="translator" data-price="28000" /><span>Переводчик</span></label>
               </div>
             </section>
 
@@ -983,129 +1105,15 @@
        <!-- Admin Panel -->
        <!-- ═════════════════════════════════════ -->
         
-       <section id="adminView" class="view" data-portal-group="admin">
-  <div class="section-head">
-    <div>
-      <p class="eyebrow">Панель администратора</p>
-      <h2>Администрирование системы</h2>
-      <p class="muted">
-        Рабочая зона администратора для контроля мероприятий, конференц-залов, заявок, расписания и технического состояния площадок.
-      </p>
-    </div>
-    <button id="exportBookingsBtn" class="secondary" type="button" data-i18n="exportBookings"></button>
-  </div>
-
-  <div class="admin-command-center panel">
-    <div>
-      <p class="eyebrow">Текущая ситуация на сайте</p>
-      <h3>Оперативный обзор площадки</h3>
-      <p class="muted">
-        Здесь администратор видит, какие мероприятия активны, сколько заявок поступило, какие залы свободны,
-        какие даты заняты и какие помещения требуют проверки перед проведением мероприятий.
-      </p>
-    </div>
-    <div class="admin-command-actions">
-      <button type="button" data-view-link="calendar">Проверить календарь</button>
-      <button class="secondary" type="button" data-view-link="halls">Состояние залов</button>
-      <button class="secondary" type="button" data-view-link="events">Каталог мероприятий</button>
-    </div>
-  </div>
-
-  <div class="metric-grid admin-metrics">
-    <article>
-      <span id="adminStatEvents">0</span>
-      <p>Мероприятий на сайте</p>
-    </article>
-    <article>
-      <span id="adminStatBookings">0</span>
-      <p>Заявок от клиентов</p>
-    </article>
-    <article>
-      <span id="adminStatUsers">0</span>
-      <p>Пользователей</p>
-    </article>
-    <article>
-      <span id="adminStatCheckedIn">0</span>
-      <p>Прошли check-in</p>
-    </article>
-    <article>
-      <span id="adminStatPaidTickets">0</span>
-      <p>Оплаченных билетов</p>
-    </article>
-    <article>
-      <span id="adminStatHallApproved">0</span>
-      <p>Одобренных броней залов</p>
-    </article>
-  </div>
-
-  <div class="admin-analytics-grid">
-    <section class="panel">
-      <h3>Загруженность площадки</h3>
-      <p class="muted">
-        Контроль занятых дат, активных заявок и свободных ресурсов здания.
-      </p>
-      <div class="analytics-bars">
-        <div>
-          <span>Занятые даты календаря</span>
-          <b>72%</b>
-          <i style="width:72%"></i>
-        </div>
-        <div>
-          <span>Подтвержденные бронирования залов</span>
-          <b>58%</b>
-          <i style="width:58%"></i>
-        </div>
-        <div>
-          <span>Заявки на рассмотрении</span>
-          <b>24%</b>
-          <i style="width:24%"></i>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h3>Уведомления и ошибки</h3>
-      <p class="muted">
-        Системные сообщения, новые заявки, отмены, технические предупреждения и действия клиентов.
-      </p>
-      <div id="adminNotificationsFeed" class="mini-list"></div>
-    </section>
-  </div>
-
-  <div class="admin-nav-grid">
-    <button class="admin-nav-card" type="button" data-view-link="events">
-      <strong>Редактировать мероприятия</strong>
-      <span>Изменение объявлений, дат, времени, описания, формата, цены и локации мероприятий.</span>
-    </button>
-
-    <button class="admin-nav-card" type="button" data-view-link="halls">
-      <strong>Управлять конференц-залами</strong>
-      <span>Проверка доступности залов, этажей, вместимости, оснащения и технического состояния.</span>
-    </button>
-
-    <button class="admin-nav-card" type="button" data-view-link="calendar">
-      <strong>Контролировать расписание</strong>
-      <span>Просмотр занятых дат, времени проведения мероприятий, бронирований и пересечений.</span>
-    </button>
-
-    <button class="admin-nav-card" type="button" data-view-link="admin">
-      <strong>Обработать заявки</strong>
-      <span>Одобрение, отклонение и проверка заявок клиентов на мероприятия и бронирование залов.</span>
-    </button>
+       <section id="adminView" class="view admin-view" data-portal-group="admin">
+  <div class="section-head admin-section-head">
+    <h2>Администрирование</h2>
   </div>
 
   <div class="admin-layout">
-    <section class="panel admin-users-panel">
-      <h3>Пользователи и активность</h3>
-      <p class="muted">
-        Список клиентов, которые зарегистрировались в системе или оставили заявки.
-      </p>
-      <div id="adminUsersList" class="booking-list"></div>
-    </section>
-
-    <form id="eventForm" class="panel form-panel">
+    <form id="eventForm" class="panel form-panel admin-event-panel">
       <input type="hidden" name="id" />
-      <h3 id="eventFormTitle">Редактирование мероприятия</h3>
+      <h3 id="eventFormTitle">Новое мероприятие</h3>
 
       <input name="title" type="text" data-placeholder="eventTitle" required />
 
@@ -1164,10 +1172,10 @@
       </div>
     </form>
 
-    <section class="panel form-panel">
-      <form id="hallForm" class="form-panel" style="padding:0;border:0;box-shadow:none;background:transparent;">
+    <section class="panel form-panel admin-halls-panel">
+      <form id="hallForm" class="form-panel admin-inner-form">
         <input type="hidden" name="id" />
-        <h3 id="hallFormTitle">Редактирование конференц-зала</h3>
+        <h3 id="hallFormTitle">Залы</h3>
 
         <input name="name" type="text" data-placeholder="hallNamePlaceholder" required />
 
@@ -1197,22 +1205,14 @@
         </div>
       </form>
 
-      <div style="margin-top:16px">
-        <h3>Состояние залов</h3>
-        <p class="muted">
-          Здесь отображаются залы, которые свободны, заняты, находятся на обслуживании или временно не готовы к мероприятиям.
-        </p>
-      </div>
+      <h3 class="admin-list-title">Список залов</h3>
 
-      <div id="adminHallsList" class="booking-list" style="margin-top:12px;"></div>
+      <div id="adminHallsList" class="booking-list"></div>
     </section>
 
     <section class="panel admin-requests-panel">
       <div class="admin-requests-head">
-        <div>
-          <h3 data-i18n="adminEventRequestsTitle"></h3>
-          <p class="muted" data-i18n="adminEventRequestsText"></p>
-        </div>
+        <h3>Заявки</h3>
 
         <div class="admin-request-filters">
           <select id="adminRequestTypeFilter">
@@ -1235,6 +1235,13 @@
       </div>
 
       <div id="adminBookingsList" class="booking-list"></div>
+    </section>
+
+    <section class="panel admin-support-panel">
+      <div class="admin-support-head">
+        <h3>Сообщения от клиентов / Тех-поддержка</h3>
+      </div>
+      <div id="adminSupportList" class="support-list"></div>
     </section>
   </div>
 </section>
@@ -1399,22 +1406,32 @@
         <div id="requestPaymentSummary" class="request-payment-summary"></div>
 
         <form id="requestPaymentForm" class="request-payment-form" novalidate>
-          <div class="field">
-            <label for="requestCardName" data-i18n="cardHolderPlaceholder"></label>
-            <input id="requestCardName" name="cardName" type="text" data-placeholder="cardHolderPlaceholder" required />
-          </div>
-          <div class="field">
-            <label for="requestCardNumber" data-i18n="cardNumberPlaceholder"></label>
-            <input id="requestCardNumber" name="cardNumber" type="text" inputmode="numeric" minlength="12" maxlength="19" data-placeholder="cardNumberPlaceholder" required />
-          </div>
-          <div class="split">
+          <section id="requestAnnouncementPayment" class="request-announcement-payment hidden">
+            <label class="pay-method-chip active">
+              <input type="radio" name="announcementPaymentMethod" value="announcement-demo" checked />
+              <span>Имитация оплаты публикации объявления</span>
+            </label>
+            <p class="muted">После подтверждения заявка уйдёт администратору на модерацию.</p>
+          </section>
+
+          <div id="requestCardPaymentFields" class="request-card-payment-fields">
             <div class="field">
-              <label for="requestCardExp" data-i18n="cardExpiryPlaceholder"></label>
-              <input id="requestCardExp" name="cardExp" type="text" minlength="4" maxlength="5" data-placeholder="cardExpiryPlaceholder" required />
+              <label for="requestCardName" data-i18n="cardHolderPlaceholder"></label>
+              <input id="requestCardName" name="cardName" type="text" data-placeholder="cardHolderPlaceholder" required />
             </div>
             <div class="field">
-              <label for="requestCardCvc" data-i18n="cardCvcPlaceholder"></label>
-              <input id="requestCardCvc" name="cardCvc" type="password" minlength="3" maxlength="4" data-placeholder="cardCvcPlaceholder" required />
+              <label for="requestCardNumber" data-i18n="cardNumberPlaceholder"></label>
+              <input id="requestCardNumber" name="cardNumber" type="text" inputmode="numeric" minlength="12" maxlength="19" data-placeholder="cardNumberPlaceholder" required />
+            </div>
+            <div class="split">
+              <div class="field">
+                <label for="requestCardExp" data-i18n="cardExpiryPlaceholder"></label>
+                <input id="requestCardExp" name="cardExp" type="text" minlength="4" maxlength="5" data-placeholder="cardExpiryPlaceholder" required />
+              </div>
+              <div class="field">
+                <label for="requestCardCvc" data-i18n="cardCvcPlaceholder"></label>
+                <input id="requestCardCvc" name="cardCvc" type="password" minlength="3" maxlength="4" data-placeholder="cardCvcPlaceholder" required />
+              </div>
             </div>
           </div>
           <p id="requestPaymentProcessText" class="muted payment-process hidden" data-i18n="paymentProcessing"></p>
@@ -1738,6 +1755,19 @@
       let current = new Date();
       current.setDate(1);
 
+      function escapeCal(value) {
+        return String(value || '').replace(/[&<>"']/g, function(ch) {
+          return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
+        });
+      }
+
+      function calStatusClass(status) {
+        if (['approved', 'published'].includes(status)) return 'free';
+        if (['pending', 'draft'].includes(status)) return 'soon';
+        if (['closed', 'cancelled', 'rejected'].includes(status)) return 'busy';
+        return 'planned';
+      }
+
       function renderCal() {
         const grid = document.getElementById('calGrid');
         const label = document.getElementById('calMonthLabel');
@@ -1769,15 +1799,17 @@
           const dayEvents = items.filter(ev => ev.date === dayStr);
 
           cell.className = 'cal-cell' + (isToday ? ' today' : '') + (dayEvents.length ? ' has-events' : '');
-          const dots = dayEvents.slice(0, 3).map(function(ev) {
-            const status = ['approved', 'published'].includes(ev.status) ? 'free' :
-              ['pending', 'draft'].includes(ev.status) ? 'soon' :
-              ['closed', 'cancelled', 'rejected'].includes(ev.status) ? 'busy' : 'planned';
-            return '<i class="cal-dot cal-dot--' + status + '"></i>';
+          const marks = dayEvents.slice(0, 2).map(function(ev) {
+            const status = calStatusClass(ev.status);
+            const title = escapeCal(ev.title || '');
+            const statusText = escapeCal(ev.statusLabel || ev.status || '');
+            return '<span class="cal-event-mark cal-event-mark--' + status + '"><b>' + title + '</b><em>' + statusText + '</em></span>';
           }).join('');
+          const more = dayEvents.length > 2 ? '<small class="cal-more">+' + (dayEvents.length - 2) + '</small>' : '';
           cell.innerHTML =
             '<span class="cal-date-number">' + d + '</span>' +
-            (dayEvents.length ? '<div class="cal-dot-row">' + dots + '</div><small>' + dayEvents.length + '</small>' : '');
+            (dayEvents.length ? '<div class="cal-event-stack">' + marks + '</div>' + more : '');
+          if (dayEvents.length) cell.title = dayEvents.map(ev => (ev.time ? ev.time + ' · ' : '') + ev.title + ' · ' + (ev.statusLabel || ev.status || '')).join('\n');
           cell.dataset.date = dayStr;
 
           if (dayEvents.length) {
