@@ -6,6 +6,7 @@ const { requireFields, validateObjectId } = require("../middleware/validate");
 const {
   bookEvent,
   getMyBookings,
+  updateMyBookingPayment,
   cancelMyBooking,
   createHallBooking,
   getMyHallBookings,
@@ -19,6 +20,7 @@ const router = express.Router();
 
 router.post("/book", dbReady, auth, requireFields(["eventId"]), asyncHandler(bookEvent));
 router.get("/my-bookings", dbReady, auth, asyncHandler(getMyBookings));
+router.patch("/my-bookings/:id", dbReady, auth, validateObjectId("id"), asyncHandler(updateMyBookingPayment));
 router.delete("/my-bookings/:id", dbReady, auth, validateObjectId("id"), asyncHandler(cancelMyBooking));
 router.post("/hall-bookings", dbReady, auth, asyncHandler(createHallBooking));
 router.get("/my-hall-bookings", dbReady, auth, asyncHandler(getMyHallBookings));

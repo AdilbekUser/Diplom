@@ -28,7 +28,6 @@
         </div>
       </div>
 
-      <!-- ── Global Quick Search (Cvent-style) ── -->
       <div class="header-search-wrap">
         <div class="global-search">
           <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -44,7 +43,6 @@
           <button id="portalAdminBtn" class="portal-btn" type="button" data-i18n="portalAdmin"></button>
         </div>
         <button id="browseBtn" class="secondary" type="button" data-i18n="browseEvents" data-portal-group="client"></button>
-        <!-- Notification bell -->
         <button id="notifBtn" class="icon-button secondary" type="button" data-i18n-aria-label="notifications" data-i18n-title="notifications">
           <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><path d="M7.5 1.5A4 4 0 0 0 3.5 5.5v2l-1 2h10l-1-2v-2A4 4 0 0 0 7.5 1.5z" stroke="currentColor" stroke-width="1.4"/><path d="M6 11.5a1.5 1.5 0 0 0 3 0" stroke="currentColor" stroke-width="1.4"/></svg>
           <span id="notifDot" class="notif-dot hidden"></span>
@@ -380,7 +378,6 @@
             </div>
           </div>
 
-          <!-- ── NEW: View Toggle (Grid / List) — Cvent style ── -->
           <div class="view-toggle-bar">
             <div class="view-toggle">
               <button class="vt-btn active" id="viewGrid" type="button" data-i18n-title="viewGrid" data-i18n-aria-label="viewGridAria">
@@ -416,7 +413,6 @@
             </div>
           </div>
 
-          <!-- ── NEW: Availability Strip (MeetingHand-style) ── -->
           <div class="avail-strip panel" id="availStrip">
             <span class="avail-label" data-i18n="availToday"></span>
             <div id="availSlots" class="avail-slots"></div>
@@ -1249,9 +1245,6 @@
       </main>
     </div>
 
-    <!-- ════════════════════════════════════════════════════════════════════ -->
-    <!-- MODAL: Event Detail (enhanced with agenda timeline + speakers)      -->
-    <!-- ════════════════════════════════════════════════════════════════════ -->
     <div id="eventModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="eventModalTitle">
       <div class="modal-card modal-wide">
         <button id="closeModal" class="icon-button modal-close secondary" type="button" data-i18n-aria-label="close">
@@ -1259,13 +1252,11 @@
         </button>
         <div id="eventDetails"></div>
 
-        <!-- ── NEW: Agenda Timeline (Whova-style) ── -->
         <div id="agendaSection" class="agenda-section hidden">
           <h4 class="agenda-title" data-i18n="agendaTitle"></h4>
           <div id="agendaTimeline" class="agenda-timeline"></div>
         </div>
 
-        <!-- ── NEW: Speakers (Swapcard-style) ── -->
         <div id="speakersSection" class="speakers-section hidden">
           <h4 class="speakers-title" data-i18n="speakersTitle"></h4>
           <div id="speakersList" class="speakers-list"></div>
@@ -1308,7 +1299,6 @@
             </div>
           </div>
 
-          <!-- ── NEW: Equipment checklist ── -->
           <div class="field">
             <label data-i18n="equipment"></label>
             <div class="equipment-checks">
@@ -1481,9 +1471,6 @@
       </div>
     </div>
 
-    <!-- ════════════════════════════════════════════════════════════════════ -->
-    <!-- MODAL: QR Ticket (NEW — Eventbrite-style)                           -->
-    <!-- ════════════════════════════════════════════════════════════════════ -->
     <div id="ticketModal" class="modal hidden" role="dialog" aria-modal="true">
       <div class="modal-card ticket-card">
         <button id="closeTicketModal" class="icon-button modal-close secondary" type="button" data-i18n-aria-label="close">
@@ -1525,7 +1512,6 @@
       </div>
     </div>
 
-    <!-- ── Notification Panel (NEW) ──────────────────────────────────────── -->
     <aside id="notifPanel" class="notif-panel hidden" data-i18n-aria-label="notifications">
       <div class="notif-head">
         <strong data-i18n="notifications"></strong>
@@ -1553,9 +1539,7 @@
     <script src="./app.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <!-- ── Inline enhancement scripts (no external deps) ──────────────────── -->
     <script>
-    /* ── Global ⌘K search shortcut ── */
     document.addEventListener('keydown', function(e) {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
@@ -1564,7 +1548,6 @@
       }
     });
 
-    /* ── Floor plan interactive tooltips ── */
     (function() {
       const svg = document.getElementById('floorplanSvg');
       const tip = document.getElementById('floorplanTooltip');
@@ -1618,7 +1601,6 @@
       });
     })();
 
-    /* ── View toggle Grid / List ── */
     (function() {
       const gridBtn = document.getElementById('viewGrid');
       const listBtn = document.getElementById('viewList');
@@ -1634,7 +1616,6 @@
       });
     })();
 
-    /* ── Notification panel ── */
     (function() {
       const btn   = document.getElementById('notifBtn');
       const panel = document.getElementById('notifPanel');
@@ -1689,21 +1670,17 @@
       });
     })();
 
-    /* ── Simple QR code generator (pure CSS squares) ── */
     function renderQR(container, text) {
-      // Minimal visual QR placeholder using SVG pattern
       container.innerHTML = '';
       const size = 120;
       const cell = 6;
       const cols = Math.floor(size / cell);
-      // Deterministic pseudo-random from text
       let hash = 0;
       for (let i = 0; i < text.length; i++) hash = ((hash << 5) - hash) + text.charCodeAt(i);
       const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
       svg.setAttribute('viewBox', '0 0 ' + size + ' ' + size);
       svg.setAttribute('width', size); svg.setAttribute('height', size);
       svg.style.display = 'block';
-      // Draw cells
       for (let r = 0; r < cols; r++) {
         for (let c = 0; c < cols; c++) {
           const bit = (hash ^ (r * 17 + c * 31)) & 1;
@@ -1719,7 +1696,6 @@
       container.appendChild(svg);
     }
 
-    /* Expose for app.js to call when showing ticket modal */
     window.ORDA = window.ORDA || {};
     window.ORDA.showTicket = function(event, userName, paymentMeta) {
       const modal = document.getElementById('ticketModal');
@@ -1750,7 +1726,6 @@
         document.getElementById('ticketModal').classList.add('hidden');
       });
 
-    /* ── Calendar renderer ── */
     (function() {
       let current = new Date();
       current.setDate(1);
@@ -1784,7 +1759,6 @@
         const daysInMonth = new Date(year, month + 1, 0).getDate();
 
         grid.innerHTML = '';
-        // Empty cells
         for (let i = 0; i < startOffset; i++) {
           const el = document.createElement('div'); el.className = 'cal-cell empty';
           grid.appendChild(el);
@@ -1857,13 +1831,11 @@
         document.getElementById('calDayEvents').classList.add('hidden');
       });
 
-      // Render on load; also expose re-render for app.js
       window.ORDA = window.ORDA || {};
       window.ORDA.renderCalendar = renderCal;
       setTimeout(renderCal, 200);
     })();
 
-    /* ── Availability strip ── */
     (function() {
       const strip = document.getElementById('availSlots');
       if (!strip) return;

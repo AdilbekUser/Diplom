@@ -202,6 +202,7 @@ let requestSelection = { hallId: "", date: "", slotId: "" };
 let pendingCustomRequest = null;
 let calendarAgendaExpanded = false;
 let requestMode = "hall";
+let supportRefreshTimer = null;
 const persistentControlKeys = [
   "homeSearchInput",
   "searchInput",
@@ -401,7 +402,7 @@ function setPaymentMethodUI(method = "card") {
 function setPaymentProcessing(active) {
   if (!els.paymentForm) return;
   Array.from(els.paymentForm.elements).forEach((field) => {
-    if (field.name === "eventId" || field.name === "bookingId") return;
+    if (field.name === "eventId" || field.name === "bookingId" || field.name === "bookingType") return;
     field.disabled = active;
   });
   if (els.paymentProcessText) els.paymentProcessText.classList.toggle("hidden", !active);
@@ -516,6 +517,42 @@ function responseMessage(result) {
   if (!result) return "";
   if (result.messageKey) return tr(result.messageKey, result.messageVars);
   return result.message || "";
+}
+
+function setButtonLoading(button, active, label = t("loading")) {
+  if (!button) return;
+  if (active) {
+    if (!button.dataset.originalText) button.dataset.originalText = button.textContent;
+    button.textContent = label;
+    button.disabled = true;
+    button.classList.add("is-loading");
+    button.setAttribute("aria-busy", "true");
+    return;
+  }
+
+  if (button.dataset.originalText) {
+    button.textContent = button.dataset.originalText;
+    delete button.dataset.originalText;
+  }
+  button.disabled = false;
+  button.classList.remove("is-loading");
+  button.removeAttribute("aria-busy");
+}
+
+function setFormLoading(form, active) {
+  if (!form) return;
+  form.classList.toggle("is-submitting", active);
+  form.setAttribute("aria-busy", active ? "true" : "false");
+  Array.from(form.elements || []).forEach((field) => {
+    if (active) {
+      field.dataset.wasDisabled = field.disabled ? "true" : "false";
+      field.disabled = true;
+      return;
+    }
+
+    field.disabled = field.dataset.wasDisabled === "true";
+    delete field.dataset.wasDisabled;
+  });
 }
 
 function shouldResetSession(error, path) {
@@ -1846,7 +1883,7 @@ async function localApiTranslated(url, options = {}) {
 
 function isBackendOnlyPath(path) {
   const pathname = String(path || "").split("?")[0];
-  return /^(\/login|\/register|\/me|\/users|\/stats|\/events|\/halls|\/book|\/bookings|\/my-bookings|\/support-messages)(\/|$)/.test(pathname);
+  return /^(\/login|\/register|\/me|\/users|\/stats|\/events|\/halls|\/book|\/bookings|\/my-bookings|\/hall-bookings|\/my-hall-bookings|\/my-notifications|\/support-messages)(\/|$)/.test(pathname);
 }
 
 async function api(url, options = {}) {
@@ -1906,11 +1943,9 @@ function clearSession() {
 function applyPortalVisibility() {
   const isAdmin = state.role === "admin";
 
-  // Persist portal state
   localStorage.setItem(STORAGE_KEYS.portal, state.portal);
   document.body.dataset.portal = state.portal;
 
-  // Show portal switcher to admins; update active states
   if (els.portalSwitcher) {
     els.portalSwitcher.classList.toggle("hidden", !isAdmin);
   }
@@ -1923,15 +1958,12 @@ function applyPortalVisibility() {
     els.portalAdminBtn.classList.toggle("active", state.portal === "admin");
   }
 
-  // Show/hide portal-grouped elements
   document.querySelectorAll("[data-portal-group]").forEach((node) => {
     const group = node.dataset.portalGroup;
     let hidden = false;
     if (group === "client") {
-      // Hide client landing sections (hero, auth, browse button) in admin portal
       hidden = (state.portal === "admin");
     } else if (group === "admin") {
-      // Hide admin-only sections from non-admin users
       hidden = !isAdmin;
     }
     node.classList.toggle("portal-hidden", hidden);
@@ -1939,13 +1971,11 @@ function applyPortalVisibility() {
 }
 
 function setPortal(portal) {
-  // Non-admins are always in client portal
   if (state.role !== "admin") portal = "client";
   state.portal = portal || portalFromRole();
   applyPortalVisibility();
 
   if (state.portal === "admin") {
-    // Admin portal: go to admin view if not already in a valid view
     if (!adminPortalViews.has(state.currentView)) {
       setView("admin");
     } else {
@@ -1954,7 +1984,6 @@ function setPortal(portal) {
     return;
   }
 
-  // Client portal
   if (!clientPortalViews.has(state.currentView)) {
     setView(state.token ? "dashboard" : "dashboard");
   } else {
@@ -2039,7 +2068,6 @@ function setView(view) {
   state.currentView = view;
   localStorage.setItem(STORAGE_KEYS.currentView, view);
 
-  // Close sidebar and backdrop on mobile
   els.sidebar.classList.remove("open");
   if (els.sidebarBackdrop) els.sidebarBackdrop.classList.remove("visible");
 
@@ -3282,15 +3310,16 @@ function renderAdminSupportMessages() {
           )}</span>
           ${
             item.status !== "read"
-              ? `<button class="secondary" type="button" data-support-read="${escapeHtml(item._id)}">Прочитано</button>`
+              ? `<button class="secondary" type="button" data-support-read="${escapeHtml(item._id)}">${escapeHtml(t("supportMarkRead"))}</button>`
               : ""
           }
+          <button class="danger" type="button" data-support-delete="${escapeHtml(item._id)}">${escapeHtml(t("supportDelete"))}</button>
         </div>
       </article>
     `
         )
         .join("")
-    : `<div class="empty">Сообщений от клиентов пока нет.</div>`;
+    : `<div class="empty">${escapeHtml(t("supportEmpty"))}</div>`;
 }
 
 function renderAdminHalls() {
@@ -3440,6 +3469,21 @@ async function loadSupportMessages() {
   const messages = await api("/support-messages", { localFallback: false });
   state.supportMessages = Array.isArray(messages) ? messages : [];
   renderAdminSupportMessages();
+}
+
+function startSupportAutoRefresh() {
+  if (supportRefreshTimer) return;
+  supportRefreshTimer = window.setInterval(() => {
+    if (state.role === "admin" && state.currentView === "admin") {
+      loadSupportMessages().catch(() => {});
+    }
+  }, 30000);
+}
+
+function stopSupportAutoRefresh() {
+  if (!supportRefreshTimer) return;
+  window.clearInterval(supportRefreshTimer);
+  supportRefreshTimer = null;
 }
 
 async function loadProfile() {
@@ -3883,7 +3927,6 @@ document.querySelectorAll(".nav-item").forEach((button) => {
   button.addEventListener("click", () => setView(button.dataset.view));
 });
 
-// Cabinet (profile) tabs
 document.querySelectorAll(".cabinet-tab").forEach((tab) => {
   tab.addEventListener("click", () => {
     activateCabinetTab(tab.dataset.cabinet);
@@ -3909,7 +3952,6 @@ els.authSection?.addEventListener("click", (event) => {
 els.themeToggle.addEventListener("click", () => window.ORDA?.theme?.toggle(els.themeToggle));
 window.addEventListener("resize", syncCalendarAgendaHeight);
 
-// Portal switcher buttons (visible to admins only)
 els.portalClientBtn?.addEventListener("click", () => {
   setPortal("client");
   setView("dashboard");
@@ -3919,7 +3961,6 @@ els.portalAdminBtn?.addEventListener("click", () => {
   setView("admin");
 });
 
-// Sidebar backdrop click closes sidebar on mobile
 els.sidebarBackdrop?.addEventListener("click", () => {
   els.sidebar.classList.remove("open");
   els.sidebarBackdrop.classList.remove("visible");
@@ -4022,6 +4063,7 @@ els.loginForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   try {
     const payload = Object.fromEntries(new FormData(els.loginForm));
+    setFormLoading(els.loginForm, true);
     const result = await api("/login", { method: "POST", body: JSON.stringify(payload) });
     saveSession(result);
     state.portal = result.role === "admin" ? "admin" : "client";
@@ -4031,6 +4073,7 @@ els.loginForm.addEventListener("submit", async (event) => {
 
     if (result.role === "admin") {
       await loadAdmin();
+      startSupportAutoRefresh();
       state.portal = "admin";
       applyPortalVisibility();
       setView("admin");
@@ -4043,6 +4086,8 @@ els.loginForm.addEventListener("submit", async (event) => {
     setView("profile");
   } catch (error) {
     showMessage(error.message, "error");
+  } finally {
+    setFormLoading(els.loginForm, false);
   }
 });
 
@@ -4050,16 +4095,20 @@ els.registerForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   try {
     const payload = Object.fromEntries(new FormData(els.registerForm));
+    setFormLoading(els.registerForm, true);
     const result = await api("/register", { method: "POST", body: JSON.stringify(payload) });
     els.registerForm.reset();
     showMessage(responseMessage(result));
   } catch (error) {
     showMessage(error.message, "error");
+  } finally {
+    setFormLoading(els.registerForm, false);
   }
 });
 
 els.logoutBtn.addEventListener("click", () => {
   clearSession();
+  stopSupportAutoRefresh();
   state.portal = "client";
   updateShell();
   setView("dashboard");
@@ -4163,6 +4212,7 @@ document.body.addEventListener("click", async (event) => {
   const cancelRequestBtn = event.target.closest("[data-cancel-request]");
   const markNotificationBtn = event.target.closest("[data-mark-notification]");
   const supportReadBtn = event.target.closest("[data-support-read]");
+  const supportDeleteBtn = event.target.closest("[data-support-delete]");
 
   try {
     if (detailsBtn) {
@@ -4336,12 +4386,35 @@ document.body.addEventListener("click", async (event) => {
     }
 
     if (supportReadBtn) {
-      const result = await api(`/support-messages/${supportReadBtn.dataset.supportRead}/read`, {
-        method: "PATCH",
-        localFallback: false,
-      });
-      await loadSupportMessages();
-      showMessage(responseMessage(result) || "Сообщение отмечено как прочитанное.");
+      setButtonLoading(supportReadBtn);
+      try {
+        const result = await api(`/support-messages/${supportReadBtn.dataset.supportRead}/read`, {
+          method: "PATCH",
+          localFallback: false,
+        });
+        await loadSupportMessages();
+        showMessage(responseMessage(result) || t("supportMarkedRead"));
+      } finally {
+        setButtonLoading(supportReadBtn, false);
+      }
+      return;
+    }
+
+    if (supportDeleteBtn) {
+      if (!window.confirm(t("supportDeleteConfirm"))) return;
+      setButtonLoading(supportDeleteBtn);
+      try {
+        const result = await api(`/support-messages/${supportDeleteBtn.dataset.supportDelete}`, {
+          method: "DELETE",
+          localFallback: false,
+        });
+        state.supportMessages = state.supportMessages.filter((item) => item._id !== supportDeleteBtn.dataset.supportDelete);
+        renderAdminSupportMessages();
+        await loadSupportMessages();
+        showMessage(responseMessage(result) || t("supportDeleted"));
+      } finally {
+        setButtonLoading(supportDeleteBtn, false);
+      }
       return;
     }
   } catch (error) {
@@ -4352,9 +4425,11 @@ document.body.addEventListener("click", async (event) => {
 els.profileForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   try {
+    const payload = Object.fromEntries(new FormData(els.profileForm));
+    setFormLoading(els.profileForm, true);
     const result = await api("/me", {
       method: "PUT",
-      body: JSON.stringify(Object.fromEntries(new FormData(els.profileForm))),
+      body: JSON.stringify(payload),
     });
 
     state.name = result.user.name;
@@ -4365,6 +4440,8 @@ els.profileForm.addEventListener("submit", async (event) => {
     showMessage(responseMessage(result));
   } catch (error) {
     showMessage(error.message, "error");
+  } finally {
+    setFormLoading(els.profileForm, false);
   }
 });
 
@@ -4377,11 +4454,12 @@ els.supportForm?.addEventListener("submit", async (event) => {
 
   const message = String(els.supportMessageText?.value || "").trim();
   if (!message) {
-    showMessage("Введите текст сообщения.", "error");
+    showMessage(t("supportMessageRequired"), "error");
     return;
   }
 
   try {
+    setFormLoading(els.supportForm, true);
     const result = await api("/support-messages", {
       method: "POST",
       body: JSON.stringify({ message }),
@@ -4389,9 +4467,11 @@ els.supportForm?.addEventListener("submit", async (event) => {
     });
     els.supportForm.reset();
     if (state.role === "admin") await loadSupportMessages();
-    showMessage(responseMessage(result) || "Сообщение отправлено администратору.");
+    showMessage(responseMessage(result) || t("supportSent"));
   } catch (error) {
     showMessage(error.message, "error");
+  } finally {
+    setFormLoading(els.supportForm, false);
   }
 });
 
@@ -4402,6 +4482,7 @@ els.eventForm.addEventListener("submit", async (event) => {
   delete formData.id;
 
   try {
+    setFormLoading(els.eventForm, true);
     const result = await api(id ? `/events/${id}` : "/events", {
       method: id ? "PUT" : "POST",
       body: JSON.stringify(formData),
@@ -4412,6 +4493,8 @@ els.eventForm.addEventListener("submit", async (event) => {
     await loadAdmin();
   } catch (error) {
     showMessage(error.message, "error");
+  } finally {
+    setFormLoading(els.eventForm, false);
   }
 });
 
@@ -4423,6 +4506,7 @@ if (els.hallForm) {
     delete formData.id;
 
     try {
+      setFormLoading(els.hallForm, true);
       const result = await api(id ? `/halls/${id}` : "/halls", {
         method: id ? "PUT" : "POST",
         body: JSON.stringify(formData),
@@ -4433,6 +4517,8 @@ if (els.hallForm) {
       await loadAdmin();
     } catch (error) {
       showMessage(error.message, "error");
+    } finally {
+      setFormLoading(els.hallForm, false);
     }
   });
 }
@@ -4441,6 +4527,7 @@ els.hallBookingForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   try {
     const payload = Object.fromEntries(new FormData(els.hallBookingForm));
+    setFormLoading(els.hallBookingForm, true);
     const hall = state.halls.find((item) => item._id === payload.hallId);
     const duration = Number(payload.duration || 0);
     const pricePerHour = Number(hall?.pricePerHour || 0);
@@ -4460,6 +4547,8 @@ els.hallBookingForm.addEventListener("submit", async (event) => {
     if (state.role === "admin") await loadAdmin();
   } catch (error) {
     showMessage(error.message, "error");
+  } finally {
+    setFormLoading(els.hallBookingForm, false);
   }
 });
 
@@ -4585,6 +4674,7 @@ els.adminRequestForm?.addEventListener("submit", async (event) => {
   if (!requestId) return;
 
   try {
+    setFormLoading(els.adminRequestForm, true);
     const result = await adminBookingApi(requestId, "", {
       method: "PATCH",
       body: JSON.stringify(payload),
@@ -4595,6 +4685,8 @@ els.adminRequestForm?.addEventListener("submit", async (event) => {
     await loadAdmin();
   } catch (error) {
     showMessage(error.message, "error");
+  } finally {
+    setFormLoading(els.adminRequestForm, false);
   }
 });
 
@@ -4620,6 +4712,7 @@ function bootstrap() {
     .then(async () => {
       if (state.role === "admin") {
         await loadAdmin();
+        startSupportAutoRefresh();
       }
 
       if (state.role !== "admin") state.portal = "client";

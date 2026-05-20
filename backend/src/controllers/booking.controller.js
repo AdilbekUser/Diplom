@@ -112,6 +112,29 @@ async function cancelMyBooking(req, res) {
   res.json({ success: true, message: "Booking has been cancelled." });
 }
 
+async function updateMyBookingPayment(req, res) {
+  const booking = await Booking.findOne({
+    _id: req.params.id,
+    userEmail: req.user.email,
+    $or: [{ type: "event" }, { type: { $exists: false } }],
+  });
+
+  if (!booking) {
+    throw new ApiError(404, "Booking was not found.");
+  }
+
+  if (inactiveBookingStatuses.includes(booking.status)) {
+    throw new ApiError(400, "Request status cannot be updated.");
+  }
+
+  booking.paymentStatus = "paid";
+  booking.paymentMethod = String(req.body.paymentMethod || booking.paymentMethod || "card").trim();
+  booking.paidAt = new Date();
+  await booking.save();
+
+  res.json({ success: true, message: "Payment has been completed.", booking, data: booking });
+}
+
 async function createHallBooking(req, res) {
   const type = String(req.body.type || "hall").trim() === "custom-event" ? "custom-event" : "hall";
   const date = String(req.body.date || "").trim();
@@ -291,6 +314,7 @@ async function cancelMyHallBooking(req, res) {
 module.exports = {
   bookEvent,
   getMyBookings,
+  updateMyBookingPayment,
   cancelMyBooking,
   createHallBooking,
   getMyHallBookings,

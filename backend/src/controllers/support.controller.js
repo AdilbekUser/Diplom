@@ -39,8 +39,19 @@ async function markSupportMessageRead(req, res) {
   res.json({ success: true, message: "Support message has been marked as read.", data: message, supportMessage: message });
 }
 
+async function deleteSupportMessage(req, res) {
+  const message = await SupportMessage.findByIdAndDelete(req.params.id);
+
+  if (!message) {
+    throw new ApiError(404, "Support message was not found.");
+  }
+
+  res.json({ success: true, message: "Support message has been deleted.", data: message, supportMessage: message });
+}
+
 module.exports = {
   createSupportMessage,
   getSupportMessages,
   markSupportMessageRead,
+  deleteSupportMessage,
 };

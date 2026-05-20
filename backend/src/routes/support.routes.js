@@ -7,6 +7,7 @@ const {
   createSupportMessage,
   getSupportMessages,
   markSupportMessageRead,
+  deleteSupportMessage,
 } = require("../controllers/support.controller");
 
 const router = express.Router();
@@ -20,6 +21,14 @@ router.patch(
   adminOnly,
   validateObjectId("id"),
   asyncHandler(markSupportMessageRead)
+);
+router.delete(
+  "/support-messages/:id",
+  dbReady,
+  auth,
+  adminOnly,
+  validateObjectId("id"),
+  asyncHandler(deleteSupportMessage)
 );
 
 module.exports = router;

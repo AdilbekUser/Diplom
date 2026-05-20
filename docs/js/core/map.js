@@ -1,9 +1,3 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   ORDA Smart Event System — map.js
-   Полноценная интерактивная карта площадок и мероприятий
-   Leaflet.js + OpenStreetMap
-   ═══════════════════════════════════════════════════════════════════════════ */
-
 (function () {
   'use strict';
 
@@ -28,7 +22,6 @@
     return lang === 'kk' ? 'kk-KZ' : lang === 'en' ? 'en-US' : 'ru-RU';
   }
 
-  /* ── Данные площадок ──────────────────────────────────────────────────── */
   const VENUES = [
     {
       id: 'h_grand',
@@ -217,7 +210,6 @@
     },
   ];
 
-  /* ── Бегущая строка событий ─────────────────────────────────────────── */
   const TICKER_EVENTS = [
     { title: 'Business Technology Expo 2026', venue: 'Atrium Expo Space', date: '13–15 мая', status: 'busy' },
     { title: 'AI & Innovation Summit 2026', venue: 'Grand Hall A', date: '5 июня', status: 'soon' },
@@ -226,7 +218,6 @@
     { title: 'Smart Business Forum', venue: 'Orion Hall B', date: '12 сентября', status: 'upcoming' },
   ];
 
-  /* ── Стейт ────────────────────────────────────────────────────────────── */
   let map = null;
   let markers = {};
   let activeVenueId = null;
@@ -246,7 +237,6 @@
     return t(venue.statusKey || 'mapLegendFree');
   }
 
-  /* ── Инициализация ────────────────────────────────────────────────────── */
   function init() {
     if (!document.getElementById('mapContainer')) return;
     if (typeof L === 'undefined') {
@@ -264,7 +254,6 @@
     updateBuildingPlan();
   }
 
-  /* ── Карта Leaflet ────────────────────────────────────────────────────── */
   function buildMap() {
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
 
@@ -275,7 +264,6 @@
       attributionControl: true,
     });
 
-    // OpenStreetMap tiles with subtle style
     const tileUrl = isDark
       ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
       : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
@@ -286,10 +274,8 @@
       maxZoom: 19,
     }).addTo(map);
 
-    // Zoom controls custom position
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-    // Markers
     VENUES.forEach(venue => addMarker(venue));
   }
 
@@ -351,7 +337,6 @@
       highlightSidebarItem(venue.id);
     });
 
-    // Popup action buttons
     marker.on('popupopen', () => {
       setTimeout(() => {
         const detailBtn = document.querySelector('.map-popup-detail-btn');
@@ -393,7 +378,6 @@
       </div>`;
   }
 
-  /* ── Список площадок в сайдбаре ───────────────────────────────────────── */
   function buildVenueList() {
     const filtered = getFiltered();
     const container = document.getElementById('mapVenueList');
@@ -494,7 +478,6 @@
     highlightSidebarItem(venue.id);
   }
 
-  /* ── Drawer (детальная карточка) ──────────────────────────────────────── */
   function openDrawer(venueId) {
     const venue = VENUES.find(v => v.id === venueId);
     if (!venue) return;
@@ -503,16 +486,13 @@
     const drawer = document.getElementById('mapDrawer');
     if (!drawer) return;
 
-    // Fill header
     setText('drawerName', venue.name);
     setText('drawerAddress', venue.address);
     setHTML('drawerType', `<span>${venueTypeLabel(venue)} · ${venueFloorLabel(venue)}</span>`);
 
-    // Image
     const imgWrap = document.getElementById('drawerImageWrap');
     if (imgWrap) imgWrap.style.backgroundImage = `url('${venue.image}')`;
 
-    // Status bar
     const statusClass = { free: 'status-free', busy: 'status-busy', soon: 'status-soon' }[venue.status] || '';
     const badge = document.getElementById('drawerStatusBadge');
     if (badge) { badge.textContent = venueStatusLabel(venue); badge.className = `map-status-badge ${statusClass}`; }
@@ -523,7 +503,6 @@
     const nextText = document.getElementById('drawerNextEventText');
     if (nextText) nextText.textContent = venue.nextDate;
 
-    // Info tab
     setText('drawerDesc', venue.description);
     const equipList = document.getElementById('drawerEquipList');
     if (equipList) {
@@ -534,7 +513,6 @@
         </span>`).join('');
     }
 
-    // Events tab
     const eventsList = document.getElementById('drawerEventsList');
     if (eventsList) {
       eventsList.innerHTML = venue.events.map(ev => {
@@ -551,7 +529,6 @@
       }).join('');
     }
 
-    // Free dates tab
     const datesList = document.getElementById('drawerDatesList');
     if (datesList) {
       datesList.innerHTML = venue.freeDates.map(d => {
@@ -565,7 +542,6 @@
       }).join('');
     }
 
-    // Activate first tab
     switchDrawerTab('info');
 
     drawer.classList.remove('hidden');
@@ -595,15 +571,12 @@
   }
 
   function openBookingFromMap(venue) {
-    // Trigger existing hall booking modal if available
     closeDrawer();
     if (map) map.closePopup();
 
-    // Try to use existing booking system
     if (window.ORDA && typeof window.ORDA.openHallBooking === 'function') {
       window.ORDA.openHallBooking(venue.id);
     } else {
-      // Fallback: navigate to halls view
       const navBtn = document.querySelector('[data-view="halls"]');
       if (navBtn) navBtn.click();
       setTimeout(() => {
@@ -613,7 +586,6 @@
     }
   }
 
-  /* ── Бегущая строка ───────────────────────────────────────────────────── */
   function buildTicker() {
     const container = document.getElementById('mapTickerItems');
     if (!container) return;
@@ -631,7 +603,6 @@
       </span>
     `).join('<span class="map-ticker-sep">·</span>');
 
-    // Auto-scroll ticker
     let pos = 0;
     const scroll = () => {
       pos += 0.5;
@@ -641,7 +612,6 @@
     setInterval(scroll, 30);
   }
 
-  /* ── Фильтры ──────────────────────────────────────────────────────────── */
   function bindFilters() {
     const bind = (id, key) => {
       const el = document.getElementById(id);
@@ -745,7 +715,6 @@
   function applyFilters() {
     const filtered = getFiltered();
 
-    // Update markers visibility
     VENUES.forEach(venue => {
       const marker = markers[venue.id];
       if (!marker) return;
@@ -757,18 +726,15 @@
       }
     });
 
-    // Update list
     buildVenueList();
     updateBuildingPlan(filtered);
 
-    // Fit bounds to visible
     if (filtered.length > 0) {
       const bounds = L.latLngBounds(filtered.map(v => [v.lat, v.lng]));
       map.fitBounds(bounds, { padding: [40, 40], maxZoom: 16 });
     }
   }
 
-  /* ── Переключение вид список/карточки ──────────────────────────────────── */
   function bindViewToggle() {
     const listBtn = document.getElementById('mapListBtn');
     const gridBtn = document.getElementById('mapGridBtn');
@@ -776,7 +742,6 @@
     if (gridBtn) gridBtn.addEventListener('click', () => { viewMode = 'grid'; gridBtn.classList.add('active'); listBtn && listBtn.classList.remove('active'); buildVenueList(); });
   }
 
-  /* ── Drawer bindings ──────────────────────────────────────────────────── */
   function bindDrawer() {
     const closeBtn = document.getElementById('mapDrawerClose');
     if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
@@ -804,7 +769,6 @@
     });
   }
 
-  /* ── Helpers ──────────────────────────────────────────────────────────── */
   function setText(id, val) {
     const el = document.getElementById(id);
     if (el) el.textContent = val || '';
@@ -814,7 +778,6 @@
     if (el) el.innerHTML = val || '';
   }
 
-  /* ── Theme change listener ────────────────────────────────────────────── */
   const observer = new MutationObserver(() => {
     if (!map) return;
     map.eachLayer(layer => { if (layer._url) map.removeLayer(layer); });
@@ -830,7 +793,6 @@
   });
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
-  /* ── Boot when floorplan view is shown ───────────────────────────────── */
   document.addEventListener('click', function onViewClick(e) {
     const btn = e.target.closest('[data-view]');
     if (btn && btn.dataset.view === 'floorplan') {
@@ -841,13 +803,11 @@
     }
   });
 
-  // Also init if already visible
   if (document.getElementById('floorplanView') &&
       document.getElementById('floorplanView').classList.contains('active-view')) {
     setTimeout(init, 200);
   }
 
-  // Expose for external calls
   window.ORDA = window.ORDA || {};
   window.ORDA.mapModule = { init, flyToVenue, openDrawer };
 

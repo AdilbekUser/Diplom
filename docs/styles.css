@@ -188,6 +188,16 @@ a.secondary {
 button:hover, a.secondary:hover { background: var(--brand-soft); box-shadow: var(--shadow-xs); }
 button:active, a.secondary:active { transform: translateY(1px); box-shadow: none; }
 button:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+button.is-loading::after {
+  content: "";
+  width: 12px;
+  height: 12px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 999px;
+  animation: spin 700ms linear infinite;
+}
+.is-submitting { opacity: 0.82; }
 .secondary, a.secondary { border-color: var(--line); background: var(--surface); color: var(--text); }
 .secondary:hover, a.secondary:hover { background: var(--surface-strong); border-color: color-mix(in srgb, var(--brand) 30%, var(--line)); }
 .danger { background: var(--danger); }
@@ -516,7 +526,7 @@ body[data-portal="admin"] .nav-item[data-view="admin"].active {
 .hero-card-grid b { font-family: "Fraunces", serif; font-size: 22px; font-weight: 700; line-height: 1.1; letter-spacing: -0.01em; }
 .hero-card-grid small { color: rgba(255,255,255,0.60); font-size: 11px; margin-top: 2px; }
 
-/* ── NEW: Featured Event Banner ── */
+/* Featured event banner */
 .featured-banner {
   display: grid;
   grid-template-columns: auto 1fr auto auto;
@@ -920,7 +930,7 @@ body[data-portal="admin"] .nav-item[data-view="admin"].active {
   text-align: center;
 }
 
-/* ── NEW: Availability Strip ── */
+/* Availability strip */
 .avail-strip {
   display: flex;
   align-items: center;
@@ -1587,7 +1597,7 @@ body[data-portal="admin"] .nav-item[data-view="admin"].active {
 .detail-box strong { display: block; font-size: 14.5px; font-weight: 600; }
 .hall-booking-form { gap: 14px; }
 
-/* ── Agenda Timeline (Whova-style) ── */
+/* Agenda timeline */
 .agenda-section { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); }
 .agenda-title { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
 .agenda-timeline { display: grid; gap: 0; }
@@ -1623,7 +1633,7 @@ body[data-portal="admin"] .nav-item[data-view="admin"].active {
 .agenda-body strong { display: block; font-size: 13.5px; font-weight: 700; line-height: 1.3; }
 .agenda-body span { color: var(--muted); font-size: 12.5px; }
 
-/* ── Speakers Section (Swapcard-style) ── */
+/* Speakers section */
 .speakers-section { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
 .speakers-title { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
 .speakers-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
@@ -1737,7 +1747,7 @@ body[data-portal="admin"] .nav-item[data-view="admin"].active {
 .notif-warn    { border-left-color: var(--warning); }
 .notif-info    { border-left-color: var(--brand); }
 
-/* ── NEW: Floor Plan View ── */
+/* Floor plan view */
 .floor-legend { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); font-weight: 600; }
 .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
@@ -1855,6 +1865,7 @@ body[data-portal="admin"] .nav-item[data-view="admin"].active {
 
 /* ─── Keyframes ─────────────────────────────────────────────────────── */
 @keyframes skeleton-pulse { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+@keyframes spin { to { transform: rotate(360deg); } }
 @keyframes fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes toast-in { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
 @keyframes toast-out { to { opacity: 0; transform: translateX(10px); } }

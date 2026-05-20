@@ -2304,6 +2304,42 @@
     serviceRegistration: "Registration desk",
   });
 
+  Object.assign(ru, {
+    loading: "Подождите...",
+    supportMarkRead: "Прочитано",
+    supportMarkedRead: "Сообщение отмечено как прочитанное.",
+    supportDelete: "Удалить сообщение",
+    supportDeleteConfirm: "Удалить это сообщение от клиента?",
+    supportDeleted: "Сообщение удалено.",
+    supportEmpty: "Сообщений от клиентов пока нет.",
+    supportSent: "Сообщение отправлено администратору.",
+    supportMessageRequired: "Введите текст сообщения.",
+  });
+
+  Object.assign(kk, {
+    loading: "Күтіңіз...",
+    supportMarkRead: "Оқылды",
+    supportMarkedRead: "Хабарлама оқылды деп белгіленді.",
+    supportDelete: "Хабарламаны жою",
+    supportDeleteConfirm: "Клиенттің осы хабарламасын жою керек пе?",
+    supportDeleted: "Хабарлама жойылды.",
+    supportEmpty: "Клиенттерден хабарламалар әзірге жоқ.",
+    supportSent: "Хабарлама әкімшіге жіберілді.",
+    supportMessageRequired: "Хабарлама мәтінін енгізіңіз.",
+  });
+
+  Object.assign(en, {
+    loading: "Please wait...",
+    supportMarkRead: "Mark as read",
+    supportMarkedRead: "Message marked as read.",
+    supportDelete: "Delete message",
+    supportDeleteConfirm: "Delete this client message?",
+    supportDeleted: "Message deleted.",
+    supportEmpty: "There are no client messages yet.",
+    supportSent: "Message sent to the administrator.",
+    supportMessageRequired: "Enter a message.",
+  });
+
   const dictionaries = { ru, kk, en };
 
   function translate(lang, key) {

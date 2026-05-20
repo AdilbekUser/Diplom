@@ -1,12 +1,18 @@
 (function initSession(window) {
   const ORDA = window.ORDA || {};
 
+  function storedValue(key) {
+    const value = localStorage.getItem(key);
+    if (!value || value === "undefined" || value === "null") return null;
+    return value;
+  }
+
   function read() {
     return {
-      token: localStorage.getItem("token"),
-      email: localStorage.getItem("email"),
-      name: localStorage.getItem("name"),
-      role: localStorage.getItem("role"),
+      token: storedValue("token"),
+      email: storedValue("email"),
+      name: storedValue("name"),
+      role: storedValue("role"),
     };
   }
 
@@ -16,10 +22,10 @@
     state.name = data.name;
     state.role = data.role;
 
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("email", data.email);
-    localStorage.setItem("name", data.name);
-    localStorage.setItem("role", data.role);
+    if (data.token) localStorage.setItem("token", data.token);
+    if (data.email) localStorage.setItem("email", data.email);
+    if (data.name) localStorage.setItem("name", data.name);
+    if (data.role) localStorage.setItem("role", data.role);
   }
 
   function clear(state) {
