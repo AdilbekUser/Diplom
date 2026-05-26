@@ -1,6 +1,7 @@
 const Event = require("../models/Event");
 const Booking = require("../models/Booking");
 const ApiError = require("../utils/apiError");
+const { findScheduleConflicts } = require("../utils/availability");
 
 const activeBookingStatuses = ["registered", "new", "review", "pending", "approved"];
 
@@ -30,6 +31,7 @@ function eventPayload(body) {
   if (Object.prototype.hasOwnProperty.call(body, "endDate")) payload.endDate = String(body.endDate || "").trim();
   if (Object.prototype.hasOwnProperty.call(body, "city")) payload.city = String(body.city || "").trim();
   if (Object.prototype.hasOwnProperty.call(body, "image")) payload.image = String(body.image || "").trim();
+  if (body.translations && typeof body.translations === "object") payload.translations = body.translations;
 
   return payload;
 }
@@ -80,6 +82,18 @@ async function getEvents(req, res) {
       { city: new RegExp(search, "i") },
       { organizer: new RegExp(search, "i") },
       { tags: new RegExp(search, "i") },
+      { "translations.ru.title": new RegExp(search, "i") },
+      { "translations.ru.description": new RegExp(search, "i") },
+      { "translations.ru.location": new RegExp(search, "i") },
+      { "translations.ru.city": new RegExp(search, "i") },
+      { "translations.kk.title": new RegExp(search, "i") },
+      { "translations.kk.description": new RegExp(search, "i") },
+      { "translations.kk.location": new RegExp(search, "i") },
+      { "translations.kk.city": new RegExp(search, "i") },
+      { "translations.en.title": new RegExp(search, "i") },
+      { "translations.en.description": new RegExp(search, "i") },
+      { "translations.en.location": new RegExp(search, "i") },
+      { "translations.en.city": new RegExp(search, "i") },
     ];
   }
 
@@ -108,6 +122,16 @@ async function createEvent(req, res) {
   const data = eventPayload(req.body);
   validateEventPayload(data);
 
+  const conflicts = await findScheduleConflicts({
+    location: data.location,
+    date: data.date,
+    time: data.time,
+    duration: 2,
+  });
+  if (conflicts.length) {
+    throw new ApiError(400, "This date and time are already occupied.");
+  }
+
   const event = await Event.create(data);
   const result = await eventWithBookingCount(event);
   res.status(201).json({ success: true, message: "Event has been created.", event: result, data: result });
@@ -116,6 +140,17 @@ async function createEvent(req, res) {
 async function updateEvent(req, res) {
   const data = eventPayload(req.body);
   validateEventPayload(data);
+
+  const conflicts = await findScheduleConflicts({
+    location: data.location,
+    date: data.date,
+    time: data.time,
+    duration: 2,
+    excludeEventId: req.params.id,
+  });
+  if (conflicts.length) {
+    throw new ApiError(400, "This date and time are already occupied.");
+  }
 
   const event = await Event.findByIdAndUpdate(req.params.id, data, {
     new: true,

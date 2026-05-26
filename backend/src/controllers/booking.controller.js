@@ -3,8 +3,13 @@ const Hall = require("../models/Hall");
 const User = require("../models/User");
 const Booking = require("../models/Booking");
 const ApiError = require("../utils/apiError");
+const {
+  activeBookingStatuses,
+  buildAvailability,
+  endTimeFrom,
+  findScheduleConflicts,
+} = require("../utils/availability");
 
-const activeBookingStatuses = ["registered", "new", "review", "pending", "approved"];
 const inactiveBookingStatuses = ["rejected", "cancelled"];
 const customEventAnnouncementPrice = 10000;
 
@@ -20,17 +25,6 @@ function checkedEquipment(body) {
   return ["projector", "mic", "webcast", "catering"]
     .filter((name) => body[`eq_${name}`] === true || body[`eq_${name}`] === "true" || body[`eq_${name}`] === "on")
     .map((name) => ({ name }));
-}
-
-function minutesFromTime(value) {
-  const [hours, minutes] = String(value || "00:00")
-    .split(":")
-    .map((part) => Number(part || 0));
-  return hours * 60 + minutes;
-}
-
-function overlaps(startA, endA, startB, endB) {
-  return startA < endB && endA > startB;
 }
 
 async function userPayload(req) {
@@ -84,7 +78,7 @@ async function bookEvent(req, res) {
     paymentStatus,
     paymentMethod: price > 0 ? String(req.body.paymentMethod || "card").trim() : "free",
     paidAt: paymentStatus === "paid" ? new Date() : null,
-    status: "pending",
+    status: "new",
   });
 
   res.json({ success: true, message: "Participant registration has been completed.", booking, data: booking });
@@ -163,32 +157,29 @@ async function createHallBooking(req, res) {
   if (hall && attendees > hall.capacity) {
     throw new ApiError(400, "Guest count exceeds hall capacity.");
   }
-
-  const start = minutesFromTime(time);
-  const end = start + duration * 60;
   if (type === "hall") {
-    const sameDayBookings = await Booking.find({
-      hallId,
-      date,
+    const exists = await Booking.findOne({
+      userEmail: req.user.email,
+      type: "hall",
+      hallId: String(hall._id),
       status: { $in: activeBookingStatuses },
     });
-    const bookingConflict = sameDayBookings.some((booking) => {
-      const bookingStart = minutesFromTime(booking.time || booking.startTime || "00:00");
-      const bookingEnd = booking.endTime ? minutesFromTime(booking.endTime) : bookingStart + Number(booking.duration || 2) * 60;
-      return overlaps(start, end, bookingStart, bookingEnd);
-    });
-    if (bookingConflict) {
-      throw new ApiError(400, "This hall time slot is already booked.");
+    if (exists) {
+      throw new ApiError(400, "You have already booked this conference hall.");
     }
+  }
 
-    const sameDayEvents = await Event.find({ date, location: hall.name, status: { $in: ["published", "draft"] } });
-    const eventConflict = sameDayEvents.some((event) => {
-      const eventStart = minutesFromTime(event.time || "10:00");
-      return overlaps(start, end, eventStart, eventStart + 120);
-    });
-    if (eventConflict) {
-      throw new ApiError(400, "This hall time slot is already used by an event.");
-    }
+  const conflictVenue = type === "hall" ? hall?.name : ownLocation;
+  const conflicts = await findScheduleConflicts({
+    hallId: type === "hall" ? hallId : "",
+    hallName: type === "hall" ? hall?.name : "",
+    location: conflictVenue,
+    date,
+    time,
+    duration,
+  });
+  if (conflicts.length) {
+    throw new ApiError(400, "This date and time are already occupied.");
   }
 
   const hallName = String(req.body.hallName || hall?.name || "").trim();
@@ -198,11 +189,12 @@ async function createHallBooking(req, res) {
   const booking = await Booking.create({
     ...(await userPayload(req)),
     type,
-    status: "pending",
+    status: "new",
     eventTitle: String(req.body.eventTitle || req.body.title || purpose || hallName || "Hall request").trim(),
     category: String(req.body.category || "").trim(),
     format: String(req.body.format || "").trim(),
     description: String(req.body.description || "").trim(),
+    image: String(req.body.image || "").trim(),
     location: type === "custom-event" ? ownLocation : hallName,
     city: ownCity,
     hallId,
@@ -210,7 +202,7 @@ async function createHallBooking(req, res) {
     date,
     time,
     startTime: String(req.body.startTime || time).trim(),
-    endTime: String(req.body.endTime || "").trim(),
+    endTime: String(req.body.endTime || endTimeFrom(time, duration)).trim(),
     duration,
     attendees,
     purpose,
@@ -227,6 +219,14 @@ async function createHallBooking(req, res) {
   });
 
   res.status(201).json({ success: true, message: "Hall request has been created.", booking, data: booking });
+}
+
+async function getAvailability(req, res) {
+  const availability = await buildAvailability({
+    hallId: req.query.hallId,
+    date: req.query.date,
+  });
+  res.json(availability);
 }
 
 async function getMyNotifications(req, res) {
@@ -322,4 +322,5 @@ module.exports = {
   cancelMyHallBooking,
   getMyNotifications,
   markMyNotificationRead,
+  getAvailability,
 };

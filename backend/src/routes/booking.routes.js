@@ -14,6 +14,7 @@ const {
   cancelMyHallBooking,
   getMyNotifications,
   markMyNotificationRead,
+  getAvailability,
 } = require("../controllers/booking.controller");
 
 const router = express.Router();
@@ -28,5 +29,6 @@ router.patch("/my-hall-bookings/:id", dbReady, auth, validateObjectId("id"), asy
 router.delete("/my-hall-bookings/:id", dbReady, auth, validateObjectId("id"), asyncHandler(cancelMyHallBooking));
 router.get("/my-notifications", dbReady, auth, asyncHandler(getMyNotifications));
 router.patch("/my-notifications/:id/read", dbReady, auth, asyncHandler(markMyNotificationRead));
+router.get("/availability", dbReady, asyncHandler(getAvailability));
 
 module.exports = router;

@@ -22,6 +22,34 @@
     return lang === 'kk' ? 'kk-KZ' : lang === 'en' ? 'en-US' : 'ru-RU';
   }
 
+  function venueTranslation(venue) {
+    return venue.translations?.[currentLang()] || venue.translations?.ru || venue.translations?.en || {};
+  }
+
+  function venueText(venue, field) {
+    return venueTranslation(venue)[field] || venue[field] || '';
+  }
+
+  function formatEventDate(start, end) {
+    const startDate = new Date(String(start || '') + 'T00:00:00');
+    if (Number.isNaN(startDate.getTime())) return start || '';
+    const options = { day: 'numeric', month: 'long' };
+    const kkMonths = ['қаңтар', 'ақпан', 'наурыз', 'сәуір', 'мамыр', 'маусым', 'шілде', 'тамыз', 'қыркүйек', 'қазан', 'қараша', 'желтоқсан'];
+    const formatOne = (date, includeYear) => {
+      if (currentLang() === 'kk') {
+        return `${date.getDate()} ${kkMonths[date.getMonth()]}${includeYear ? ' ' + date.getFullYear() : ''}`;
+      }
+      return date.toLocaleDateString(locale(), includeYear ? { ...options, year: 'numeric' } : options);
+    };
+    const endDate = end ? new Date(String(end) + 'T00:00:00') : null;
+    if (endDate && !Number.isNaN(endDate.getTime())) {
+      const includeYear = startDate.getFullYear() !== new Date().getFullYear() || endDate.getFullYear() !== new Date().getFullYear();
+      return formatOne(startDate, includeYear) + ' - ' + formatOne(endDate, includeYear);
+    }
+    const includeYear = startDate.getFullYear() !== new Date().getFullYear();
+    return formatOne(startDate, includeYear);
+  }
+
   const VENUES = [
     {
       id: 'h_grand',
@@ -42,8 +70,8 @@
       image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=700&q=80',
       equipment: ['LED wall 12m', 'Stage lighting', 'Translation booths', 'Broadcast desk', 'VIP entrance'],
       events: [
-        { title: 'AI & Innovation Summit 2026', date: '5 июня 2026', time: '10:00', status: 'soon', attendees: 380 },
-        { title: 'Cybersecurity Day Kazakhstan', date: '7 октября 2026', time: '09:00', status: 'upcoming', attendees: 300 },
+        { title: 'AI & Innovation Summit 2026', date: '2026-06-05', time: '10:00', status: 'soon', attendees: 380 },
+        { title: 'Cybersecurity Day Kazakhstan', date: '2026-10-07', time: '09:00', status: 'upcoming', attendees: 300 },
       ],
       freeDates: ['2026-05-20', '2026-05-27', '2026-06-12', '2026-07-01', '2026-07-08'],
     },
@@ -66,7 +94,7 @@
       image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=700&q=80',
       equipment: ['Expo booths', 'Registration desks', 'Media wall', 'Sponsor zones', 'Catering line'],
       events: [
-        { title: 'Business Technology Expo 2026', date: '13–15 мая 2026', time: '10:00', status: 'busy', attendees: 620 },
+        { title: 'Business Technology Expo 2026', date: '2026-05-13', endDate: '2026-05-15', time: '10:00', status: 'busy', attendees: 620 },
       ],
       freeDates: ['2026-06-10', '2026-06-17', '2026-07-15', '2026-08-05'],
     },
@@ -89,7 +117,7 @@
       image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=700&q=80',
       equipment: ['4K projector', 'Zoom room', 'Acoustic system', 'Video wall', 'Hybrid kit'],
       events: [
-        { title: 'Smart Business Forum', date: '12 сентября 2026', time: '10:30', status: 'upcoming', attendees: 160 },
+        { title: 'Smart Business Forum', date: '2026-09-12', time: '10:30', status: 'upcoming', attendees: 160 },
       ],
       freeDates: ['2026-05-16', '2026-05-23', '2026-06-01', '2026-06-08', '2026-06-22'],
     },
@@ -112,7 +140,7 @@
       image: 'https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=700&q=80',
       equipment: ['Modular furniture', 'Flipcharts', 'VR kit', 'Interactive panels', 'Team zones'],
       events: [
-        { title: 'Product Community Meetup', date: '28 мая 2026', time: '18:30', status: 'upcoming', attendees: 80 },
+        { title: 'Product Community Meetup', date: '2026-05-28', time: '18:30', status: 'upcoming', attendees: 80 },
       ],
       freeDates: ['2026-05-18', '2026-05-21', '2026-06-01', '2026-06-07', '2026-06-14'],
     },
@@ -135,7 +163,7 @@
       image: 'https://images.unsplash.com/photo-1431540015161-0bf868a2d407?w=700&q=80',
       equipment: ['Video conference', 'Smart display', 'Coffee station', 'Private lobby'],
       events: [
-        { title: 'Finance Briefing 2026', date: '19 ноября 2026', time: '09:30', status: 'upcoming', attendees: 28 },
+        { title: 'Finance Briefing 2026', date: '2026-11-19', time: '09:30', status: 'upcoming', attendees: 28 },
       ],
       freeDates: ['2026-05-15', '2026-05-22', '2026-06-05', '2026-06-19'],
     },
@@ -158,7 +186,7 @@
       image: 'https://images.unsplash.com/photo-1517502884422-41eaead166d4?w=700&q=80',
       equipment: ['Conference table', 'Interpretation system', 'Wireless microphones', 'Press wall'],
       events: [
-        { title: 'FinTech Conference Central Asia', date: '20 августа 2026', time: '11:00', status: 'busy', attendees: 110 },
+        { title: 'FinTech Conference Central Asia', date: '2026-08-20', time: '11:00', status: 'busy', attendees: 110 },
       ],
       freeDates: ['2026-06-03', '2026-06-17', '2026-07-08', '2026-07-22'],
     },
@@ -181,7 +209,7 @@
       image: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=700&q=80',
       equipment: ['Laptops', 'Smart board', 'Lab desks', 'Recording camera'],
       events: [
-        { title: 'Education Seminar: AI in Learning', date: '26 июня 2026', time: '14:00', status: 'upcoming', attendees: 50 },
+        { title: 'Education Seminar: AI in Learning', date: '2026-06-26', time: '14:00', status: 'upcoming', attendees: 50 },
       ],
       freeDates: ['2026-05-20', '2026-06-03', '2026-06-17', '2026-07-08'],
     },
@@ -204,18 +232,137 @@
       image: 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?w=700&q=80',
       equipment: ['Lounge seating', 'Catering line', 'Ambient audio', 'City view'],
       events: [
-        { title: 'HR Leadership Forum networking', date: '18 июня 2026', time: '17:00', status: 'soon', attendees: 95 },
+        { title: 'HR Leadership Forum networking', date: '2026-06-18', time: '17:00', status: 'soon', attendees: 95 },
       ],
       freeDates: ['2026-05-23', '2026-07-04', '2026-07-18'],
     },
   ];
 
+  const VENUE_TRANSLATIONS = {
+    h_grand: {
+      ru: {
+        address: '1 этаж · Центральное крыло · вход A',
+        description: 'Флагманский зал для форумов, keynote-сессий и крупных конференций. Пространство оснащено сценическим светом, LED-экраном, зонами регистрации и синхронным переводом.',
+      },
+      kk: {
+        address: '1-қабат · Орталық қанат · A кіреберісі',
+        description: 'Форумдар, keynote-сессиялар және ірі конференциялар үшін сахналық жарықпен, LED-экранмен, тіркеу аймақтарымен және синхронды аудармамен жабдықталған басты зал.',
+      },
+      en: {
+        address: 'Floor 1 · Central Wing · entrance A',
+        description: 'A flagship hall for forums, keynote sessions, and major conferences with stage lighting, an LED screen, registration zones, and simultaneous interpretation.',
+      },
+    },
+    h_atrium: {
+      ru: {
+        address: '1 этаж · Главный атриум · зона регистрации',
+        description: 'Открытое выставочное пространство для стендов, партнерских зон, нетворкинга и демонстрации технологических решений перед основными сессиями.',
+      },
+      kk: {
+        address: '1-қабат · Бас атриум · тіркеу аймағы',
+        description: 'Негізгі сессиялар алдында стендтер, серіктес аймақтар, нетворкинг және технологиялық шешімдерді көрсетуге арналған ашық көрме кеңістігі.',
+      },
+      en: {
+        address: 'Floor 1 · Main Atrium · registration zone',
+        description: 'An open exhibition space for booths, partner zones, networking, and technology demos before the main sessions.',
+      },
+    },
+    h_orion: {
+      ru: {
+        address: '2 этаж · Северное крыло · секционный блок',
+        description: 'Универсальный зал для корпоративных конференций, презентаций продуктов и гибридных программ с отдельной зоной для спикеров.',
+      },
+      kk: {
+        address: '2-қабат · Солтүстік қанат · секциялық блок',
+        description: 'Корпоративтік конференциялар, өнім презентациялары және спикерлерге арналған жеке аймағы бар гибридті бағдарламалар үшін әмбебап зал.',
+      },
+      en: {
+        address: 'Floor 2 · North Wing · session block',
+        description: 'A versatile hall for corporate conferences, product presentations, and hybrid programs with a separate speaker area.',
+      },
+    },
+    h_workshop: {
+      ru: {
+        address: '2 этаж · Южное крыло · учебный кластер',
+        description: 'Гибкое пространство для тренингов, дизайн-сессий, образовательных интенсивов и командных workshop-программ.',
+      },
+      kk: {
+        address: '2-қабат · Оңтүстік қанат · оқу кластері',
+        description: 'Тренингтер, дизайн-сессиялар, білім беру интенсивтері және командалық workshop бағдарламаларына арналған икемді кеңістік.',
+      },
+      en: {
+        address: 'Floor 2 · South Wing · learning cluster',
+        description: 'A flexible space for trainings, design sessions, educational intensives, and team workshop programs.',
+      },
+    },
+    h_board: {
+      ru: {
+        address: '3 этаж · Executive Zone · переговорная',
+        description: 'Закрытая переговорная для совещаний руководителей, стратегических встреч и private briefing-сессий с отдельным лобби.',
+      },
+      kk: {
+        address: '3-қабат · Executive Zone · келіссөз бөлмесі',
+        description: 'Басшылар жиналыстары, стратегиялық кездесулер және жеке лоббиі бар private briefing-сессиялар үшін жабық келіссөз бөлмесі.',
+      },
+      en: {
+        address: 'Floor 3 · Executive Zone · boardroom',
+        description: 'A private boardroom for executive meetings, strategic sessions, and private briefings with a separate lobby.',
+      },
+    },
+    h_silk: {
+      ru: {
+        address: '3 этаж · Восточное крыло · пресс-зона',
+        description: 'Премиальный конференц-зал для международных деловых встреч, пресс-конференций и переговоров с системой синхронного перевода.',
+      },
+      kk: {
+        address: '3-қабат · Шығыс қанат · пресс-аймақ',
+        description: 'Синхронды аударма жүйесі бар халықаралық іскерлік кездесулерге, баспасөз конференцияларына және келіссөздерге арналған премиум конференц-зал.',
+      },
+      en: {
+        address: 'Floor 3 · East Wing · press zone',
+        description: 'A premium conference room for international business meetings, press conferences, and negotiations with simultaneous interpretation.',
+      },
+    },
+    h_nova: {
+      ru: {
+        address: '4 этаж · Education Cluster · лаборатория',
+        description: 'Учебная лаборатория для практических семинаров, сертификаций, интенсивов и hands-on занятий с записью занятий.',
+      },
+      kk: {
+        address: '4-қабат · Education Cluster · зертхана',
+        description: 'Сабақ жазбасымен бірге практикалық семинарлар, сертификаттау, интенсивтер және hands-on сабақтарға арналған оқу зертханасы.',
+      },
+      en: {
+        address: 'Floor 4 · Education Cluster · lab',
+        description: 'A training lab for practical seminars, certifications, intensives, and hands-on classes with session recording.',
+      },
+    },
+    h_sky: {
+      ru: {
+        address: '5 этаж · Panorama Zone · lounge',
+        description: 'Лаунж-пространство для afterparty, coffee break, VIP networking и неформальных встреч участников с панорамным видом.',
+      },
+      kk: {
+        address: '5-қабат · Panorama Zone · lounge',
+        description: 'Панорамалық көрінісі бар afterparty, coffee break, VIP networking және қатысушылардың бейресми кездесулеріне арналған lounge кеңістік.',
+      },
+      en: {
+        address: 'Floor 5 · Panorama Zone · lounge',
+        description: 'A lounge space with a panoramic view for afterparties, coffee breaks, VIP networking, and informal participant meetings.',
+      },
+    },
+  };
+
+  VENUES.forEach(venue => {
+    venue.translations = VENUE_TRANSLATIONS[venue.id] || {};
+  });
+
   const TICKER_EVENTS = [
-    { title: 'Business Technology Expo 2026', venue: 'Atrium Expo Space', date: '13–15 мая', status: 'busy' },
-    { title: 'AI & Innovation Summit 2026', venue: 'Grand Hall A', date: '5 июня', status: 'soon' },
-    { title: 'HR Leadership Forum networking', venue: 'Skyline Lounge', date: '18 июня', status: 'soon' },
-    { title: 'Education Seminar: AI in Learning', venue: 'Nova Training Lab', date: '26 июня', status: 'upcoming' },
-    { title: 'Smart Business Forum', venue: 'Orion Hall B', date: '12 сентября', status: 'upcoming' },
+    { title: 'Business Technology Expo 2026', venue: 'Atrium Expo Space', date: '2026-05-13', endDate: '2026-05-15', status: 'busy' },
+    { title: 'AI & Innovation Summit 2026', venue: 'Grand Hall A', date: '2026-06-05', status: 'soon' },
+    { title: 'HR Leadership Forum networking', venue: 'Skyline Lounge', date: '2026-06-18', status: 'soon' },
+    { title: 'Education Seminar: AI in Learning', venue: 'Nova Training Lab', date: '2026-06-26', status: 'upcoming' },
+    { title: 'Smart Business Forum', venue: 'Orion Hall B', date: '2026-09-12', status: 'upcoming' },
   ];
 
   let map = null;
@@ -223,6 +370,7 @@
   let activeVenueId = null;
   let activeDrawerTab = 'info';
   let viewMode = 'list'; // 'list' | 'grid'
+  let tickerTimer = null;
   let filters = { city: 'all', type: 'all', capacity: 'all', status: 'all', search: '' };
 
   function venueTypeLabel(venue) {
@@ -310,7 +458,7 @@
         <div class="map-marker-pin" style="background:${color};box-shadow:0 4px 16px ${color}55">
           <span class="map-marker-icon">${icon}</span>
         </div>
-        <div class="map-marker-label">${venue.name}</div>
+        <div class="map-marker-label">${venueText(venue, 'name')}</div>
       </div>`;
 
     return L.divIcon({
@@ -363,11 +511,11 @@
             <span class="map-popup-type">${venueTypeLabel(venue)}</span>
             <span class="map-status-badge ${statusClass}">${venueStatusLabel(venue)}</span>
           </div>
-          <h4 class="map-popup-title">${venue.name}</h4>
-          <p class="map-popup-address">${venue.address}</p>
+          <h4 class="map-popup-title">${venueText(venue, 'name')}</h4>
+          <p class="map-popup-address">${venueText(venue, 'address')}</p>
           <div class="map-popup-stats">
             <span>👥 ${capacityStr}</span>
-            <span>📅 ${venue.nextDate}</span>
+            <span>📅 ${formatEventDate(venue.nextDate)}</span>
           </div>
           <p class="map-popup-event">▶ ${venue.nextEvent}</p>
           <div class="map-popup-actions">
@@ -382,6 +530,8 @@
     const filtered = getFiltered();
     const container = document.getElementById('mapVenueList');
     if (!container) return;
+    container.classList.toggle('map-venue-list--list', viewMode === 'list');
+    container.classList.toggle('map-venue-list--grid', viewMode === 'grid');
 
     const countEl = document.getElementById('mapSidebarCount');
     if (countEl) countEl.textContent = `${t('mapSidebarTitle')} · ${filtered.length}`;
@@ -403,7 +553,8 @@
 
     filtered.forEach(venue => {
       const el = document.createElement('button');
-      el.className = 'map-venue-card' + (viewMode === 'grid' ? ' map-venue-card--grid' : '');
+      el.type = 'button';
+      el.className = `map-venue-card map-venue-card--${viewMode}`;
       el.dataset.venueId = venue.id;
 
       const statusClass = { free: 'status-free', busy: 'status-busy', soon: 'status-soon' }[venue.status] || '';
@@ -417,8 +568,8 @@
         </div>
         <div class="map-venue-body">
           <div class="map-venue-type">${venueTypeLabel(venue)} · ${venueFloorLabel(venue)}</div>
-          <div class="map-venue-name">${venue.name}</div>
-          <div class="map-venue-address">${venue.address}</div>
+          <div class="map-venue-name">${venueText(venue, 'name')}</div>
+          <div class="map-venue-address">${venueText(venue, 'address')}</div>
           <div class="map-venue-footer">
             <span class="map-venue-capacity">
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="4" r="2" stroke="currentColor" stroke-width="1.3"/><path d="M1.5 11c0-2.5 2-4.5 4.5-4.5S10.5 8.5 10.5 11" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
@@ -426,7 +577,7 @@
             </span>
             <span class="map-venue-event">
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="1" y="2" width="10" height="9" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M1 5h10M4 1v2M8 1v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-              ${venue.nextDate}
+              ${formatEventDate(venue.nextDate)}
             </span>
           </div>
         </div>`;
@@ -452,8 +603,9 @@
       if (filters.status !== 'all' && v.status !== filters.status) return false;
       if (filters.search) {
         const q = filters.search.toLowerCase();
-        if (!v.name.toLowerCase().includes(q) &&
-            !v.address.toLowerCase().includes(q) &&
+        if (!venueText(v, 'name').toLowerCase().includes(q) &&
+            !venueText(v, 'address').toLowerCase().includes(q) &&
+            !venueText(v, 'description').toLowerCase().includes(q) &&
             !v.nextEvent.toLowerCase().includes(q)) return false;
       }
       return true;
@@ -486,8 +638,8 @@
     const drawer = document.getElementById('mapDrawer');
     if (!drawer) return;
 
-    setText('drawerName', venue.name);
-    setText('drawerAddress', venue.address);
+    setText('drawerName', venueText(venue, 'name'));
+    setText('drawerAddress', venueText(venue, 'address'));
     setHTML('drawerType', `<span>${venueTypeLabel(venue)} · ${venueFloorLabel(venue)}</span>`);
 
     const imgWrap = document.getElementById('drawerImageWrap');
@@ -501,9 +653,9 @@
     if (capText) capText.textContent = tr('mapCapacityUpTo', { count: venue.capacity });
 
     const nextText = document.getElementById('drawerNextEventText');
-    if (nextText) nextText.textContent = venue.nextDate;
+    if (nextText) nextText.textContent = formatEventDate(venue.nextDate);
 
-    setText('drawerDesc', venue.description);
+    setText('drawerDesc', venueText(venue, 'description'));
     const equipList = document.getElementById('drawerEquipList');
     if (equipList) {
       equipList.innerHTML = venue.equipment.map(e => `
@@ -522,7 +674,7 @@
           <div class="map-drawer-event-item">
             <div class="map-drawer-event-info">
               <strong>${ev.title}</strong>
-              <span>${ev.date} · ${ev.time} · ${ev.attendees} ${t('mapPeopleShort')}</span>
+              <span>${formatEventDate(ev.date, ev.endDate)} · ${ev.time} · ${ev.attendees} ${t('mapPeopleShort')}</span>
             </div>
             <span class="map-status-badge ${sc}">${sl}</span>
           </div>`;
@@ -581,7 +733,7 @@
       if (navBtn) navBtn.click();
       setTimeout(() => {
         const toast = window.ORDA && window.ORDA.toast;
-        if (toast && typeof toast.show === 'function') toast.show(`${t('mapChooseInCatalog')}: ${venue.name}`, 'success');
+        if (toast && typeof toast.show === 'function') toast.show(`${t('mapChooseInCatalog')}: ${venueText(venue, 'name')}`, 'success');
       }, 300);
     }
   }
@@ -598,7 +750,7 @@
         <span class="map-ticker-dot" style="background:${statusColors[ev.status] || '#1B3F78'}"></span>
         <strong>${ev.title}</strong>
         <span>${ev.venue}</span>
-        <span class="map-ticker-date">${ev.date}</span>
+        <span class="map-ticker-date">${formatEventDate(ev.date, ev.endDate)}</span>
         <span class="map-ticker-status" style="color:${statusColors[ev.status]}">${statusLabels[ev.status]}</span>
       </span>
     `).join('<span class="map-ticker-sep">·</span>');
@@ -609,7 +761,8 @@
       if (pos > container.scrollWidth / 2) pos = 0;
       container.scrollLeft = pos;
     };
-    setInterval(scroll, 30);
+    if (tickerTimer) clearInterval(tickerTimer);
+    tickerTimer = setInterval(scroll, 30);
   }
 
   function bindFilters() {
@@ -735,11 +888,40 @@
     }
   }
 
+  function refresh() {
+    buildVenueList();
+    buildTicker();
+    if (map) {
+      VENUES.forEach(venue => {
+        const marker = markers[venue.id];
+        if (!marker) return;
+        marker.setIcon(getMarkerIcon(venue));
+        marker.setPopupContent(buildPopupHtml(venue));
+      });
+    }
+    if (activeVenueId) openDrawer(activeVenueId);
+  }
+
   function bindViewToggle() {
     const listBtn = document.getElementById('mapListBtn');
     const gridBtn = document.getElementById('mapGridBtn');
-    if (listBtn) listBtn.addEventListener('click', () => { viewMode = 'list'; listBtn.classList.add('active'); gridBtn && gridBtn.classList.remove('active'); buildVenueList(); });
-    if (gridBtn) gridBtn.addEventListener('click', () => { viewMode = 'grid'; gridBtn.classList.add('active'); listBtn && listBtn.classList.remove('active'); buildVenueList(); });
+    const setMode = (mode) => {
+      viewMode = mode === 'grid' ? 'grid' : 'list';
+      if (listBtn) {
+        const active = viewMode === 'list';
+        listBtn.classList.toggle('active', active);
+        listBtn.setAttribute('aria-pressed', active ? 'true' : 'false');
+      }
+      if (gridBtn) {
+        const active = viewMode === 'grid';
+        gridBtn.classList.toggle('active', active);
+        gridBtn.setAttribute('aria-pressed', active ? 'true' : 'false');
+      }
+      buildVenueList();
+    };
+    setMode(viewMode);
+    if (listBtn) listBtn.addEventListener('click', () => setMode('list'));
+    if (gridBtn) gridBtn.addEventListener('click', () => setMode('grid'));
   }
 
   function bindDrawer() {
@@ -809,6 +991,7 @@
   }
 
   window.ORDA = window.ORDA || {};
-  window.ORDA.mapModule = { init, flyToVenue, openDrawer };
+  window.ORDA.mapModule = { init, flyToVenue, openDrawer, refresh };
+  window.addEventListener('orda:languagechange', refresh);
 
 })();

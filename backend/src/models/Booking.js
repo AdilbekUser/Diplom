@@ -23,6 +23,7 @@ const bookingSchema = new mongoose.Schema(
     category: { type: String, trim: true, default: "" },
     format: { type: String, trim: true, default: "" },
     description: { type: String, trim: true, default: "" },
+    image: { type: String, trim: true, default: "" },
     location: { type: String, trim: true, default: "" },
     city: { type: String, trim: true, default: "" },
     hallId: { type: String, trim: true, default: "" },
@@ -52,7 +53,7 @@ const bookingSchema = new mongoose.Schema(
     refundedAt: { type: Date, default: null },
     status: {
       type: String,
-      default: "pending",
+      default: "new",
       enum: ["new", "review", "pending", "approved", "rejected", "cancelled", "registered"],
     },
     adminReason: { type: String, trim: true, default: "" },

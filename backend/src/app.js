@@ -35,7 +35,7 @@ app.use(
     },
   })
 );
-app.use(express.json());
+app.use(express.json({ limit: "5mb" }));
 
 app.use((req, res, next) => {
   if (req.path.endsWith(".js") || req.path.endsWith(".css") || req.path === "/") {

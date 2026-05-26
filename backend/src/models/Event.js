@@ -12,6 +12,7 @@ const eventSchema = new mongoose.Schema(
     organizer: { type: String, trim: true, default: "ORDA" },
     location: { type: String, required: true, trim: true },
     city: { type: String, trim: true, default: "" },
+    translations: { type: Object, default: {} },
     format: { type: String, default: "offline", enum: ["offline", "online", "hybrid"] },
     meetingUrl: { type: String, trim: true, default: "" },
     image: { type: String, trim: true, default: "" },

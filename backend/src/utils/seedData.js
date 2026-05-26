@@ -203,4 +203,153 @@ const demoEvents = [
   },
 ];
 
+const eventTranslationsByTitle = {
+  "Business Technology Expo 2026": {
+    kk: {
+      description: "Бұлтты технологиялар, автоматтандыру, корпоративтік инфрақұрылым және бизнеске арналған серіктестік шешімдер туралы B2B-платформа.",
+      agenda: "Экспо ашылуы, cloud keynote, жеткізуші сессиялары, B2B кездесулер, қорытынды networking",
+      city: "Астана, Қазақстан",
+    },
+    en: {
+      description: "A B2B platform for cloud technology, automation, corporate infrastructure, and partner solutions for business.",
+      agenda: "Expo opening, cloud keynote, vendor sessions, B2B meetings, closing networking",
+      city: "Astana, Kazakhstan",
+    },
+  },
+  "AI & Innovation Summit 2026": {
+    kk: {
+      description: "Жасанды интеллект, генеративті модельдер, процестерді автоматтандыру және инновациялық өнімдер туралы саммит.",
+      agenda: "Ашылу keynote, AI өнім тректері, startup showcase, networking",
+      city: "Астана",
+    },
+    en: {
+      description: "A summit on artificial intelligence, generative models, process automation, and innovative products.",
+      agenda: "Opening keynote, AI product tracks, startup showcase, networking",
+      city: "Astana",
+    },
+  },
+  "GO DIGITAL EURASIA 2026": {
+    kk: {
+      description: "Бизнестің цифрлық трансформациясы, клиент тәжірибесі, деректер, автоматтандыру және digital-first моделіне көшу туралы форум.",
+      agenda: "Цифрлық стратегия, CX аналитикасы, автоматтандыру кейстері, boardroom сессиялары",
+      city: "Астана",
+    },
+    en: {
+      description: "A forum on business digital transformation, customer experience, data, automation, and the shift to a digital-first model.",
+      agenda: "Digital strategy, CX analytics, automation cases, boardroom sessions",
+      city: "Astana",
+    },
+  },
+  "FinTech Conference Central Asia": {
+    kk: {
+      description: "Төлем жүйелері, open banking, финтех реттеу, цифрлық әмияндар және B2B-платформалар туралы конференция.",
+      agenda: "Реттеу briefing, банк панельдері, product demos, investor meetups",
+      city: "Алматы",
+    },
+    en: {
+      description: "A conference on payment systems, open banking, fintech regulation, digital wallets, and B2B platforms.",
+      agenda: "Regulation briefing, bank panels, product demos, investor meetups",
+      city: "Almaty",
+    },
+  },
+  "Smart Business Forum": {
+    kk: {
+      description: "Кәсіпкерлер мен басқарушыларға арналған өсу, сатылым, операциялық жүйелер және smart-басқару туралы іскерлік форум.",
+      agenda: "CEO talks, operations clinic, sales systems, networking lounge",
+      city: "Астана",
+    },
+    en: {
+      description: "A business forum for entrepreneurs and managers about growth, sales, operating systems, and smart management.",
+      agenda: "CEO talks, operations clinic, sales systems, networking lounge",
+      city: "Astana",
+    },
+  },
+  "Product Community Meetup": {
+    kk: {
+      description: "Product менеджерлер, аналитиктер және негізін қалаушылар үшін discovery, метрикалар және жаңа функцияларды іске қосу туралы кешкі кездесу.",
+      agenda: "Lightning talks, Q&A, networking",
+      city: "Астана",
+    },
+    en: {
+      description: "An evening meetup for product managers, analysts, and founders about discovery, metrics, and launching new features.",
+      agenda: "Lightning talks, Q&A, networking",
+      city: "Astana",
+    },
+  },
+  "HR Leadership Forum": {
+    kk: {
+      description: "People strategy, таланттарды дамыту, командалардың қатысуы және операциялық HR-процестер туралы форум.",
+      agenda: "Панельдер, практикалық кейстер, дөңгелек үстел",
+      city: "Алматы",
+    },
+    en: {
+      description: "A forum on people strategy, talent development, team engagement, and operational HR processes.",
+      agenda: "Panels, practical cases, round table",
+      city: "Almaty",
+    },
+  },
+  "Education Seminar: AI in Learning": {
+    kk: {
+      description: "AI-құралдарын оқу бағдарламаларына, корпоративтік оқытуға және нәтижені бағалауға енгізу туралы практикалық семинар.",
+      agenda: "Ашылу сессиясы, workshop, енгізу roadmap",
+      city: "Астана",
+    },
+    en: {
+      description: "A practical seminar on implementing AI tools in curricula, corporate learning, and outcome assessment.",
+      agenda: "Opening session, workshop, implementation roadmap",
+      city: "Astana",
+    },
+  },
+  "Cybersecurity Day Kazakhstan": {
+    kk: {
+      description: "Ақпараттық қауіпсіздік бойынша практикалық күн: SOC, деректерді қорғау, тәуекелдерді басқару және инциденттерге әрекет ету.",
+      agenda: "Threat landscape, SOC кейстері, tabletop exercise, vendor demos",
+      city: "Астана",
+    },
+    en: {
+      description: "A practical day on cybersecurity: SOC, data protection, risk management, and incident response.",
+      agenda: "Threat landscape, SOC cases, tabletop exercise, vendor demos",
+      city: "Astana",
+    },
+  },
+  "Finance Briefing 2026": {
+    kk: {
+      description: "Корпоративтік қаржы, нарық болжамдары, бюджеттеу және келесі жыл стратегиясы туралы жабық сессия.",
+      agenda: "Нарық шолуы, болжамдар, executive Q&A",
+      city: "Астана",
+    },
+    en: {
+      description: "A private session on corporate finance, market forecasts, budgeting, and next-year strategy.",
+      agenda: "Market overview, forecasts, executive Q&A",
+      city: "Astana",
+    },
+  },
+};
+
+demoEvents.forEach((event) => {
+  const extra = eventTranslationsByTitle[event.title] || {};
+  event.translations = {
+    ru: {
+      title: event.title,
+      description: event.description,
+      agenda: event.agenda,
+      organizer: event.organizer,
+      location: event.location,
+      city: event.city,
+    },
+    kk: {
+      title: event.title,
+      organizer: event.organizer,
+      location: event.location,
+      ...(extra.kk || {}),
+    },
+    en: {
+      title: event.title,
+      organizer: event.organizer,
+      location: event.location,
+      ...(extra.en || {}),
+    },
+  };
+});
+
 module.exports = demoEvents;

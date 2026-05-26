@@ -8,7 +8,8 @@
     const canBook = hasToken && event.status === "published" && !event.isBookedByMe && !isFull;
     const isOnline = ORDA.domain.isOnline(event);
     const isPaid = Number(event.price || 0) > 0;
-    const actionLabel = event.isBookedByMe ? t("booked") : isFull ? t("full") : isPaid ? t("ticket") : t("book");
+    const actionLabel = event.isBookedByMe ? t("eventParticipating") : isFull ? t("full") : isPaid ? t("ticket") : t("book");
+    const actionClass = event.isBookedByMe ? "is-status is-success" : isPaid ? "ticket-action" : "";
 
     return `
       <article class="event-card">
@@ -48,7 +49,7 @@
           <div class="progress"><span style="width:${percent}%"></span></div>
         </div>
         <div class="card-actions">
-          <button type="button" data-book="${event._id}" ${canBook ? "" : "disabled"}>
+          <button class="${actionClass}" type="button" data-book="${event._id}" ${canBook ? "" : "disabled"}>
             ${escapeHtml(actionLabel)}
           </button>
           <button class="secondary admin-action" type="button" data-details="${event._id}" title="${escapeHtml(t("details"))}">i</button>

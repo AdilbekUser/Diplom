@@ -524,14 +524,19 @@
             </section>
           </div>
 
-          <div id="calDayEvents" class="cal-day-events hidden">
-            <div class="cal-day-events-head">
-              <span id="calDayTitle" class="cal-day-title"></span>
-              <button class="secondary icon-button" id="calDayClose" type="button" data-i18n-aria-label="close">
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 1l8 8M9 1L1 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-              </button>
+          <div id="calDayEvents" class="calendar-day-modal hidden" role="dialog" aria-modal="true" aria-labelledby="calDayTitle">
+            <div class="calendar-day-dialog">
+              <div class="cal-day-events-head">
+                <div>
+                  <span class="calendar-day-kicker" data-i18n="navCalendar"></span>
+                  <span id="calDayTitle" class="cal-day-title"></span>
+                </div>
+                <button class="secondary icon-button" id="calDayClose" type="button" data-i18n-aria-label="close">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 1l8 8M9 1L1 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                </button>
+              </div>
+              <div id="calDayList" class="mini-list calendar-day-list"></div>
             </div>
-            <div id="calDayList" class="mini-list"></div>
           </div>
           <div id="calendarList" class="hidden"></div>
         </section>
@@ -722,10 +727,10 @@
           <h3 id="mapSidebarCount" class="map-sidebar-title"></h3>
         </div>
         <div class="map-view-toggle">
-          <button id="mapListBtn" class="map-vtbtn active" type="button" data-i18n-title="viewList">
+          <button id="mapListBtn" class="map-vtbtn active" type="button" aria-pressed="true" data-i18n-title="viewList" data-i18n-aria-label="viewListAria">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M1 3h12M1 7h12M1 11h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
           </button>
-          <button id="mapGridBtn" class="map-vtbtn" type="button" data-i18n-title="viewGrid">
+          <button id="mapGridBtn" class="map-vtbtn" type="button" aria-pressed="false" data-i18n-title="viewGrid" data-i18n-aria-label="viewGridAria">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.4"/></svg>
           </button>
         </div>
@@ -803,47 +808,47 @@
         <section id="aboutView" class="view">
           <div class="section-head">
             <div>
-              <p class="eyebrow">О платформе</p>
-              <h2>ORDA Smart Event System</h2>
+              <p class="eyebrow" data-i18n="aboutLabel"></p>
+              <h2 data-i18n="aboutSystemName"></h2>
             </div>
           </div>
           <div class="about-grid">
             <section class="panel about-main">
-              <h3>Краткое описание</h3>
-              <p>ORDA Smart Event System — цифровая платформа для публикации мероприятий, регистрации участников, бронирования конференц-залов и обработки клиентских заявок.</p>
-              <h3>Как работает платформа</h3>
-              <p>Клиент выбирает мероприятие или зал, оформляет заявку, проходит демонстрационную оплату и отслеживает статус в личном кабинете. Администратор проверяет заявки, управляет каталогом, расписанием и уведомлениями.</p>
+              <h3 data-i18n="aboutShortTitle"></h3>
+              <p data-i18n="aboutShortText"></p>
+              <h3 data-i18n="aboutHowTitle"></h3>
+              <p data-i18n="aboutHowText"></p>
             </section>
             <section class="panel about-list">
-              <h3>Контакты</h3>
+              <h3 data-i18n="aboutContactsTitle"></h3>
               <ul>
-                <li>Офис: г. Астана, район EXPO, Mangilik El Avenue</li>
+                <li data-i18n="aboutOfficeLine"></li>
                 <li>Email: adilbek.zhanuzak@gmail.com</li>
-                <li>Время обработки заявок: ежедневно, 09:00–18:00</li>
-                <li>Техническая поддержка: через форму в личном кабинете</li>
+                <li data-i18n="aboutProcessingLine"></li>
+                <li data-i18n="aboutSupportLine"></li>
               </ul>
             </section>
           </div>
           <div class="about-capability-grid">
             <section class="panel capability-panel">
               <span>01</span>
-              <h3>Каталог мероприятий</h3>
-              <p>Публикация одобренных событий, карточки с датой, залом, ценой и регистрацией участников.</p>
+              <h3 data-i18n="aboutCatalogTitle"></h3>
+              <p data-i18n="aboutCatalogText"></p>
             </section>
             <section class="panel capability-panel">
               <span>02</span>
-              <h3>Заявки и модерация</h3>
-              <p>Заявки клиентов попадают администратору, проходят проверку и меняют статус с уведомлением клиента.</p>
+              <h3 data-i18n="aboutRequestsTitle"></h3>
+              <p data-i18n="aboutRequestsText"></p>
             </section>
             <section class="panel capability-panel">
               <span>03</span>
-              <h3>Календарь</h3>
-              <p>Расписание показывает мероприятия и занятость площадок, чтобы быстро видеть свободные даты.</p>
+              <h3 data-i18n="navCalendar"></h3>
+              <p data-i18n="aboutCalendarText"></p>
             </section>
             <section class="panel capability-panel">
               <span>04</span>
-              <h3>Техническая поддержка</h3>
-              <p>Пользователь может отправить сообщение администратору, а администратор отметить обращение как обработанное.</p>
+              <h3 data-i18n="aboutSupportTitle"></h3>
+              <p data-i18n="aboutSupportText"></p>
             </section>
           </div>
         </section>
@@ -881,9 +886,9 @@
                 <div id="myBookingsList" class="booking-list"></div>
               </section>
               <form id="supportForm" class="panel form-panel client-support-panel">
-                <h3>Тех-поддержка</h3>
-                <textarea id="supportMessageText" name="message" rows="3" placeholder="Напишите сообщение администратору" required></textarea>
-                <button type="submit">Отправить администратору</button>
+                <h3 data-i18n="supportTitle"></h3>
+                <textarea id="supportMessageText" name="message" rows="3" data-placeholder="supportPlaceholder" required></textarea>
+                <button type="submit" data-i18n="supportSubmit"></button>
               </form>
             </div>
           </div>
@@ -929,8 +934,8 @@
           </div>
 
           <div class="request-mode-toggle panel">
-            <button class="active" type="button" data-request-mode="hall">Бронирование конференц-зала</button>
-            <button type="button" data-request-mode="event">Объявление для своего мероприятия</button>
+            <button class="active" type="button" data-request-mode="hall" data-i18n="requestModeHall"></button>
+            <button type="button" data-request-mode="event" data-i18n="requestModeEvent"></button>
           </div>
 
           <div id="requestHallPlanner" class="request-layout">
@@ -943,16 +948,6 @@
               </div>
               <div id="requestHallGrid" class="request-hall-grid"></div>
 
-              <div class="request-date-card">
-                <div class="field">
-                  <label for="requestDate" data-i18n="requestDateLabel"></label>
-                  <input id="requestDate" type="date" />
-                </div>
-                <div>
-                  <p class="eyebrow" data-i18n="requestSlotsLabel"></p>
-                  <div id="requestSlotGrid" class="request-slot-grid"></div>
-                </div>
-              </div>
             </section>
 
             <aside class="panel request-summary-card">
@@ -1016,26 +1011,26 @@
               </div>
 
               <div class="field">
-                <label for="requestDurationHours">Длительность мероприятия</label>
+                <label for="requestDurationHours" data-i18n="requestDurationHours"></label>
                 <input id="requestDurationHours" name="duration" type="number" min="1" max="24" value="2" required />
               </div>
 
               <div id="ownEventFields" class="request-own-event-fields request-field-wide hidden">
                 <div class="field">
-                  <label for="requestOwnDate">Дата</label>
+                  <label for="requestOwnDate" data-i18n="requestOwnDate"></label>
                   <input id="requestOwnDate" name="ownDate" type="date" />
                 </div>
                 <div class="field">
-                  <label for="requestOwnTime">Время начала</label>
+                  <label for="requestOwnTime" data-i18n="requestOwnTime"></label>
                   <input id="requestOwnTime" name="ownTime" type="time" value="10:00" />
                 </div>
                 <div class="field">
-                  <label for="requestOwnLocation">Место проведения</label>
-                  <input id="requestOwnLocation" name="ownLocation" type="text" placeholder="Например, БЦ Abu Dhabi Plaza, зал переговоров" />
+                  <label for="requestOwnLocation" data-i18n="requestOwnLocation"></label>
+                  <input id="requestOwnLocation" name="ownLocation" type="text" data-placeholder="requestOwnLocationPlaceholder" />
                 </div>
                 <div class="field">
-                  <label for="requestOwnCity">Город</label>
-                  <input id="requestOwnCity" name="ownCity" type="text" placeholder="Астана" />
+                  <label for="requestOwnCity" data-i18n="requestOwnCity"></label>
+                  <input id="requestOwnCity" name="ownCity" type="text" data-placeholder="requestOwnCityPlaceholder" />
                 </div>
               </div>
 
@@ -1059,6 +1054,17 @@
                 <textarea id="requestDescription" name="description" rows="3" data-placeholder="requestDescriptionPlaceholder" required></textarea>
               </div>
 
+              <div class="field request-field-wide request-photo-field">
+                <label for="requestImageFile" data-i18n="requestAttachPhoto"></label>
+                <input id="requestImage" name="image" type="hidden" />
+                <label class="request-photo-picker" for="requestImageFile">
+                  <input id="requestImageFile" name="requestImageFile" type="file" accept="image/*" />
+                  <span data-i18n="requestAttachPhoto"></span>
+                  <small data-i18n="requestAttachPhotoHint"></small>
+                </label>
+                <div id="requestImagePreview" class="request-image-preview hidden"></div>
+              </div>
+
               <div class="field request-field-wide">
                 <label for="requestNotes" data-i18n="requestAdminNotes"></label>
                 <textarea id="requestNotes" name="notes" rows="3" data-placeholder="requestAdminNotes"></textarea>
@@ -1072,18 +1078,18 @@
               </div>
               <div class="request-services-grid">
                 <label><input type="checkbox" name="services" value="registration" data-price="9000" /><span data-i18n="serviceRegistration"></span></label>
-                <label><input type="checkbox" name="services" value="assistants" data-price="22000" /><span>Ассистенты / координаторы</span></label>
-                <label><input type="checkbox" name="services" value="tech" data-price="18000" /><span>Технический специалист</span></label>
+                <label><input type="checkbox" name="services" value="assistants" data-price="22000" /><span data-i18n="serviceAssistants"></span></label>
+                <label><input type="checkbox" name="services" value="tech" data-price="18000" /><span data-i18n="serviceTech"></span></label>
                 <label><input type="checkbox" name="services" value="projector" data-price="10000" /><span data-i18n="serviceProjector"></span></label>
                 <label><input type="checkbox" name="services" value="microphones" data-price="8000" /><span data-i18n="serviceMicrophones"></span></label>
-                <label><input type="checkbox" name="services" value="audio" data-price="12000" /><span>Звуковая система</span></label>
-                <label><input type="checkbox" name="services" value="led" data-price="16000" /><span>Экран / LED-панель</span></label>
+                <label><input type="checkbox" name="services" value="audio" data-price="12000" /><span data-i18n="serviceAudio"></span></label>
+                <label><input type="checkbox" name="services" value="led" data-price="16000" /><span data-i18n="serviceLedScreen"></span></label>
                 <label><input type="checkbox" name="services" value="coffee" data-price="25000" /><span data-i18n="serviceCoffee"></span></label>
-                <label><input type="checkbox" name="services" value="badges" data-price="6000" /><span>Бейджи участников</span></label>
-                <label><input type="checkbox" name="services" value="security" data-price="30000" /><span>Охрана</span></label>
-                <label><input type="checkbox" name="services" value="cleaning" data-price="12000" /><span>Уборка после мероприятия</span></label>
-                <label><input type="checkbox" name="services" value="streaming" data-price="35000" /><span>Онлайн-трансляция</span></label>
-                <label><input type="checkbox" name="services" value="translator" data-price="28000" /><span>Переводчик</span></label>
+                <label><input type="checkbox" name="services" value="badges" data-price="6000" /><span data-i18n="badgeLabel"></span></label>
+                <label><input type="checkbox" name="services" value="security" data-price="30000" /><span data-i18n="serviceSecurity"></span></label>
+                <label><input type="checkbox" name="services" value="cleaning" data-price="12000" /><span data-i18n="serviceCleaning"></span></label>
+                <label><input type="checkbox" name="services" value="streaming" data-price="35000" /><span data-i18n="serviceStreaming"></span></label>
+                <label><input type="checkbox" name="services" value="translator" data-price="28000" /><span data-i18n="serviceTranslator"></span></label>
               </div>
             </section>
 
@@ -1100,16 +1106,16 @@
        <!-- ═════════════════════════════════════ -->
        <!-- Admin Panel -->
        <!-- ═════════════════════════════════════ -->
-        
-       <section id="adminView" class="view admin-view" data-portal-group="admin">
+         
+        <section id="adminView" class="view admin-view" data-portal-group="admin">
   <div class="section-head admin-section-head">
-    <h2>Администрирование</h2>
+    <h2 data-i18n="adminPanelTitle"></h2>
   </div>
 
   <div class="admin-layout">
     <form id="eventForm" class="panel form-panel admin-event-panel">
       <input type="hidden" name="id" />
-      <h3 id="eventFormTitle">Новое мероприятие</h3>
+      <h3 id="eventFormTitle" data-i18n="newEvent"></h3>
 
       <input name="title" type="text" data-placeholder="eventTitle" required />
 
@@ -1171,7 +1177,7 @@
     <section class="panel form-panel admin-halls-panel">
       <form id="hallForm" class="form-panel admin-inner-form">
         <input type="hidden" name="id" />
-        <h3 id="hallFormTitle">Залы</h3>
+        <h3 id="hallFormTitle" data-i18n="adminHallsTitle"></h3>
 
         <input name="name" type="text" data-placeholder="hallNamePlaceholder" required />
 
@@ -1201,14 +1207,14 @@
         </div>
       </form>
 
-      <h3 class="admin-list-title">Список залов</h3>
+      <h3 class="admin-list-title" data-i18n="adminHallsListTitle"></h3>
 
       <div id="adminHallsList" class="booking-list"></div>
     </section>
 
     <section class="panel admin-requests-panel">
       <div class="admin-requests-head">
-        <h3>Заявки</h3>
+        <h3 data-i18n="adminRequestsTitle"></h3>
 
         <div class="admin-request-filters">
           <select id="adminRequestTypeFilter">
@@ -1235,7 +1241,7 @@
 
     <section class="panel admin-support-panel">
       <div class="admin-support-head">
-        <h3>Сообщения от клиентов / Тех-поддержка</h3>
+        <h3 data-i18n="adminSupportTitle"></h3>
       </div>
       <div id="adminSupportList" class="support-list"></div>
     </section>
@@ -1323,6 +1329,42 @@
     </div>
 
     <!-- ════════════════════════════════════════════════════════════════════ -->
+    <!-- MODAL: Request Slot Selection                                       -->
+    <!-- ════════════════════════════════════════════════════════════════════ -->
+    <div id="requestSlotModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="requestSlotModalTitle">
+      <div class="modal-card request-slot-modal-card">
+        <button id="closeRequestSlotModal" class="icon-button modal-close secondary" type="button" data-i18n-aria-label="close">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+        <div class="request-slot-modal-head">
+          <p class="eyebrow" data-i18n="requestSlotModalLabel"></p>
+          <h3 id="requestSlotModalTitle" data-i18n="requestSlotModalTitle"></h3>
+          <p class="muted">
+            <span data-i18n="requestSlotModalText"></span>
+            <strong id="requestSlotModalHallName"></strong>
+          </p>
+        </div>
+
+        <div class="request-date-card request-date-card--modal">
+          <div class="field">
+            <label for="requestDate" data-i18n="requestDateLabel"></label>
+            <input id="requestDate" type="date" />
+          </div>
+          <div>
+            <p class="eyebrow" data-i18n="requestSlotsLabel"></p>
+            <div id="requestSlotGrid" class="request-slot-grid"></div>
+          </div>
+        </div>
+
+        <p id="requestSlotModalMessage" class="request-slot-modal-message hidden"></p>
+        <div class="form-actions request-slot-modal-actions">
+          <button id="cancelRequestSlotModal" class="secondary" type="button" data-i18n="cancel"></button>
+          <button id="confirmRequestSlot" type="button" data-i18n="requestSlotModalConfirm"></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════════════ -->
     <!-- MODAL: Payment                                                      -->
     <!-- ════════════════════════════════════════════════════════════════════ -->
     <div id="paymentModal" class="modal hidden" role="dialog" aria-modal="true">
@@ -1399,9 +1441,9 @@
           <section id="requestAnnouncementPayment" class="request-announcement-payment hidden">
             <label class="pay-method-chip active">
               <input type="radio" name="announcementPaymentMethod" value="announcement-demo" checked />
-              <span>Имитация оплаты публикации объявления</span>
+              <span data-i18n="requestAnnouncementPaymentMethod"></span>
             </label>
-            <p class="muted">После подтверждения заявка уйдёт администратору на модерацию.</p>
+            <p class="muted" data-i18n="requestAnnouncementPaymentHint"></p>
           </section>
 
           <div id="requestCardPaymentFields" class="request-card-payment-fields">
@@ -1730,6 +1772,11 @@
       let current = new Date();
       current.setDate(1);
 
+      function t(key) {
+        const lang = (window.ORDA && window.ORDA.lang) || 'ru';
+        return (window.ORDA && window.ORDA.i18n && window.ORDA.i18n.translate(lang, key)) || key;
+      }
+
       function escapeCal(value) {
         return String(value || '').replace(/[&<>"']/g, function(ch) {
           return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
@@ -1737,10 +1784,76 @@
       }
 
       function calStatusClass(status) {
-        if (['approved', 'published'].includes(status)) return 'free';
-        if (['pending', 'draft'].includes(status)) return 'soon';
-        if (['closed', 'cancelled', 'rejected'].includes(status)) return 'busy';
+        if (['approved', 'published'].includes(status)) return 'busy';
+        if (['new', 'review', 'pending', 'draft'].includes(status)) return 'planned';
+        if (['closed', 'cancelled', 'rejected'].includes(status)) return 'free';
         return 'planned';
+      }
+
+      function dayState(events) {
+        const activeEvents = events.filter(function(ev) { return calStatusClass(ev.status) !== 'free'; });
+        if (!activeEvents.length) return 'free';
+        return activeEvents.some(function(ev) { return calStatusClass(ev.status) === 'busy'; }) ? 'busy' : 'planned';
+      }
+
+      function dayStateText(state) {
+        if (state === 'busy') return t('calendarDayBusy');
+        if (state === 'planned') return t('calendarDayPlanned');
+        return t('calendarDayFree');
+      }
+
+      function calValue(value, fallback) {
+        const text = String(value ?? '').trim();
+        if (!text || ['undefined', 'null', 'nan'].includes(text.toLowerCase())) return fallback || '';
+        return text;
+      }
+
+      function calMeta(label, value) {
+        const clean = calValue(value);
+        if (!clean) return '';
+        return '<span><b>' + escapeCal(label) + '</b>' + escapeCal(clean) + '</span>';
+      }
+
+      function closeDayModal() {
+        const panel = document.getElementById('calDayEvents');
+        if (panel) panel.classList.add('hidden');
+      }
+
+      function planOption(title, text, action, dateStr) {
+        const item = document.createElement('button');
+        item.className = 'mini-item calendar-plan-option';
+        item.type = 'button';
+        item.innerHTML = '<strong>' + title + '</strong><p>' + text + '</p>';
+        item.addEventListener('click', function() {
+          if (window.ORDA && typeof window.ORDA.calendarPlan === 'function') {
+            window.ORDA.calendarPlan(action, dateStr);
+          }
+        });
+        return item;
+      }
+
+      function buildPlanOptions(dateStr) {
+        const group = document.createElement('div');
+        group.className = 'calendar-plan-options';
+        group.appendChild(planOption(
+          t('calendarPlanHallsTitle'),
+          t('calendarPlanHallsText'),
+          'halls',
+          dateStr
+        ));
+        group.appendChild(planOption(
+          t('calendarPlanBookingTitle'),
+          t('calendarPlanBookingText'),
+          'request-hall',
+          dateStr
+        ));
+        group.appendChild(planOption(
+          t('calendarPlanAnnouncementTitle'),
+          t('calendarPlanAnnouncementText'),
+          'request-event',
+          dateStr
+        ));
+        return group;
       }
 
       function renderCal() {
@@ -1770,27 +1883,25 @@
           const cell = document.createElement('div');
           const isToday = (today.getFullYear() === year && today.getMonth() === month && today.getDate() === d);
           const dayStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-          const dayEvents = items.filter(ev => ev.date === dayStr);
+          const dayEvents = items.filter(ev => ev.date === dayStr && calStatusClass(ev.status) !== 'free');
+          const state = dayState(dayEvents);
 
-          cell.className = 'cal-cell' + (isToday ? ' today' : '') + (dayEvents.length ? ' has-events' : '');
-          const marks = dayEvents.slice(0, 2).map(function(ev) {
+          cell.className = 'cal-cell is-' + state + (isToday ? ' today' : '') + (dayEvents.length ? ' has-events' : '');
+          const marks = dayEvents.slice(0, 3).map(function(ev) {
             const status = calStatusClass(ev.status);
-            const title = escapeCal(ev.title || '');
-            const statusText = escapeCal(ev.statusLabel || ev.status || '');
-            return '<span class="cal-event-mark cal-event-mark--' + status + '"><b>' + title + '</b><em>' + statusText + '</em></span>';
+            return '<span class="cal-dot cal-dot--' + status + '" aria-hidden="true"></span>';
           }).join('');
-          const more = dayEvents.length > 2 ? '<small class="cal-more">+' + (dayEvents.length - 2) + '</small>' : '';
           cell.innerHTML =
             '<span class="cal-date-number">' + d + '</span>' +
-            (dayEvents.length ? '<div class="cal-event-stack">' + marks + '</div>' + more : '');
-          if (dayEvents.length) cell.title = dayEvents.map(ev => (ev.time ? ev.time + ' · ' : '') + ev.title + ' · ' + (ev.statusLabel || ev.status || '')).join('\n');
+            (dayEvents.length ? '<span class="cal-status-ring cal-status-ring--' + state + '" aria-hidden="true"></span><div class="cal-dot-row" aria-hidden="true">' + marks + '</div>' : '');
+          cell.title = dayEvents.length
+            ? dayEvents.map(ev => (calValue(ev.time) ? calValue(ev.time) + ' · ' : '') + calValue(ev.title, t('calendarFallbackPlanned')) + ' · ' + calValue(ev.statusLabel || ev.status)).join('\n')
+            : t('calendarDayFree');
           cell.dataset.date = dayStr;
 
-          if (dayEvents.length) {
-            cell.addEventListener('click', function() {
-              showDayEvents(dayStr, dayEvents, locale);
-            });
-          }
+          cell.addEventListener('click', function() {
+            showDayEvents(dayStr, dayEvents, locale);
+          });
           grid.appendChild(cell);
         }
       }
@@ -1803,14 +1914,44 @@
         const d = new Date(dateStr + 'T00:00:00');
         if (title) title.textContent = d.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
         list.innerHTML = '';
+        const state = dayState(events);
+        const summary = document.createElement('div');
+        summary.className = 'mini-item calendar-day-summary calendar-day-summary--' + state;
+        summary.innerHTML =
+          '<strong>' + dayStateText(state) + '</strong>' +
+          '<p>' + (events.length ? t('calendarDaySummaryHasEvents') : t('calendarDaySummaryEmpty')) + '</p>';
+        list.appendChild(summary);
+
+        if (!events.length) {
+          list.appendChild(buildPlanOptions(dateStr));
+          panel.classList.remove('hidden');
+          requestAnimationFrame(function() {
+            const close = document.getElementById('calDayClose');
+            if (close) close.focus({ preventScroll: true });
+          });
+          return;
+        }
+
         events.forEach(function(ev) {
           const item = document.createElement('button');
-          item.className = 'mini-item';
+          const status = calStatusClass(ev.status);
+          const titleText = calValue(ev.title, t('calendarFallbackPlanned'));
+          const timeText = calValue(ev.time, t('calendarFallbackTime'));
+          const placeText = calValue(ev.location || ev.hall);
+          const occupation = calValue(ev.occupationType, ev.type === 'event' ? t('calendarOccupationEvent') : t('calendarOccupationHallBooking'));
+          const occupiedBy = calValue(ev.occupiedBy, ev.type === 'event' ? t('calendarOccupiedByOrganizer') : t('calendarOccupiedByClient'));
+          const confirmation = calValue(ev.confirmationLabel, status === 'busy' ? t('calendarConfirmationApproved') : t('calendarConfirmationPending'));
+          item.className = 'mini-item calendar-occupied-card calendar-occupied-card--' + status;
           item.type = 'button';
           item.innerHTML =
-            '<strong>' + (ev.title || '') + '</strong>' +
-            '<p>' + (ev.time || '') + ' · ' + (ev.location || '') + '</p>' +
-            '<p><span class="calendar-inline-status">' + (ev.statusLabel || ev.status || '') + '</span>' + (ev.attendees ? ' · ' + ev.attendees : '') + '</p>';
+            '<strong>' + escapeCal(titleText) + '</strong>' +
+            '<div class="calendar-occupied-meta">' +
+              calMeta(t('calendarMetaTime'), timeText) +
+              calMeta(t('calendarMetaPlace'), placeText) +
+              calMeta(t('calendarMetaType'), occupation) +
+              calMeta(t('calendarMetaOccupiedBy'), occupiedBy) +
+              '<span><b>' + escapeCal(t('calendarMetaStatus')) + '</b><span class="calendar-inline-status">' + escapeCal(confirmation) + '</span></span>' +
+            '</div>';
           item.addEventListener('click', function() {
             if (window.ORDA && typeof window.ORDA.openCalendarItem === 'function') {
               window.ORDA.openCalendarItem(ev);
@@ -1819,6 +1960,10 @@
           list.appendChild(item);
         });
         panel.classList.remove('hidden');
+        requestAnimationFrame(function() {
+          const close = document.getElementById('calDayClose');
+          if (close) close.focus({ preventScroll: true });
+        });
       }
 
       document.getElementById('calPrev') && document.getElementById('calPrev').addEventListener('click', function() {
@@ -1828,7 +1973,16 @@
         current.setMonth(current.getMonth() + 1); renderCal();
       });
       document.getElementById('calDayClose') && document.getElementById('calDayClose').addEventListener('click', function() {
-        document.getElementById('calDayEvents').classList.add('hidden');
+        closeDayModal();
+      });
+      document.getElementById('calDayEvents') && document.getElementById('calDayEvents').addEventListener('click', function(event) {
+        if (event.target === event.currentTarget) closeDayModal();
+      });
+      document.addEventListener('keydown', function(event) {
+        const panel = document.getElementById('calDayEvents');
+        if (event.key === 'Escape' && panel && !panel.classList.contains('hidden')) {
+          closeDayModal();
+        }
       });
 
       window.ORDA = window.ORDA || {};

@@ -19,6 +19,7 @@ const state = {
   bookings: [],
   hallBookings: [],
   adminBookings: [],
+  availability: [],
   adminUsers: [],
   adminNotifications: [],
   clientNotifications: [],
@@ -137,6 +138,12 @@ const els = {
   ownEventFields: document.querySelector("#ownEventFields"),
   requestDate: document.querySelector("#requestDate"),
   requestSlotGrid: document.querySelector("#requestSlotGrid"),
+  requestSlotModal: document.querySelector("#requestSlotModal"),
+  closeRequestSlotModal: document.querySelector("#closeRequestSlotModal"),
+  cancelRequestSlotModal: document.querySelector("#cancelRequestSlotModal"),
+  confirmRequestSlot: document.querySelector("#confirmRequestSlot"),
+  requestSlotModalHallName: document.querySelector("#requestSlotModalHallName"),
+  requestSlotModalMessage: document.querySelector("#requestSlotModalMessage"),
   requestSelectedSummary: document.querySelector("#requestSelectedSummary"),
   requestRentPreview: document.querySelector("#requestRentPreview"),
   customRequestForm: document.querySelector("#customRequestForm"),
@@ -150,6 +157,8 @@ const els = {
   requestAnnouncementPayment: document.querySelector("#requestAnnouncementPayment"),
   requestCardPaymentFields: document.querySelector("#requestCardPaymentFields"),
   requestPaymentProcessText: document.querySelector("#requestPaymentProcessText"),
+  requestImageFile: document.querySelector("#requestImageFile"),
+  requestImagePreview: document.querySelector("#requestImagePreview"),
   clientWorkspace: document.querySelector("#clientWorkspace"),
   adminWorkspace: document.querySelector("#adminWorkspace"),
   eventsCount: document.querySelector("#eventsCount"),
@@ -165,19 +174,29 @@ const requestSlots = [
 ];
 const requestServiceConfig = [
   { id: "registration", key: "serviceRegistration", price: 9000 },
-  { id: "assistants", label: "Ассистенты / координаторы", price: 22000 },
-  { id: "tech", label: "Технический специалист", price: 18000 },
+  { id: "assistants", key: "serviceAssistants", price: 22000 },
+  { id: "tech", key: "serviceTech", price: 18000 },
   { id: "projector", key: "serviceProjector", price: 10000 },
   { id: "microphones", key: "serviceMicrophones", price: 8000 },
-  { id: "audio", label: "Звуковая система", price: 12000 },
-  { id: "led", label: "Экран / LED-панель", price: 16000 },
+  { id: "audio", key: "serviceAudio", price: 12000 },
+  { id: "led", key: "serviceLedScreen", price: 16000 },
   { id: "coffee", key: "serviceCoffee", price: 25000 },
-  { id: "badges", label: "Бейджи участников", price: 6000 },
-  { id: "security", label: "Охрана", price: 30000 },
-  { id: "cleaning", label: "Уборка после мероприятия", price: 12000 },
-  { id: "streaming", label: "Онлайн-трансляция", price: 35000 },
-  { id: "translator", label: "Переводчик", price: 28000 },
+  { id: "badges", key: "badgeLabel", price: 6000 },
+  { id: "security", key: "serviceSecurity", price: 30000 },
+  { id: "cleaning", key: "serviceCleaning", price: 12000 },
+  { id: "streaming", key: "serviceStreaming", price: 35000 },
+  { id: "translator", key: "serviceTranslator", price: 28000 },
 ];
+const equipmentLabelKeys = {
+  projector: "eqProjector",
+  mic: "eqMic",
+  microphones: "serviceMicrophones",
+  webcast: "eqWebcast",
+  catering: "eqCatering",
+  led: "serviceTv",
+  wifi: "serviceWifi",
+  tech: "serviceTech",
+};
 const announcementRequestPrice = 10000;
 const hallImageFallbacks = {
   h_grand: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1200&q=80",
@@ -198,8 +217,455 @@ const hallImageFallbacks = {
   "Skyline Networking Lounge": "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1200&q=80",
   default: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=80",
 };
+
+const demoHallTranslations = {
+  h_grand: {
+    ru: {
+      name: "Grand Hall A",
+      floor: "1 этаж",
+      location: "Центральное крыло, район Astana Expo",
+      description: "Флагманский зал для форумов, выставочных открытий и keynote-сессий с профессиональным светом, сценой и синхронным переводом.",
+      equipment: ["LED-экран 12 м", "Сценический свет", "Кабины перевода", "Пульт трансляции", "VIP-вход"],
+      advantages: ["Панорамная сцена", "Отдельная регистрация", "Потоковая трансляция"],
+    },
+    kk: {
+      name: "Grand Hall A",
+      floor: "1-қабат",
+      location: "Орталық қанат, Astana Expo ауданы",
+      description: "Форумдар, көрме ашылымдары және keynote-сессиялар үшін кәсіби жарығы, сахнасы және синхронды аудармасы бар басты зал.",
+      equipment: ["12 м LED-экран", "Сахналық жарық", "Аударма кабиналары", "Трансляция пульті", "VIP-кіру"],
+      advantages: ["Панорамалық сахна", "Жеке тіркеу аймағы", "Ағынды трансляция"],
+    },
+    en: {
+      name: "Grand Hall A",
+      floor: "Floor 1",
+      location: "Central Wing, Astana Expo District",
+      description: "A flagship hall for forums, exhibition openings, and keynote sessions with professional lighting, a stage, and simultaneous interpretation.",
+      equipment: ["12 m LED wall", "Stage lighting", "Translation booths", "Broadcast desk", "VIP entrance"],
+      advantages: ["Panoramic stage", "Separate registration", "Live streaming"],
+    },
+  },
+  h_orion: {
+    ru: {
+      name: "Orion Hall B",
+      floor: "2 этаж",
+      location: "Северное крыло",
+      description: "Универсальный зал для корпоративных конференций, продуктовых презентаций и гибридных программ.",
+      equipment: ["4K-проектор", "Zoom room", "Акустическая система", "Видеостена", "Гибридный комплект"],
+      advantages: ["Гибридный формат", "Сильная акустика", "Быстрая рассадка"],
+    },
+    kk: {
+      name: "Orion Hall B",
+      floor: "2-қабат",
+      location: "Солтүстік қанат",
+      description: "Корпоративтік конференциялар, өнім презентациялары және гибридті бағдарламаларға арналған әмбебап зал.",
+      equipment: ["4K-проектор", "Zoom room", "Акустикалық жүйе", "Бейнеқабырға", "Гибридті жинақ"],
+      advantages: ["Гибридті формат", "Күшті акустика", "Жылдам отырғызу"],
+    },
+    en: {
+      name: "Orion Hall B",
+      floor: "Floor 2",
+      location: "North Wing",
+      description: "A flexible hall for corporate conferences, product presentations, and hybrid programs.",
+      equipment: ["4K projector", "Zoom room", "Acoustic system", "Video wall", "Hybrid kit"],
+      advantages: ["Hybrid format", "Strong acoustics", "Fast seating setup"],
+    },
+  },
+  h_workshop: {
+    ru: {
+      name: "Workshop Hub C",
+      floor: "2 этаж",
+      location: "Южное крыло",
+      description: "Гибкое пространство для тренингов, дизайн-сессий, образовательных интенсивов и командных workshop-программ.",
+      equipment: ["Модульная мебель", "Флипчарты", "VR-комплект", "Интерактивные панели"],
+      advantages: ["Модульная мебель", "Интерактивные панели", "Командные зоны"],
+    },
+    kk: {
+      name: "Workshop Hub C",
+      floor: "2-қабат",
+      location: "Оңтүстік қанат",
+      description: "Тренингтер, дизайн-сессиялар, білім беру интенсивтері және командалық workshop бағдарламаларына арналған икемді кеңістік.",
+      equipment: ["Модульдік жиһаз", "Флипчарттар", "VR-жинақ", "Интерактивті панельдер"],
+      advantages: ["Модульдік жиһаз", "Интерактивті панельдер", "Командалық аймақтар"],
+    },
+    en: {
+      name: "Workshop Hub C",
+      floor: "Floor 2",
+      location: "South Wing",
+      description: "A flexible space for trainings, design sessions, educational intensives, and team workshop programs.",
+      equipment: ["Modular furniture", "Flipcharts", "VR kit", "Interactive panels"],
+      advantages: ["Modular furniture", "Interactive panels", "Team zones"],
+    },
+  },
+  h_board: {
+    ru: {
+      name: "Boardroom D",
+      floor: "3 этаж",
+      location: "Executive Zone",
+      description: "Закрытая переговорная для совещаний руководителей, стратегических встреч и private briefing-сессий.",
+      equipment: ["Видеоконференция", "Smart display", "Кофе-станция", "Приватное лобби"],
+      advantages: ["Приватность", "Executive-сервис", "Видеосвязь"],
+    },
+    kk: {
+      name: "Boardroom D",
+      floor: "3-қабат",
+      location: "Executive Zone",
+      description: "Басшылар жиналыстары, стратегиялық кездесулер және private briefing-сессиялар үшін жабық келіссөз бөлмесі.",
+      equipment: ["Бейнебайланыс", "Smart display", "Кофе станциясы", "Жеке лобби"],
+      advantages: ["Құпиялылық", "Executive-сервис", "Бейнебайланыс"],
+    },
+    en: {
+      name: "Boardroom D",
+      floor: "Floor 3",
+      location: "Executive Zone",
+      description: "A private boardroom for executive meetings, strategy sessions, and private briefings.",
+      equipment: ["Video conference", "Smart display", "Coffee station", "Private lobby"],
+      advantages: ["Privacy", "Executive service", "Video conferencing"],
+    },
+  },
+  h_atrium: {
+    ru: {
+      name: "Atrium Expo Space",
+      floor: "1 этаж",
+      location: "Главный атриум",
+      description: "Открытая зона для выставок, партнерских стендов, нетворкинга и демонстрации технологических решений.",
+      equipment: ["Выставочные стенды", "Стойки регистрации", "Медиа-стена", "Sponsor zones"],
+      advantages: ["Выставочные стенды", "Высокий трафик", "Sponsor branding"],
+    },
+    kk: {
+      name: "Atrium Expo Space",
+      floor: "1-қабат",
+      location: "Бас атриум",
+      description: "Көрмелерге, серіктес стендтерге, нетворкингке және технологиялық шешімдерді көрсетуге арналған ашық аймақ.",
+      equipment: ["Көрме стендтері", "Тіркеу үстелдері", "Медиа-қабырға", "Демеуші аймақтары"],
+      advantages: ["Көрме стендтері", "Жоғары трафик", "Демеуші брендингі"],
+    },
+    en: {
+      name: "Atrium Expo Space",
+      floor: "Floor 1",
+      location: "Main Atrium",
+      description: "An open area for exhibitions, partner booths, networking, and technology solution demos.",
+      equipment: ["Expo booths", "Registration desks", "Media wall", "Sponsor zones"],
+      advantages: ["Exhibition booths", "High traffic", "Sponsor branding"],
+    },
+  },
+  h_silk: {
+    ru: {
+      name: "Silk Road Conference Room",
+      floor: "3 этаж",
+      location: "Восточное крыло",
+      description: "Премиальный конференц-зал для международных деловых встреч, пресс-конференций и переговоров.",
+      equipment: ["Конференц-стол", "Система перевода", "Беспроводные микрофоны", "Пресс-стена"],
+      advantages: ["Международный формат", "Пресс-зона", "Синхроперевод"],
+    },
+    kk: {
+      name: "Silk Road Conference Room",
+      floor: "3-қабат",
+      location: "Шығыс қанат",
+      description: "Халықаралық іскерлік кездесулерге, баспасөз конференцияларына және келіссөздерге арналған премиум конференц-зал.",
+      equipment: ["Конференц-үстел", "Аударма жүйесі", "Сымсыз микрофондар", "Пресс-қабырға"],
+      advantages: ["Халықаралық формат", "Пресс-аймақ", "Синхронды аударма"],
+    },
+    en: {
+      name: "Silk Road Conference Room",
+      floor: "Floor 3",
+      location: "East Wing",
+      description: "A premium conference room for international business meetings, press conferences, and negotiations.",
+      equipment: ["Conference table", "Interpretation system", "Wireless microphones", "Press wall"],
+      advantages: ["International format", "Press area", "Simultaneous interpretation"],
+    },
+  },
+  h_nova: {
+    ru: {
+      name: "Nova Training Lab",
+      floor: "4 этаж",
+      location: "Education Cluster",
+      description: "Учебная лаборатория для практических семинаров, сертификаций, интенсивов и hands-on занятий.",
+      equipment: ["Ноутбуки", "Smart board", "Лабораторные столы", "Камера записи"],
+      advantages: ["Учебный формат", "Запись занятий", "Компьютерные места"],
+    },
+    kk: {
+      name: "Nova Training Lab",
+      floor: "4-қабат",
+      location: "Education Cluster",
+      description: "Практикалық семинарлар, сертификаттау, интенсивтер және hands-on сабақтарға арналған оқу зертханасы.",
+      equipment: ["Ноутбуктер", "Smart board", "Зертханалық үстелдер", "Жазу камерасы"],
+      advantages: ["Оқу форматы", "Сабақты жазу", "Компьютерлік орындар"],
+    },
+    en: {
+      name: "Nova Training Lab",
+      floor: "Floor 4",
+      location: "Education Cluster",
+      description: "A training lab for practical seminars, certifications, intensives, and hands-on classes.",
+      equipment: ["Laptops", "Smart board", "Lab desks", "Recording camera"],
+      advantages: ["Training format", "Class recording", "Computer seats"],
+    },
+  },
+  h_sky: {
+    ru: {
+      name: "Skyline Networking Lounge",
+      floor: "5 этаж",
+      location: "Panorama Zone",
+      description: "Лаунж-пространство для afterparty, coffee break, VIP networking и неформальных встреч участников.",
+      equipment: ["Лаунж-посадка", "Линия кейтеринга", "Фоновое аудио", "Вид на город"],
+      advantages: ["Панорамный вид", "Catering-ready", "Networking формат"],
+    },
+    kk: {
+      name: "Skyline Networking Lounge",
+      floor: "5-қабат",
+      location: "Panorama Zone",
+      description: "Afterparty, coffee break, VIP networking және қатысушылардың бейресми кездесулеріне арналған lounge кеңістік.",
+      equipment: ["Лаунж орындары", "Кейтеринг желісі", "Фондық аудио", "Қала көрінісі"],
+      advantages: ["Панорамалық көрініс", "Кейтерингке дайын", "Networking форматы"],
+    },
+    en: {
+      name: "Skyline Networking Lounge",
+      floor: "Floor 5",
+      location: "Panorama Zone",
+      description: "A lounge space for afterparties, coffee breaks, VIP networking, and informal participant meetings.",
+      equipment: ["Lounge seating", "Catering line", "Ambient audio", "City view"],
+      advantages: ["Panoramic view", "Catering-ready", "Networking format"],
+    },
+  },
+};
+
+const demoEventTranslations = {
+  e_business_expo: {
+    ru: {
+      title: "Business Technology Expo 2026",
+      description: "B2B-платформа для облачных технологий, автоматизации, корпоративной инфраструктуры и партнерских решений для бизнеса.",
+      agenda: "Открытие экспо, keynote о cloud, сессии поставщиков, B2B-встречи, финальный networking",
+      location: "Atrium Expo Space",
+      city: "Астана, Казахстан",
+    },
+    kk: {
+      title: "Business Technology Expo 2026",
+      description: "Бұлтты технологиялар, автоматтандыру, корпоративтік инфрақұрылым және бизнеске арналған серіктестік шешімдер туралы B2B-платформа.",
+      agenda: "Экспо ашылуы, cloud keynote, жеткізуші сессиялары, B2B кездесулер, қорытынды networking",
+      location: "Atrium Expo Space",
+      city: "Астана, Қазақстан",
+    },
+    en: {
+      title: "Business Technology Expo 2026",
+      description: "A B2B platform for cloud technology, automation, corporate infrastructure, and partner solutions for business.",
+      agenda: "Expo opening, cloud keynote, vendor sessions, B2B meetings, closing networking",
+      location: "Atrium Expo Space",
+      city: "Astana, Kazakhstan",
+    },
+  },
+  e_orda_summit: {
+    ru: {
+      title: "AI & Innovation Summit 2026",
+      description: "Саммит о применении искусственного интеллекта, генеративных моделей, автоматизации процессов и инновационных продуктах.",
+      agenda: "Открывающий keynote, треки AI-продуктов, startup showcase, networking",
+      location: "Grand Hall A",
+      city: "Астана",
+    },
+    kk: {
+      title: "AI & Innovation Summit 2026",
+      description: "Жасанды интеллект, генеративті модельдер, процестерді автоматтандыру және инновациялық өнімдер туралы саммит.",
+      agenda: "Ашылу keynote, AI өнім тректері, startup showcase, networking",
+      location: "Grand Hall A",
+      city: "Астана",
+    },
+    en: {
+      title: "AI & Innovation Summit 2026",
+      description: "A summit on artificial intelligence, generative models, process automation, and innovative products.",
+      agenda: "Opening keynote, AI product tracks, startup showcase, networking",
+      location: "Grand Hall A",
+      city: "Astana",
+    },
+  },
+  e_go_digital: {
+    ru: {
+      title: "GO DIGITAL EURASIA 2026",
+      description: "Форум о цифровой трансформации бизнеса, клиентском опыте, данных, автоматизации и переходе компаний к digital-first модели.",
+      agenda: "Цифровая стратегия, CX-аналитика, кейсы автоматизации, boardroom-сессии",
+      location: "Grand Hall A",
+      city: "Астана",
+    },
+    kk: {
+      title: "GO DIGITAL EURASIA 2026",
+      description: "Бизнестің цифрлық трансформациясы, клиент тәжірибесі, деректер, автоматтандыру және digital-first моделіне көшу туралы форум.",
+      agenda: "Цифрлық стратегия, CX аналитикасы, автоматтандыру кейстері, boardroom сессиялары",
+      location: "Grand Hall A",
+      city: "Астана",
+    },
+    en: {
+      title: "GO DIGITAL EURASIA 2026",
+      description: "A forum on business digital transformation, customer experience, data, automation, and the shift to a digital-first model.",
+      agenda: "Digital strategy, CX analytics, automation cases, boardroom sessions",
+      location: "Grand Hall A",
+      city: "Astana",
+    },
+  },
+  e_fintech_ca: {
+    ru: {
+      title: "FinTech Conference Central Asia",
+      description: "Конференция о платежных системах, open banking, финтех-регулировании, цифровых кошельках и B2B-платформах.",
+      agenda: "Регуляторный briefing, банковские панели, product demos, investor meetups",
+      location: "Silk Road Conference Room",
+      city: "Алматы",
+    },
+    kk: {
+      title: "FinTech Conference Central Asia",
+      description: "Төлем жүйелері, open banking, финтех реттеу, цифрлық әмияндар және B2B-платформалар туралы конференция.",
+      agenda: "Реттеу briefing, банк панельдері, product demos, investor meetups",
+      location: "Silk Road Conference Room",
+      city: "Алматы",
+    },
+    en: {
+      title: "FinTech Conference Central Asia",
+      description: "A conference on payment systems, open banking, fintech regulation, digital wallets, and B2B platforms.",
+      agenda: "Regulation briefing, bank panels, product demos, investor meetups",
+      location: "Silk Road Conference Room",
+      city: "Almaty",
+    },
+  },
+  e_smart_business: {
+    ru: {
+      title: "Smart Business Forum",
+      description: "Деловой форум для предпринимателей и управленцев о росте, продажах, операционных системах и smart-управлении.",
+      agenda: "CEO talks, operations clinic, sales systems, networking lounge",
+      location: "Orion Hall B",
+      city: "Астана",
+    },
+    kk: {
+      title: "Smart Business Forum",
+      description: "Кәсіпкерлер мен басқарушыларға арналған өсу, сатылым, операциялық жүйелер және smart-басқару туралы іскерлік форум.",
+      agenda: "CEO talks, operations clinic, sales systems, networking lounge",
+      location: "Orion Hall B",
+      city: "Астана",
+    },
+    en: {
+      title: "Smart Business Forum",
+      description: "A business forum for entrepreneurs and managers about growth, sales, operating systems, and smart management.",
+      agenda: "CEO talks, operations clinic, sales systems, networking lounge",
+      location: "Orion Hall B",
+      city: "Astana",
+    },
+  },
+  e_product_meetup: {
+    ru: {
+      title: "Product Community Meetup",
+      description: "Вечерняя встреча продуктовых менеджеров, аналитиков и основателей о discovery, метриках и запуске новых функций.",
+      agenda: "Lightning talks, Q&A, networking",
+      location: "Workshop Hub C",
+      city: "Астана",
+    },
+    kk: {
+      title: "Product Community Meetup",
+      description: "Product менеджерлер, аналитиктер және негізін қалаушылар үшін discovery, метрикалар және жаңа функцияларды іске қосу туралы кешкі кездесу.",
+      agenda: "Lightning talks, Q&A, networking",
+      location: "Workshop Hub C",
+      city: "Астана",
+    },
+    en: {
+      title: "Product Community Meetup",
+      description: "An evening meetup for product managers, analysts, and founders about discovery, metrics, and launching new features.",
+      agenda: "Lightning talks, Q&A, networking",
+      location: "Workshop Hub C",
+      city: "Astana",
+    },
+  },
+  e_hr_forum: {
+    ru: {
+      title: "HR Leadership Forum",
+      description: "Форум о people strategy, развитии талантов, вовлеченности команд и операционных HR-процессах.",
+      agenda: "Панели, практические кейсы, круглый стол",
+      location: "Orion Hall B",
+      city: "Алматы",
+    },
+    kk: {
+      title: "HR Leadership Forum",
+      description: "People strategy, таланттарды дамыту, командалардың қатысуы және операциялық HR-процестер туралы форум.",
+      agenda: "Панельдер, практикалық кейстер, дөңгелек үстел",
+      location: "Orion Hall B",
+      city: "Алматы",
+    },
+    en: {
+      title: "HR Leadership Forum",
+      description: "A forum on people strategy, talent development, team engagement, and operational HR processes.",
+      agenda: "Panels, practical cases, round table",
+      location: "Orion Hall B",
+      city: "Almaty",
+    },
+  },
+  e_ed_seminar: {
+    ru: {
+      title: "Education Seminar: AI in Learning",
+      description: "Практический семинар о внедрении AI-инструментов в учебные программы, корпоративное обучение и оценку результатов.",
+      agenda: "Открывающая сессия, workshop, roadmap внедрения",
+      location: "Nova Training Lab",
+      city: "Астана",
+    },
+    kk: {
+      title: "Education Seminar: AI in Learning",
+      description: "AI-құралдарын оқу бағдарламаларына, корпоративтік оқытуға және нәтижені бағалауға енгізу туралы практикалық семинар.",
+      agenda: "Ашылу сессиясы, workshop, енгізу roadmap",
+      location: "Nova Training Lab",
+      city: "Астана",
+    },
+    en: {
+      title: "Education Seminar: AI in Learning",
+      description: "A practical seminar on implementing AI tools in curricula, corporate learning, and outcome assessment.",
+      agenda: "Opening session, workshop, implementation roadmap",
+      location: "Nova Training Lab",
+      city: "Astana",
+    },
+  },
+  e_cyber_day: {
+    ru: {
+      title: "Cybersecurity Day Kazakhstan",
+      description: "Практический день по информационной безопасности: SOC, защита данных, управление рисками и реагирование на инциденты.",
+      agenda: "Threat landscape, SOC-кейсы, tabletop exercise, vendor demos",
+      location: "Grand Hall A",
+      city: "Астана",
+    },
+    kk: {
+      title: "Cybersecurity Day Kazakhstan",
+      description: "Ақпараттық қауіпсіздік бойынша практикалық күн: SOC, деректерді қорғау, тәуекелдерді басқару және инциденттерге әрекет ету.",
+      agenda: "Threat landscape, SOC кейстері, tabletop exercise, vendor demos",
+      location: "Grand Hall A",
+      city: "Астана",
+    },
+    en: {
+      title: "Cybersecurity Day Kazakhstan",
+      description: "A practical day on cybersecurity: SOC, data protection, risk management, and incident response.",
+      agenda: "Threat landscape, SOC cases, tabletop exercise, vendor demos",
+      location: "Grand Hall A",
+      city: "Astana",
+    },
+  },
+  e_finance_briefing: {
+    ru: {
+      title: "Finance Briefing 2026",
+      description: "Закрытая сессия о корпоративных финансах, прогнозах рынка, бюджетировании и стратегии на следующий год.",
+      agenda: "Обзор рынка, прогнозы, executive Q&A",
+      location: "Boardroom D",
+      city: "Астана",
+    },
+    kk: {
+      title: "Finance Briefing 2026",
+      description: "Корпоративтік қаржы, нарық болжамдары, бюджеттеу және келесі жыл стратегиясы туралы жабық сессия.",
+      agenda: "Нарық шолуы, болжамдар, executive Q&A",
+      location: "Boardroom D",
+      city: "Астана",
+    },
+    en: {
+      title: "Finance Briefing 2026",
+      description: "A private session on corporate finance, market forecasts, budgeting, and next-year strategy.",
+      agenda: "Market overview, forecasts, executive Q&A",
+      location: "Boardroom D",
+      city: "Astana",
+    },
+  },
+};
+
 let requestSelection = { hallId: "", date: "", slotId: "" };
+let requestSlotDraft = { hallId: "", date: "", slotId: "" };
 let pendingCustomRequest = null;
+let requestSubmitFeedback = null;
 let calendarAgendaExpanded = false;
 let requestMode = "hall";
 let supportRefreshTimer = null;
@@ -299,7 +765,68 @@ function escapeHtml(value) {
   return window.ORDA.format.escapeHtml(value);
 }
 
+function isBlankValue(value) {
+  if (value === null || value === undefined) return true;
+  if (typeof value === "number" && Number.isNaN(value)) return true;
+  const text = String(value).trim();
+  return !text || ["undefined", "null", "nan", "invalid date"].includes(text.toLowerCase());
+}
+
+function cleanDisplayValue(value, fallback = "-") {
+  if (Array.isArray(value)) {
+    const text = value.map((item) => cleanDisplayValue(item, "")).filter(Boolean).join(", ");
+    return text || fallback;
+  }
+  if (typeof value === "object" && value !== null) return fallback;
+  return isBlankValue(value) ? fallback : String(value).trim();
+}
+
+function firstDisplayValue(...values) {
+  const found = values.find((value) => !isBlankValue(value));
+  return cleanDisplayValue(found, "");
+}
+
+function mergeTranslationSets(base = {}, fallback = {}) {
+  const result = { ...fallback, ...base };
+  ["ru", "kk", "en"].forEach((lang) => {
+    result[lang] = { ...(fallback[lang] || {}), ...(base[lang] || {}) };
+  });
+  return result;
+}
+
+function knownEventTranslations(event) {
+  const id = String(event?._id || "");
+  if (demoEventTranslations[id]) return demoEventTranslations[id];
+  const title = cleanDisplayValue(event?.title, "");
+  return Object.values(demoEventTranslations).find((item) =>
+    ["ru", "kk", "en"].some((lang) => item[lang]?.title === title)
+  ) || {};
+}
+
+function knownHallTranslations(hall) {
+  const id = String(hall?._id || "");
+  if (demoHallTranslations[id]) return demoHallTranslations[id];
+  const name = cleanDisplayValue(hall?.name, "");
+  return Object.values(demoHallTranslations).find((item) =>
+    ["ru", "kk", "en"].some((lang) => item[lang]?.name === name)
+  ) || {};
+}
+
+function applyKnownTranslations(item, fallback = {}) {
+  if (!item || typeof item !== "object") return item;
+  item.translations = mergeTranslationSets(item.translations || {}, fallback);
+  return item;
+}
+
+function isValidDateOnly(value) {
+  const text = cleanDisplayValue(value, "");
+  if (!text) return false;
+  const date = new Date(`${text}T00:00:00`);
+  return !Number.isNaN(date.getTime());
+}
+
 function formatDate(value, options = {}) {
+  if (!isValidDateOnly(value)) return "-";
   return window.ORDA.format.date(value, state.lang, options);
 }
 
@@ -326,7 +853,9 @@ function formatPrice(event) {
 }
 
 function dateTimeText(value) {
-  return new Date(value).toLocaleString(window.ORDA.format.localeFor(state.lang));
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleString(window.ORDA.format.localeFor(state.lang));
 }
 
 function formatCurrency(value, currency = "KZT") {
@@ -358,6 +887,7 @@ function paymentClass(request) {
 }
 
 function paymentMethodLabel(method) {
+  if (method === "announcement-demo") return t("requestAnnouncementPaymentMethod");
   if (method === "kaspi") return t("payMethodKaspi");
   if (method === "applepay") return t("payMethodApple");
   if (method === "googlepay") return t("payMethodGoogle");
@@ -439,6 +969,9 @@ function isInactiveRequest(status) {
   return status === "rejected" || status === "cancelled";
 }
 
+const activeRequestStatuses = new Set(["new", "review", "pending", "approved", "registered"]);
+const confirmedRequestStatuses = new Set(["approved", "registered"]);
+
 const clientPortalViews = new Set(["dashboard", "events", "halls", "calendar", "floorplan", "profile", "request", "about"]);
 const adminPortalViews = new Set(["dashboard", "events", "halls", "calendar", "floorplan", "profile", "request", "about", "admin"]);
 
@@ -464,7 +997,7 @@ function showMessage(text, type = "success") {
 }
 
 function supportStatusLabel(status) {
-  return status === "read" ? "Прочитано" : "Новое";
+  return status === "read" ? t("supportStatusRead") : t("supportStatusNew");
 }
 
 function setAuthTab(authTab = "login") {
@@ -601,7 +1134,7 @@ function isLocalSessionToken(token) {
 }
 
 function ensureEventShape(event, db, user) {
-  const activeStatuses = new Set(["pending", "approved"]);
+  const activeStatuses = new Set(["new", "review", "pending", "approved", "registered"]);
   const related = db.requests.filter((request) => request.type === "event" && request.eventId === event._id);
   const booked = related.filter((request) => activeStatuses.has(request.status)).length;
   const isBookedByMe = Boolean(
@@ -1112,6 +1645,8 @@ function ensureDemoDb() {
 
 function ensureDbShape(db) {
   if (!Array.isArray(db.notifications)) db.notifications = [];
+  if (Array.isArray(db.halls)) db.halls.forEach((hall) => applyKnownTranslations(hall, knownHallTranslations(hall)));
+  if (Array.isArray(db.events)) db.events.forEach((event) => applyKnownTranslations(event, knownEventTranslations(event)));
   return db;
 }
 
@@ -1140,7 +1675,7 @@ function publishLocalCustomEvent(db, request) {
     time: request.time || request.startTime || "10:00",
     category: request.category || "conference",
     description: request.description || request.purpose || "",
-    agenda: `Длительность: ${request.duration || 1} ч. ${request.adminNotes || ""}`.trim(),
+    agenda: `${t("requestDurationHours")}: ${request.duration || 1} ${t("hourShort")}. ${request.adminNotes || ""}`.trim(),
     organizer: request.organization || request.userName || "Client",
     location: request.location || request.hallName || "",
     city: request.city || "",
@@ -1152,10 +1687,177 @@ function publishLocalCustomEvent(db, request) {
     tags: [request.category, "client-event"].filter(Boolean),
     capacity: Number(request.attendees || 80),
     status: "published",
-    image: hallImageFallbacks.default,
+    image: request.image || hallImageFallbacks.default,
   };
   db.events.push(event);
   request.eventId = event._id;
+}
+
+function sameDisplayText(left, right) {
+  const a = cleanDisplayValue(left, "").toLowerCase();
+  const b = cleanDisplayValue(right, "").toLowerCase();
+  return Boolean(a && b && a === b);
+}
+
+function localHallNames(hall) {
+  return [
+    hall?.name,
+    hall?.translations?.ru?.name,
+    hall?.translations?.kk?.name,
+    hall?.translations?.en?.name,
+  ].map((name) => cleanDisplayValue(name, "")).filter(Boolean);
+}
+
+function localFindHall(db, request = {}) {
+  const hallId = cleanDisplayValue(request.hallId, "");
+  if (hallId) {
+    const byId = db.halls.find((hall) => hall._id === hallId);
+    if (byId) return byId;
+  }
+  const venue = [request.hallName, request.location].map((item) => cleanDisplayValue(item, "")).filter(Boolean);
+  if (!venue.length) return null;
+  return db.halls.find((hall) => localHallNames(hall).some((name) => venue.some((item) => sameDisplayText(name, item)))) || null;
+}
+
+function localRequestEndTime(request) {
+  return cleanDisplayValue(request.endTime, "") || addHoursToTime(request.time || request.startTime || "00:00", Number(request.duration || 2));
+}
+
+function localEventEndTime(event) {
+  return cleanDisplayValue(event.endTime, "") || addHoursToTime(event.time || "10:00", 2);
+}
+
+function localEntryStatus(status) {
+  return ["approved", "registered", "published"].includes(status) ? "busy" : "planned";
+}
+
+function localRequestMatchesHall(request, hall) {
+  if (!request || !hall) return false;
+  if (cleanDisplayValue(request.hallId, "") && cleanDisplayValue(request.hallId, "") === hall._id) return true;
+  return localHallNames(hall).some((name) => sameDisplayText(name, request.hallName) || sameDisplayText(name, request.location));
+}
+
+function localEventMatchesHall(event, hall) {
+  if (!event || !hall) return false;
+  return localHallNames(hall).some((name) => sameDisplayText(name, event.location) || sameDisplayText(name, event.hallName));
+}
+
+function localScheduleConflicts(db, payload = {}, options = {}) {
+  const date = cleanDisplayValue(payload.date, "");
+  const time = cleanDisplayValue(payload.time || payload.startTime, "");
+  if (!date || !time) return [];
+
+  const duration = Number(payload.duration || 2);
+  const start = minutesFromTime(time);
+  const end = minutesFromTime(payload.endTime || addHoursToTime(time, duration));
+  const statuses = options.statuses || ["new", "review", "pending", "approved", "registered"];
+  const targetHall = localFindHall(db, payload);
+  const targetVenue = [payload.hallName, payload.location].map((item) => cleanDisplayValue(item, "")).filter(Boolean);
+  if (!targetHall && !targetVenue.length) return [];
+
+  const conflicts = [];
+  db.requests
+    .filter((request) => request._id !== options.excludeRequestId)
+    .filter((request) => ["hall", "custom-event"].includes(request.type))
+    .filter((request) => statuses.includes(request.status))
+    .forEach((request) => {
+      if (request.type === "custom-event" && request.eventId) return;
+      const sameVenue = targetHall
+        ? localRequestMatchesHall(request, targetHall)
+        : targetVenue.some((venue) => sameDisplayText(venue, request.hallName) || sameDisplayText(venue, request.location));
+      if (!sameVenue || request.date !== date) return;
+      const requestStart = minutesFromTime(request.time || request.startTime || "00:00");
+      const requestEnd = minutesFromTime(localRequestEndTime(request));
+      if (start < requestEnd && end > requestStart) conflicts.push(request);
+    });
+
+  db.events
+    .filter((event) => event._id !== options.excludeEventId)
+    .filter((event) => ["published", "draft"].includes(event.status || "published"))
+    .forEach((event) => {
+      const sameVenue = targetHall
+        ? localEventMatchesHall(event, targetHall)
+        : targetVenue.some((venue) => sameDisplayText(venue, event.location) || sameDisplayText(venue, event.hallName));
+      if (!sameVenue || event.date !== date) return;
+      const eventStart = minutesFromTime(event.time || "10:00");
+      const eventEnd = minutesFromTime(localEventEndTime(event));
+      if (start < eventEnd && end > eventStart) conflicts.push(event);
+    });
+
+  return conflicts;
+}
+
+function localConfirmedConflicts(db, request) {
+  if (!["hall", "custom-event"].includes(request?.type)) return [];
+  return localScheduleConflicts(
+    db,
+    {
+      hallId: request.type === "hall" ? request.hallId : "",
+      hallName: request.type === "hall" ? request.hallName : "",
+      location: request.type === "custom-event" ? request.location || request.hallName : request.hallName || request.location,
+      date: request.date,
+      time: request.time || request.startTime,
+      duration: request.duration || 2,
+      endTime: request.endTime,
+    },
+    { excludeRequestId: request._id, statuses: ["approved", "registered"] }
+  );
+}
+
+function localAvailabilityEntries(db, filters = {}) {
+  const dateFilter = cleanDisplayValue(filters.date, "");
+  const hallFilter = cleanDisplayValue(filters.hallId, "");
+  const entries = [];
+
+  db.requests
+    .filter((request) => ["hall", "custom-event"].includes(request.type))
+    .filter((request) => ["new", "review", "pending", "approved", "registered"].includes(request.status))
+    .forEach((request) => {
+      if (request.type === "custom-event" && request.eventId) return;
+      const hall = localFindHall(db, request);
+      if (!hall) return;
+      if (dateFilter && request.date !== dateFilter) return;
+      if (hallFilter && hall._id !== hallFilter) return;
+      const startTime = cleanDisplayValue(request.time || request.startTime, "");
+      if (!request.date || !startTime) return;
+      entries.push({
+        source: "booking",
+        sourceId: request._id,
+        requestType: request.type,
+        hallId: hall._id,
+        hallName: hall.name,
+        date: request.date,
+        startTime,
+        endTime: localRequestEndTime(request),
+        status: localEntryStatus(request.status),
+        requestStatus: request.status,
+        title: request.eventTitle || request.hallName || hall.name,
+      });
+    });
+
+  db.events
+    .filter((event) => ["published", "draft"].includes(event.status || "published"))
+    .forEach((event) => {
+      const hall = localFindHall(db, { location: event.location, hallName: event.hallName });
+      if (!hall) return;
+      if (dateFilter && event.date !== dateFilter) return;
+      if (hallFilter && hall._id !== hallFilter) return;
+      entries.push({
+        source: "event",
+        sourceId: event._id,
+        requestType: "event",
+        hallId: hall._id,
+        hallName: hall.name,
+        date: event.date,
+        startTime: event.time || "10:00",
+        endTime: localEventEndTime(event),
+        status: localEntryStatus(event.status || "published"),
+        eventStatus: event.status || "published",
+        title: event.title || "Event",
+      });
+    });
+
+  return entries.sort((left, right) => `${left.date} ${left.startTime}`.localeCompare(`${right.date} ${right.startTime}`));
 }
 
 function applyAdminDecision(db, request, nextStatus, reason = "") {
@@ -1221,7 +1923,7 @@ function ensureSessionValidity() {
 }
 
 function eventPayload(body) {
-  return {
+  const payload = {
     title: String(body.title || "").trim(),
     date: String(body.date || "").trim(),
     time: String(body.time || "10:00").trim(),
@@ -1242,6 +1944,8 @@ function eventPayload(body) {
     capacity: Number(body.capacity || 80),
     status: String(body.status || "published").trim(),
   };
+  if (body.translations && typeof body.translations === "object") payload.translations = body.translations;
+  return payload;
 }
 
 function hallPayload(body) {
@@ -1252,7 +1956,7 @@ function hallPayload(body) {
         .map((item) => item.trim())
         .filter(Boolean);
 
-  return {
+  const payload = {
     name: String(body.name || "").trim(),
     floor: String(body.floor || "").trim(),
     location: String(body.location || "").trim(),
@@ -1262,6 +1966,8 @@ function hallPayload(body) {
     description: String(body.description || "").trim(),
     status: String(body.status || "available").trim(),
   };
+  if (body.translations && typeof body.translations === "object") payload.translations = body.translations;
+  return payload;
 }
 
 function parseBody(options) {
@@ -1415,7 +2121,11 @@ async function localApi(url, options = {}) {
 
     if (search) {
       filtered = filtered.filter((item) => {
-        const haystack = [item.title, item.description, item.location, item.city, item.organizer, (item.tags || []).join(" ")]
+        const translations = mergeTranslationSets(item.translations || {}, knownEventTranslations(item));
+        const translatedText = Object.values(translations)
+          .map((entry) => [entry.title, entry.description, entry.agenda, entry.location, entry.city, (entry.tags || []).join?.(" ")].filter(Boolean).join(" "))
+          .join(" ");
+        const haystack = [item.title, item.description, item.location, item.city, item.organizer, (item.tags || []).join(" "), translatedText]
           .join(" ")
           .toLowerCase();
         return haystack.includes(search);
@@ -1439,6 +2149,9 @@ async function localApi(url, options = {}) {
     if (!payload.title || !payload.date || !payload.category || !payload.location) throw createError("errEventRequired");
     if (!Number.isFinite(payload.capacity) || payload.capacity < 1) throw createError("errCapacityPositive");
     if (!Number.isFinite(payload.price) || payload.price < 0) throw createError("errPriceNegative");
+    if (localScheduleConflicts(db, { location: payload.location, date: payload.date, time: payload.time, duration: 2 }).length) {
+      throw createError("errSlotBusy");
+    }
 
     payload._id = uid("e");
     db.events.push(payload);
@@ -1455,6 +2168,11 @@ async function localApi(url, options = {}) {
     if (!payload.title || !payload.date || !payload.category || !payload.location) throw createError("errEventRequired");
     if (!Number.isFinite(payload.capacity) || payload.capacity < 1) throw createError("errCapacityPositive");
     if (!Number.isFinite(payload.price) || payload.price < 0) throw createError("errPriceNegative");
+    if (
+      localScheduleConflicts(db, { location: payload.location, date: payload.date, time: payload.time, duration: 2 }, { excludeEventId: target._id }).length
+    ) {
+      throw createError("errSlotBusy");
+    }
 
     Object.assign(target, payload);
     writeDemoDb(db);
@@ -1485,7 +2203,7 @@ async function localApi(url, options = {}) {
         request.type === "event" &&
         request.eventId === eventId &&
         request.userId === user._id &&
-        ["pending", "approved"].includes(request.status)
+        ["new", "review", "pending", "approved", "registered"].includes(request.status)
     );
     if (existing) throw createError("errEventAlreadyRequested");
 
@@ -1493,7 +2211,7 @@ async function localApi(url, options = {}) {
       (request) =>
         request.type === "event" &&
         request.eventId === eventId &&
-        ["pending", "approved"].includes(request.status)
+        ["new", "review", "pending", "approved", "registered"].includes(request.status)
     ).length;
     if (booked >= Number(event.capacity || 0)) throw createError("errNoSeats");
 
@@ -1505,7 +2223,7 @@ async function localApi(url, options = {}) {
     const request = {
       _id: uid("r"),
       type: "event",
-      status: "pending",
+      status: "new",
       userId: user._id,
       userName: String(body.userName || body.contactName || user.name || "").trim(),
       userEmail: String(body.userEmail || body.email || user.email || "").trim(),
@@ -1575,7 +2293,11 @@ async function localApi(url, options = {}) {
 
     if (search) {
       halls = halls.filter((item) => {
-        const haystack = [item.name, item.floor, item.location, item.description, (item.equipment || []).join(" "), (item.advantages || []).join(" ")]
+        const translations = mergeTranslationSets(item.translations || {}, knownHallTranslations(item));
+        const translatedText = Object.values(translations)
+          .map((entry) => [entry.name, entry.floor, entry.location, entry.description, (entry.equipment || []).join?.(" "), (entry.advantages || []).join?.(" ")].filter(Boolean).join(" "))
+          .join(" ");
+        const haystack = [item.name, item.floor, item.location, item.description, (item.equipment || []).join(" "), (item.advantages || []).join(" "), translatedText]
           .join(" ")
           .toLowerCase();
         return haystack.includes(search);
@@ -1587,7 +2309,7 @@ async function localApi(url, options = {}) {
         (request) =>
           request.type === "hall" &&
           request.hallId === hall._id &&
-          ["pending", "approved"].includes(request.status)
+          ["new", "review", "pending", "approved", "registered"].includes(request.status)
       );
       return { ...hall, pricePerHour: Number(hall.pricePerHour || 0), activeRequests: active.length };
     });
@@ -1630,7 +2352,7 @@ async function localApi(url, options = {}) {
     const hall = db.halls[index];
 
     const hasActiveRequests = db.requests.some(
-      (request) => request.type === "hall" && request.hallId === hall._id && ["pending", "approved"].includes(request.status)
+      (request) => request.type === "hall" && request.hallId === hall._id && ["new", "review", "pending", "approved", "registered"].includes(request.status)
     );
     if (hasActiveRequests) throw createError("errHallHasRequests");
 
@@ -1663,11 +2385,35 @@ async function localApi(url, options = {}) {
     if (!date || !time || !duration || !attendees || !purpose) throw createError("errHallFieldsRequired");
     if (type === "custom-event" && (!body.eventTitle || !location || !city)) throw createError("errHallFieldsRequired");
     if (hall && attendees > hall.capacity) throw createError("errHallCapacityExceeded", 400, { hall: hall.name, capacity: hall.capacity });
+    if (
+      type === "hall" &&
+      db.requests.some(
+        (request) =>
+          request.type === "hall" &&
+          request.userId === user._id &&
+          request.hallId === hall._id &&
+          ["new", "review", "pending", "approved", "registered"].includes(request.status)
+      )
+    ) {
+      throw createError("errHallAlreadyBooked");
+    }
+    if (
+      localScheduleConflicts(db, {
+        hallId: hall?._id || "",
+        hallName: hall?.name || "",
+        location: type === "custom-event" ? location : hall?.name || "",
+        date,
+        time,
+        duration,
+      }).length
+    ) {
+      throw createError("errSlotBusy");
+    }
 
     const request = {
       _id: uid("r"),
       type,
-      status: "pending",
+      status: "new",
       userId: user._id,
       userName: user.name,
       userEmail: user.email,
@@ -1677,6 +2423,7 @@ async function localApi(url, options = {}) {
       category: String(body.category || "").trim(),
       format: String(body.format || "offline").trim(),
       description: String(body.description || purpose).trim(),
+      image: String(body.image || "").trim(),
       hallId: hall?._id || "",
       hallName: hall?.name || "",
       location: type === "custom-event" ? location : hall?.name || "",
@@ -1684,7 +2431,7 @@ async function localApi(url, options = {}) {
       date,
       time,
       startTime: String(body.startTime || time).trim(),
-      endTime: String(body.endTime || "").trim(),
+      endTime: String(body.endTime || addHoursToTime(time, duration)).trim(),
       duration,
       attendees,
       purpose,
@@ -1758,6 +2505,13 @@ async function localApi(url, options = {}) {
     return success("msgNotificationMarkedRead");
   }
 
+  if (path === "/availability" && method === "GET") {
+    return localAvailabilityEntries(db, {
+      hallId: params.get("hallId"),
+      date: params.get("date"),
+    });
+  }
+
   if (path === "/users" && method === "GET") {
     if (!user || user.role !== "admin") throw createError("adminOnly", 403);
     return db.users.map((item) => ({
@@ -1786,7 +2540,7 @@ async function localApi(url, options = {}) {
       publishedEvents: db.events.filter((event) => event.status === "published").length,
       checkedIn: db.requests.filter((request) => request.type === "event" && request.checkedIn).length,
       paidTickets: db.requests.filter((request) => request.type === "event" && request.paymentStatus === "paid").length,
-      approvedHallBookings: db.requests.filter((request) => request.type === "hall" && request.status === "approved").length,
+      approvedHallBookings: db.requests.filter((request) => ["hall", "custom-event"].includes(request.type) && request.status === "approved").length,
     };
 
     return { ...success("msgStatsLoaded"), ...stats, data: stats };
@@ -1824,7 +2578,15 @@ async function localApi(url, options = {}) {
       if (Number(body.duration) > 0) request.duration = Number(body.duration);
       if (Number(body.attendees) > 0) request.attendees = Number(body.attendees);
       if (typeof body.purpose === "string") request.purpose = String(body.purpose).trim();
+      if (request.time && Number(request.duration || 0) > 0) {
+        request.startTime = request.startTime || request.time;
+        request.endTime = request.endTime || addHoursToTime(request.time || request.startTime, Number(request.duration || 2));
+      }
       request.amount = Number(request.pricePerHour || 0) * Number(request.duration || 0) || Number(request.amount || 0);
+    }
+
+    if (nextStatus === "approved" && localConfirmedConflicts(db, request).length) {
+      throw createError("errSlotBusy");
     }
 
     const { refunded } = applyAdminDecision(db, request, nextStatus, reason);
@@ -1855,6 +2617,10 @@ async function localApi(url, options = {}) {
     const nextStatus = String(body.status || "").trim();
     if (!["new", "review", "pending", "approved", "rejected", "cancelled"].includes(nextStatus)) throw createError("errRequestStatusInvalid");
     const reason = String(body.reason || "").trim();
+
+    if (nextStatus === "approved" && localConfirmedConflicts(db, request).length) {
+      throw createError("errSlotBusy");
+    }
 
     const { refunded } = applyAdminDecision(db, request, nextStatus, reason);
 
@@ -2018,15 +2784,15 @@ function updateDataModeBadge() {
 
 function applyTranslations() {
   document.documentElement.lang = state.lang === "kk" ? "kk" : state.lang;
-  els.languageSelect.value = state.lang;
+  if (els.languageSelect) els.languageSelect.value = state.lang;
   window.ORDA.lang = state.lang;
 
   document.querySelectorAll("[data-i18n]").forEach((node) => {
     node.textContent = t(node.dataset.i18n);
   });
 
-  document.querySelectorAll("[data-placeholder]").forEach((node) => {
-    node.placeholder = t(node.dataset.placeholder);
+  document.querySelectorAll("[data-placeholder], [data-i18n-placeholder]").forEach((node) => {
+    node.placeholder = t(node.dataset.placeholder || node.dataset.i18nPlaceholder);
   });
 
   document.querySelectorAll("[data-i18n-title]").forEach((node) => {
@@ -2045,7 +2811,18 @@ function applyTranslations() {
   updateShell();
   renderAll();
   if (typeof window.ORDA.renderCalendar === "function") window.ORDA.renderCalendar();
+  window.dispatchEvent(new CustomEvent("orda:languagechange", { detail: { lang: state.lang } }));
 }
+
+function setLanguage(lang) {
+  const next = ["ru", "kk", "en"].includes(lang) ? lang : "ru";
+  state.lang = next;
+  localStorage.setItem(STORAGE_KEYS.lang, next);
+  applyTranslations();
+}
+
+window.ORDA.setLanguage = setLanguage;
+window.ORDA.applyTranslations = applyTranslations;
 
 function setView(view) {
   const allowedViews = state.portal === "admin" ? adminPortalViews : clientPortalViews;
@@ -2111,16 +2888,28 @@ function csvCell(value) {
 }
 
 function normalizeRequestStatus(status) {
-  return status === "registered" ? "pending" : status || "pending";
+  return status === "registered" ? "approved" : status || "new";
 }
 
 function normalizeAdminBooking(request) {
   const id = String(request._id || request.id || "");
+  const type = ["event", "hall", "custom-event"].includes(request.type)
+    ? request.type
+    : request.hallId || request.hallName
+      ? "hall"
+      : "event";
+  const amount = Number(request.amount ?? request.price ?? request.rentAmount ?? 0);
   return {
     ...request,
     _id: id,
-    type: request.type || "event",
+    type,
     status: normalizeRequestStatus(request.status),
+    userName: firstDisplayValue(request.userName, request.name, request.fullName, request.contactName),
+    userEmail: firstDisplayValue(request.userEmail, request.email),
+    userPhone: firstDisplayValue(request.userPhone, request.phone),
+    eventTitle: firstDisplayValue(request.eventTitle, request.title, request.eventName),
+    hallName: firstDisplayValue(request.hallName, request.hall, request.roomName, type === "hall" ? request.location : ""),
+    paymentStatus: firstDisplayValue(request.paymentStatus, request.isPaid === true ? "paid" : "", amount > 0 ? "unpaid" : "free"),
   };
 }
 
@@ -2147,12 +2936,11 @@ async function updateAdminBookingStatus(requestId, payload) {
 
 function statusLabel(status) {
   status = normalizeRequestStatus(status);
-  if (status === "new") return t("requestStatusNew");
-  if (status === "review") return t("requestStatusReview");
+  if (status === "new" || status === "review" || status === "pending") return t("requestStatusNew");
   if (status === "approved") return t("requestStatusApproved");
   if (status === "rejected") return t("requestStatusRejected");
   if (status === "cancelled") return t("requestStatusCancelled");
-  return t("requestStatusPending");
+  return t("requestStatusNew");
 }
 
 function statusClass(status) {
@@ -2168,28 +2956,189 @@ function statusClass(status) {
   return map[status] || "status-pill-pending";
 }
 
+function isActiveRequestStatus(status) {
+  return activeRequestStatuses.has(normalizeRequestStatus(status));
+}
+
+function isConfirmedRequestStatus(status) {
+  return confirmedRequestStatuses.has(normalizeRequestStatus(status));
+}
+
+function eventBookingByMe(eventId) {
+  const id = String(eventId || "");
+  if (!id) return null;
+  return state.bookings.find((booking) => String(booking.eventId || "") === id && isActiveRequestStatus(booking.status)) || null;
+}
+
+function hallBookingMatchesHall(booking, hall) {
+  if (!booking || !hall || booking.type !== "hall") return false;
+  const hallId = String(hall._id || "");
+  if (booking.hallId && hallId && String(booking.hallId) === hallId) return true;
+  const hallName = hallText(hall, "name") || hall.name || "";
+  return sameDisplayText(booking.hallName || booking.location, hallName);
+}
+
+function activeHallBookingForHall(hall) {
+  return state.hallBookings.find((booking) => hallBookingMatchesHall(booking, hall) && isActiveRequestStatus(booking.status)) || null;
+}
+
+function confirmedHallBookingForHall(hall) {
+  return state.hallBookings.find((booking) => hallBookingMatchesHall(booking, hall) && isConfirmedRequestStatus(booking.status)) || null;
+}
+
+function latestOwnEventRequest() {
+  return state.hallBookings
+    .filter((booking) => booking.type === "custom-event" && !isInactiveRequest(normalizeRequestStatus(booking.status)))
+    .slice()
+    .sort((left, right) => new Date(right.createdAt || 0) - new Date(left.createdAt || 0))[0] || null;
+}
+
 function requestTypeLabel(type) {
   if (type === "custom-event") return t("requestTypeCustomEvent");
   return type === "hall" ? t("requestTypeHall") : t("requestTypeEvent");
 }
 
-function hallTranslation(hall) {
-  return hall?.translations?.[state.lang] || hall?.translations?.ru || hall?.translations?.en || {};
+function adminPaymentLabel(request) {
+  const status = cleanDisplayValue(request?.paymentStatus, "").toLowerCase();
+  if (status === "refunded") return t("paymentRefunded");
+  if (status === "paid" || status === "free") return t("paymentPaid");
+  return t("paymentUnpaid");
 }
 
-function hallText(hall, field) {
-  const translated = hallTranslation(hall);
-  return translated[field] || hall?.[field] || "";
+function scheduleText(date, time, endTime = "") {
+  const datePart = isValidDateOnly(date) ? formatDate(date) : "";
+  const timePart = cleanDisplayValue(endTime, "") ? `${cleanDisplayValue(time, "")}-${cleanDisplayValue(endTime, "")}` : cleanDisplayValue(time, "");
+  return [datePart, timePart].filter(Boolean).join(", ");
 }
 
-function hallList(hall, field) {
-  const translated = hallTranslation(hall);
-  const value = translated[field] || hall?.[field] || [];
+function serviceDisplayName(service) {
+  if (typeof service === "string") {
+    const config = requestServiceConfig.find((item) => item.id === service || item.key === service);
+    const labelKey = config?.key || equipmentLabelKeys[service];
+    return cleanDisplayValue(config?.label || (labelKey ? t(labelKey) : service), "");
+  }
+  if (service && typeof service === "object") {
+    const config = requestServiceConfig.find((item) => item.id === service.id || item.key === service.key || item.id === service.name);
+    const raw = service.name || service.label || service.key || service.id;
+    const labelKey = config?.key || equipmentLabelKeys[raw];
+    return cleanDisplayValue(service.label || config?.label || (labelKey ? t(labelKey) : raw), "");
+  }
+  return "";
+}
+
+function uniqueDisplayItems(items = []) {
+  const seen = new Set();
+  return items
+    .map(serviceDisplayName)
+    .filter(Boolean)
+    .filter((item) => {
+      const key = item.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+}
+
+function adminField(label, value, options = {}) {
+  const text = cleanDisplayValue(value, "");
+  if (!text && !options.keepEmpty) return "";
+  return `<span><b>${escapeHtml(label)}:</b> ${escapeHtml(text || "-")}</span>`;
+}
+
+function adminRequestViewModel(request, sourceEvent = null) {
+  const type = request.type || "event";
+  const userName = firstDisplayValue(request.userName, request.contactName, request.name, request.fullName);
+  const userEmail = firstDisplayValue(request.userEmail, request.email);
+  const userPhone = firstDisplayValue(request.userPhone, request.phone);
+  const date = firstDisplayValue(request.date, type === "event" ? sourceEvent?.date : "");
+  const time = firstDisplayValue(request.time, request.startTime, type === "event" ? sourceEvent?.time : "");
+  const endTime = firstDisplayValue(request.endTime);
+  const sourceHall = type === "hall" && request.hallId
+    ? state.halls.find((hall) => String(hall._id) === String(request.hallId))
+    : null;
+  const localizedHallName = sourceHall ? hallText(sourceHall, "name") : "";
+  const hallName = firstDisplayValue(localizedHallName, request.hallName, type === "hall" ? request.location : "", sourceEvent?.location);
+  const eventTitle = firstDisplayValue(request.eventTitle, request.title, sourceEvent?.title);
+  const place = firstDisplayValue(request.location, request.hallName, sourceEvent?.location);
+  const serviceItems = type === "hall" ? uniqueDisplayItems(request.services || []) : [];
+  const equipmentItems = type === "hall" ? uniqueDisplayItems(request.equipment || []) : [];
+
+  return {
+    type,
+    typeLabel: requestTypeLabel(type),
+    title: type === "hall" ? hallName : eventTitle,
+    userName,
+    userEmail,
+    userPhone,
+    eventTitle,
+    hallName,
+    description: firstDisplayValue(request.description, request.purpose),
+    place,
+    schedule: scheduleText(date, time, endTime),
+    status: statusLabel(request.status),
+    payment: adminPaymentLabel(request),
+    services: serviceItems.join(", "),
+    equipmentServices: equipmentItems.join(", "),
+    adminNotes: firstDisplayValue(request.adminNotes, request.notes),
+    adminReason: firstDisplayValue(request.adminReason, request.reason),
+    image: firstDisplayValue(request.image, sourceEvent?.image),
+  };
+}
+
+function entityTranslation(entity, fallback = {}) {
+  const translations = mergeTranslationSets(entity?.translations || {}, fallback);
+  return translations[state.lang] || translations.ru || translations.en || translations.kk || {};
+}
+
+function translatedText(entity, fallback, field) {
+  const translated = entityTranslation(entity, fallback);
+  return translated[field] || entity?.[field] || "";
+}
+
+function translatedList(entity, fallback, field) {
+  const translated = entityTranslation(entity, fallback);
+  const value = translated[field] || entity?.[field] || [];
   if (Array.isArray(value)) return value;
   return String(value || "")
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+function eventText(event, field) {
+  return translatedText(event, knownEventTranslations(event), field);
+}
+
+function eventList(event, field) {
+  return translatedList(event, knownEventTranslations(event), field);
+}
+
+function localizeEvent(event) {
+  if (!event) return event;
+  const localized = {
+    ...event,
+    title: eventText(event, "title") || event.title || "",
+    description: eventText(event, "description") || event.description || "",
+    agenda: eventText(event, "agenda") || event.agenda || "",
+    organizer: eventText(event, "organizer") || event.organizer || "",
+    location: eventText(event, "location") || event.location || "",
+    city: eventText(event, "city") || event.city || "",
+  };
+  const tags = eventList(event, "tags");
+  if (tags.length) localized.tags = tags;
+  return localized;
+}
+
+function hallTranslation(hall) {
+  return entityTranslation(hall, knownHallTranslations(hall));
+}
+
+function hallText(hall, field) {
+  return translatedText(hall, knownHallTranslations(hall), field);
+}
+
+function hallList(hall, field) {
+  return translatedList(hall, knownHallTranslations(hall), field);
 }
 
 function hallImage(hall) {
@@ -2221,12 +3170,12 @@ function addHoursToTime(time, duration) {
   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 }
 
-function selectedRequestHall() {
-  return state.halls.find((hall) => hall._id === requestSelection.hallId) || null;
+function selectedRequestHall(selection = requestSelection) {
+  return state.halls.find((hall) => hall._id === selection.hallId) || null;
 }
 
-function selectedRequestSlot() {
-  return requestSlots.find((slot) => slot.id === requestSelection.slotId) || null;
+function selectedRequestSlot(selection = requestSelection) {
+  return requestSlots.find((slot) => slot.id === selection.slotId) || null;
 }
 
 function requestBlocksSlot(request, hall, date, slot) {
@@ -2246,21 +3195,138 @@ function requestBlocksSlot(request, hall, date, slot) {
   return start < slotEnd && end > slotStart;
 }
 
-function isRequestSlotBusy(hall, date, slot) {
-  if (!hall || !date || !slot) return false;
-  const requests = [...state.adminBookings, ...state.hallBookings];
-  const requestBusy = requests.some((request) => requestBlocksSlot(request, hall, date, slot));
-  const eventBusy = state.events.some((event) => {
-    if (event.status && !["published", "draft"].includes(event.status)) return false;
-    if (event.date !== date) return false;
-    if ((event.location || "") !== hall.name && (event.hallName || "") !== hall.name) return false;
+function availabilityBlocksSlot(entry, hall, date, slot) {
+  if (!entry || !hall || !date || !slot) return false;
+  if (entry.date !== date) return false;
+  if (entry.hallId && entry.hallId !== hall._id) return false;
+  if (!entry.hallId && entry.hallName && !sameDisplayText(entry.hallName, hall.name)) return false;
+  const start = minutesFromTime(entry.startTime || entry.time || "00:00");
+  const end = minutesFromTime(entry.endTime || addHoursToTime(entry.startTime || entry.time || "00:00", 2));
+  const slotStart = minutesFromTime(slot.start);
+  const slotEnd = minutesFromTime(slot.end);
+  return start < slotEnd && end > slotStart;
+}
+
+function requestSlotState(hall, date, slot) {
+  if (!hall || !date || !slot) return "free";
+  if (hall.status && hall.status !== "available") return "unavailable";
+
+  const blockingRequests = [...state.adminBookings, ...state.hallBookings].filter((request) => requestBlocksSlot(request, hall, date, slot));
+  if (blockingRequests.some((request) => ["approved", "registered"].includes(request.status))) return "busy";
+  if (blockingRequests.length) return "planned";
+
+  const blockingAvailability = state.availability.filter((entry) => availabilityBlocksSlot(entry, hall, date, slot));
+  if (blockingAvailability.some((entry) => entry.status === "busy")) return "busy";
+  if (blockingAvailability.length) return "planned";
+
+  const eventState = state.events.reduce((result, event) => {
+    if (result === "busy") return result;
+    if (event.status && !["published", "draft"].includes(event.status)) return result;
+    if (event.date !== date) return result;
+    if ((event.location || "") !== hall.name && (event.hallName || "") !== hall.name) return result;
     const start = minutesFromTime(event.time || "10:00");
     const end = start + 120;
     const slotStart = minutesFromTime(slot.start);
     const slotEnd = minutesFromTime(slot.end);
-    return start < slotEnd && end > slotStart;
-  });
-  return requestBusy || eventBusy;
+    if (start < slotEnd && end > slotStart) return event.status === "draft" ? "planned" : "busy";
+    return result;
+  }, "");
+  return eventState || "free";
+}
+
+function requestSlotStateLabel(stateName) {
+  if (stateName === "busy") return t("requestSlotBusy");
+  if (stateName === "planned") return t("requestSlotPlanned");
+  if (stateName === "unavailable") return t("requestSlotUnavailable");
+  return t("requestSlotFree");
+}
+
+function isRequestSlotBusy(hall, date, slot) {
+  return requestSlotState(hall, date, slot) !== "free";
+}
+
+function requestTodayIso() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function isRequestSlotModalOpen() {
+  return Boolean(els.requestSlotModal && !els.requestSlotModal.classList.contains("hidden"));
+}
+
+function setRequestSlotModalMessage(message = "", type = "info") {
+  if (!els.requestSlotModalMessage) return;
+  els.requestSlotModalMessage.textContent = message;
+  els.requestSlotModalMessage.classList.toggle("hidden", !message);
+  els.requestSlotModalMessage.classList.toggle("is-error", type === "error");
+  els.requestSlotModalMessage.classList.toggle("is-success", type === "success");
+}
+
+function requestSlotUnavailableMessage(stateName) {
+  if (stateName === "planned") return t("requestSlotPlannedNotice");
+  if (stateName === "unavailable") return t("requestSlotUnavailableNotice");
+  return t("requestSlotBusyNotice");
+}
+
+function updateRequestSlotModalControls() {
+  if (!els.confirmRequestSlot) return;
+  const hall = selectedRequestHall(requestSlotDraft);
+  const slot = selectedRequestSlot(requestSlotDraft);
+  const stateName = hall && requestSlotDraft.date && slot ? requestSlotState(hall, requestSlotDraft.date, slot) : "";
+  const canConfirm = Boolean(hall && requestSlotDraft.date && slot && stateName === "free");
+  els.confirmRequestSlot.disabled = !canConfirm;
+  if (canConfirm) {
+    setRequestSlotModalMessage(`${t("requestSlotSelected")}: ${formatDate(requestSlotDraft.date)}, ${requestSlotLabel(slot)}`, "success");
+  } else if (!requestSlotDraft.slotId) {
+    setRequestSlotModalMessage("");
+  }
+}
+
+function openRequestSlotModal(hallId) {
+  const hall = state.halls.find((item) => item._id === hallId);
+  if (!hall) return;
+  const today = requestTodayIso();
+  requestSlotDraft = {
+    hallId,
+    date: requestSelection.date || els.requestDate?.value || today,
+    slotId: "",
+  };
+  if (requestSlotDraft.date < today) requestSlotDraft.date = today;
+  if (els.requestDate) {
+    els.requestDate.min = today;
+    els.requestDate.value = requestSlotDraft.date;
+  }
+  if (els.requestSlotModalHallName) {
+    els.requestSlotModalHallName.textContent = hallText(hall, "name") || "";
+  }
+  setRequestSlotModalMessage("");
+  els.requestSlotModal?.classList.remove("hidden");
+  renderRequestSlots(requestSlotDraft, { syncSummary: false });
+}
+
+function closeRequestSlotModal() {
+  els.requestSlotModal?.classList.add("hidden");
+  requestSlotDraft = { hallId: "", date: "", slotId: "" };
+  setRequestSlotModalMessage("");
+}
+
+function confirmRequestSlotSelection() {
+  const hall = selectedRequestHall(requestSlotDraft);
+  const slot = selectedRequestSlot(requestSlotDraft);
+  if (!hall || !requestSlotDraft.date || !slot) {
+    setRequestSlotModalMessage(t("requestSlotModalChooseFirst"), "error");
+    return;
+  }
+  const stateName = requestSlotState(hall, requestSlotDraft.date, slot);
+  if (stateName !== "free") {
+    requestSlotDraft.slotId = "";
+    renderRequestSlots(requestSlotDraft, { syncSummary: false });
+    setRequestSlotModalMessage(requestSlotUnavailableMessage(stateName), "error");
+    return;
+  }
+  requestSelection = { hallId: hall._id, date: requestSlotDraft.date, slotId: slot.id };
+  requestSubmitFeedback = null;
+  closeRequestSlotModal();
+  renderRequestView();
 }
 
 function requestBaseRent() {
@@ -2293,10 +3359,117 @@ function updateRequestTotals() {
   const amount = requestTotalAmount();
   if (els.requestRentPreview) els.requestRentPreview.textContent = formatCurrency(requestBaseRent());
   if (els.requestTotalPreview) els.requestTotalPreview.textContent = formatCurrency(amount);
+  updateRequestSubmitButton();
+}
+
+function requestSubmitButton() {
+  return els.customRequestForm?.querySelector('button[type="submit"]') || null;
+}
+
+function setRequestSubmitButtonState({ label, disabled = false, status = "" } = {}) {
+  const button = requestSubmitButton();
+  if (!button) return;
+  button.textContent = label || t("requestPayAndSubmit");
+  button.disabled = Boolean(disabled);
+  button.classList.toggle("is-status", Boolean(status));
+  button.classList.toggle("is-success", status === "success");
+  button.classList.toggle("is-pending", status === "pending");
+}
+
+function updateRequestSubmitButton() {
+  const hall = selectedRequestHall();
+  const activeHallBooking = hall ? activeHallBookingForHall(hall) : null;
+  const confirmedHallBooking = hall ? confirmedHallBookingForHall(hall) : null;
+  const ownEventRequest = latestOwnEventRequest();
+
+  if (requestMode === "hall" && confirmedHallBooking) {
+    setRequestSubmitButtonState({ label: t("hallBooked"), disabled: true, status: "success" });
+    return;
+  }
+
+  if (requestMode === "hall" && activeHallBooking) {
+    setRequestSubmitButtonState({ label: t("requestAlreadySent"), disabled: true, status: "pending" });
+    return;
+  }
+
+  if (requestMode === "event" && (ownEventRequest?.eventId || isConfirmedRequestStatus(ownEventRequest?.status))) {
+    setRequestSubmitButtonState({ label: t("requestEventPublished"), disabled: true, status: "success" });
+    return;
+  }
+
+  if (requestSubmitFeedback?.mode === requestMode) {
+    setRequestSubmitButtonState({ label: t(requestSubmitFeedback.labelKey), disabled: true, status: requestSubmitFeedback.status });
+    return;
+  }
+
+  setRequestSubmitButtonState({ label: t("requestPayAndSubmit") });
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error(t("requestPhotoInvalid")));
+    reader.readAsDataURL(file);
+  });
+}
+
+function resizeImageDataUrl(dataUrl, maxSize = 1200) {
+  return new Promise((resolve) => {
+    const image = new Image();
+    image.onload = () => {
+      const ratio = Math.min(1, maxSize / Math.max(image.width || maxSize, image.height || maxSize));
+      if (ratio >= 1) {
+        resolve(dataUrl);
+        return;
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(image.width * ratio);
+      canvas.height = Math.round(image.height * ratio);
+      const context = canvas.getContext("2d");
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL("image/jpeg", 0.84));
+    };
+    image.onerror = () => resolve(dataUrl);
+    image.src = dataUrl;
+  });
+}
+
+async function imageFileToDataUrl(file) {
+  if (!file) return "";
+  if (!String(file.type || "").startsWith("image/")) throw new Error(t("requestPhotoInvalid"));
+  return await resizeImageDataUrl(await readFileAsDataUrl(file));
+}
+
+function setRequestImagePreview(src = "") {
+  const imageField = els.customRequestForm?.elements.namedItem("image");
+  if (imageField) imageField.value = src;
+  if (!els.requestImagePreview) return;
+  els.requestImagePreview.classList.toggle("hidden", !src);
+  els.requestImagePreview.innerHTML = src ? `<img src="${escapeHtml(src)}" alt="${escapeHtml(t("requestAttachPhoto"))}" />` : "";
+}
+
+async function handleRequestImageChange(input) {
+  const file = input?.files?.[0];
+  if (!file) {
+    setRequestImagePreview("");
+    return "";
+  }
+  try {
+    const src = await imageFileToDataUrl(file);
+    setRequestImagePreview(src);
+    return src;
+  } catch (error) {
+    if (input) input.value = "";
+    setRequestImagePreview("");
+    showMessage(error.message, "error");
+    return "";
+  }
 }
 
 function setRequestMode(mode = "hall") {
   requestMode = mode === "event" ? "event" : "hall";
+  requestSubmitFeedback = null;
   document.querySelectorAll("[data-request-mode]").forEach((button) => {
     button.classList.toggle("active", button.dataset.requestMode === requestMode);
   });
@@ -2310,14 +3483,15 @@ function setRequestMode(mode = "hall") {
   });
 
   renderRequestSummary();
+  updateRequestSubmitButton();
 }
 
 function renderRequestSummary() {
   if (!els.requestSelectedSummary) return;
   if (requestMode === "event") {
     els.requestSelectedSummary.innerHTML = `
-      <div><span>Сценарий</span><strong>Собственное мероприятие</strong></div>
-      <div><span>Публикация</span><strong>После модерации</strong></div>
+      <div><span>${escapeHtml(t("requestScenarioLabel"))}</span><strong>${escapeHtml(t("requestScenarioOwnEvent"))}</strong></div>
+      <div><span>${escapeHtml(t("requestPublicationLabel"))}</span><strong>${escapeHtml(t("requestPublicationModeration"))}</strong></div>
     `;
     els.customRequestForm?.classList.remove("hidden");
     updateRequestTotals();
@@ -2327,7 +3501,8 @@ function renderRequestSummary() {
   const hall = selectedRequestHall();
   const slot = selectedRequestSlot();
   if (!hall || !requestSelection.date || !slot) {
-    els.requestSelectedSummary.innerHTML = `<div class="empty">${escapeHtml(t("requestPickSlotHint"))}</div>`;
+    const hint = hall ? t("requestSlotModalChooseFirst") : t("requestPickSlotHint");
+    els.requestSelectedSummary.innerHTML = `<div class="empty">${escapeHtml(hint)}</div>`;
     els.customRequestForm?.classList.add("hidden");
     updateRequestTotals();
     return;
@@ -2343,29 +3518,33 @@ function renderRequestSummary() {
   updateRequestTotals();
 }
 
-function renderRequestSlots() {
+function renderRequestSlots(selection = requestSelection, options = {}) {
   if (!els.requestSlotGrid) return;
-  const hall = selectedRequestHall();
-  const date = requestSelection.date;
+  const { syncSummary = true } = options;
+  const hall = selectedRequestHall(selection);
+  const date = selection.date;
   if (!hall || !date) {
     els.requestSlotGrid.innerHTML = `<div class="empty">${escapeHtml(t("requestChooseHallDateHint"))}</div>`;
-    renderRequestSummary();
+    if (syncSummary) renderRequestSummary();
+    else updateRequestSlotModalControls();
     return;
   }
 
   els.requestSlotGrid.innerHTML = requestSlots
     .map((slot) => {
-      const busy = isRequestSlotBusy(hall, date, slot);
-      const active = requestSelection.slotId === slot.id;
+      const stateName = requestSlotState(hall, date, slot);
+      const busy = stateName !== "free";
+      const active = selection.slotId === slot.id;
       return `
-        <button class="request-slot ${active ? "active" : ""}" type="button" data-request-slot="${escapeHtml(slot.id)}" ${busy ? "disabled" : ""}>
+        <button class="request-slot request-slot--${escapeHtml(stateName)} ${active ? "active" : ""}" type="button" data-request-slot="${escapeHtml(slot.id)}" data-slot-state="${escapeHtml(stateName)}" aria-disabled="${busy ? "true" : "false"}">
           <strong>${escapeHtml(requestSlotLabel(slot))}</strong>
-          <span>${escapeHtml(busy ? t("requestSlotBusy") : t("requestSlotFree"))}</span>
+          <span>${escapeHtml(requestSlotStateLabel(stateName))}</span>
         </button>
       `;
     })
     .join("");
-  renderRequestSummary();
+  if (syncSummary) renderRequestSummary();
+  else updateRequestSlotModalControls();
 }
 
 function renderRequestHalls() {
@@ -2375,18 +3554,19 @@ function renderRequestHalls() {
         .map((hall) => {
           const available = hall.status === "available";
           const active = requestSelection.hallId === hall._id;
+          const myBooking = activeHallBookingForHall(hall);
           const name = hallText(hall, "name") || "-";
           const floor = hallText(hall, "floor") || "-";
           const description = hallText(hall, "description") || hallText(hall, "location") || "-";
           return `
-            <button class="request-hall-card ${active ? "active" : ""}" type="button" data-request-hall="${escapeHtml(hall._id)}" ${available ? "" : "disabled"}>
+            <button class="request-hall-card ${active ? "active" : ""} ${myBooking ? "booked" : ""}" type="button" data-request-hall="${escapeHtml(hall._id)}" ${available ? "" : "disabled"}>
               <span>${escapeHtml(floor)}</span>
               <strong>${escapeHtml(name)}</strong>
               <p>${escapeHtml(description)}</p>
               <div>
                 <small>${escapeHtml(`${hall.capacity || 0} ${t("mapPeopleShort")}`)}</small>
                 <small>${escapeHtml(formatCurrency(hall.pricePerHour || 0))} / ${escapeHtml(t("hourShort"))}</small>
-                <small>${escapeHtml(hall.status === "maintenance" ? t("hallStatusMaintenance") : hall.status === "busy" ? t("hallStatusBusy") : t("hallStatusAvailable"))}</small>
+                <small>${escapeHtml(myBooking ? t("hallBooked") : hall.status === "maintenance" ? t("hallStatusMaintenance") : hall.status === "busy" ? t("hallStatusBusy") : t("hallStatusAvailable"))}</small>
               </div>
             </button>
           `;
@@ -2397,20 +3577,21 @@ function renderRequestHalls() {
 
 function renderRequestView() {
   if (!els.requestHallGrid) return;
-  const today = new Date().toISOString().slice(0, 10);
+  const today = requestTodayIso();
   if (els.requestDate) {
     els.requestDate.min = today;
-    if (!els.requestDate.value) els.requestDate.value = requestSelection.date || today;
-    requestSelection.date = els.requestDate.value;
+    if (!els.requestDate.value || els.requestDate.value < today) {
+      const nextDate = requestSelection.date || requestSlotDraft.date || today;
+      els.requestDate.value = nextDate < today ? today : nextDate;
+    }
   }
   const ownDate = els.customRequestForm?.elements.namedItem("ownDate");
   if (ownDate) {
     ownDate.min = today;
     if (!ownDate.value) ownDate.value = today;
   }
-  if (!requestSelection.hallId && state.halls.length) {
-    const firstAvailable = state.halls.find((hall) => hall.status === "available") || state.halls[0];
-    requestSelection.hallId = firstAvailable?._id || "";
+  if (requestSelection.hallId && !state.halls.some((hall) => hall._id === requestSelection.hallId)) {
+    requestSelection = { hallId: "", date: "", slotId: "" };
   }
   renderRequestHalls();
   renderRequestSlots();
@@ -2418,6 +3599,7 @@ function renderRequestView() {
 
 function buildCustomRequestPayload() {
   const payload = Object.fromEntries(new FormData(els.customRequestForm));
+  delete payload.requestImageFile;
   const services = selectedRequestServices();
   const user = state.profile || {};
   const duration = Number(payload.duration || 0);
@@ -2429,6 +3611,7 @@ function buildCustomRequestPayload() {
 
   if (!duration || !date || !time) throw createError("errHallFieldsRequired");
   if (!isOwnEvent && (!hall || !slot)) throw createError("requestPickSlotHint");
+  if (!isOwnEvent && requestSlotState(hall, date, slot) !== "free") throw createError("errSlotBusy");
   if (isOwnEvent && (!payload.ownLocation || !payload.ownCity)) throw createError("errHallFieldsRequired");
 
   return {
@@ -2446,6 +3629,7 @@ function buildCustomRequestPayload() {
     category: String(payload.category || "").trim(),
     format: "offline",
     description: String(payload.description || "").trim(),
+    image: String(payload.image || "").trim(),
     purpose: String(payload.description || "").trim(),
     adminNotes: String(payload.notes || "").trim(),
     ticketPrice: Number(payload.ticketPrice || 0),
@@ -2473,14 +3657,15 @@ function renderRequestPaymentSummary(request) {
   const hallName = hall ? hallText(hall, "name") : request.hallName;
   const isAnnouncement = request.type === "custom-event";
   const serviceText = request.services.length
-    ? request.services.map((service) => `${service.name} (${formatCurrency(service.price)})`).join(", ")
+    ? request.services.map((service) => `${serviceDisplayName(service)} (${formatCurrency(service.price)})`).join(", ")
     : t("requestNoServices");
   els.requestPaymentSummary.innerHTML = `
-    <div><span>${escapeHtml(isAnnouncement ? "Стоимость объявления" : t("requestRentTotal"))}</span><strong>${escapeHtml(formatCurrency(request.amount))}</strong></div>
+    ${request.image ? `<div class="request-payment-image"><img src="${escapeHtml(request.image)}" alt="${escapeHtml(request.eventTitle || request.hallName || t("requestAttachPhoto"))}" /></div>` : ""}
+    <div><span>${escapeHtml(isAnnouncement ? t("requestAnnouncementCost") : t("requestRentTotal"))}</span><strong>${escapeHtml(formatCurrency(request.amount))}</strong></div>
     <div><span>${escapeHtml(isAnnouncement ? t("location") : t("navHalls"))}</span><strong>${escapeHtml(isAnnouncement ? request.location : hallName)}</strong></div>
     <div><span>${escapeHtml(t("date"))}</span><strong>${escapeHtml(formatDate(request.date))}</strong></div>
     <div><span>${escapeHtml(t("time"))}</span><strong>${escapeHtml(`${request.startTime}-${request.endTime}`)}</strong></div>
-    ${isAnnouncement ? `<div><span>Способ оплаты</span><strong>Имитация оплаты публикации</strong></div>` : `<div class="request-payment-services"><span>${escapeHtml(t("requestServicesTitle"))}</span><strong>${escapeHtml(serviceText)}</strong></div>`}
+    ${isAnnouncement ? `<div><span>${escapeHtml(t("paymentMethodLabel"))}</span><strong>${escapeHtml(t("requestAnnouncementPaymentMethod"))}</strong></div>` : `<div class="request-payment-services"><span>${escapeHtml(t("requestServicesTitle"))}</span><strong>${escapeHtml(serviceText)}</strong></div>`}
   `;
 }
 
@@ -2527,7 +3712,12 @@ async function saveCustomEventRequest(request) {
 }
 
 function eventCard(event) {
-  return window.ORDA.eventTemplates.eventCard(event, {
+  const localizedEvent = localizeEvent(event);
+  const eventWithClientState = {
+    ...localizedEvent,
+    isBookedByMe: Boolean(event.isBookedByMe || eventBookingByMe(event._id)),
+  };
+  return window.ORDA.eventTemplates.eventCard(eventWithClientState, {
     t,
     escapeHtml,
     formatDate,
@@ -2546,6 +3736,9 @@ function hallCard(hall) {
   const features = hallList(hall, "equipment").slice(0, 4);
   const advantages = hallList(hall, "advantages").slice(0, 3);
   const image = hallImage(hall);
+  const myBooking = activeHallBookingForHall(hall);
+  const hallActionLabel = myBooking ? t("hallBooked") : t("hallBookButton");
+  const hallActionDisabled = !state.token || Boolean(myBooking);
   return `
     <article class="hall-card">
       <div class="card-media hall-media">
@@ -2577,8 +3770,8 @@ function hallCard(hall) {
         <strong>${escapeHtml(formatCurrency(hall.pricePerHour || 0))}</strong>
       </div>
       <div class="card-actions">
-        <button type="button" data-book-hall="${escapeHtml(hall._id)}" ${state.token ? "" : "disabled"}>
-          ${escapeHtml(t("hallBookButton"))}
+        <button class="${myBooking ? "is-status is-success" : ""}" type="button" data-book-hall="${escapeHtml(hall._id)}" ${hallActionDisabled ? "disabled" : ""}>
+          ${escapeHtml(hallActionLabel)}
         </button>
         <button class="secondary admin-action" type="button" data-view-hall="${escapeHtml(hall._id)}" title="${escapeHtml(t("details"))}">i</button>
         <button class="secondary admin-action hidden" type="button" aria-hidden="true">-</button>
@@ -2604,9 +3797,9 @@ function renderDashboard() {
   const isAdmin = state.role === "admin";
   const seats = state.events.reduce((sum, event) => sum + Number(event.seatsLeft || 0), 0);
   const nextEvent = state.events[0];
-  const myActiveBookings = state.bookings.filter((booking) => ["pending", "approved"].includes(booking.status));
-  const allActiveRequests = state.adminBookings.filter((booking) => ["pending", "approved"].includes(booking.status));
-  const pendingRequests = state.adminBookings.filter((booking) => booking.status === "pending");
+  const myActiveBookings = state.bookings.filter((booking) => ["new", "review", "pending", "approved"].includes(booking.status));
+  const allActiveRequests = state.adminBookings.filter((booking) => ["new", "review", "pending", "approved"].includes(booking.status));
+  const pendingRequests = state.adminBookings.filter((booking) => ["new", "review", "pending"].includes(booking.status));
   const hallLoad = state.halls.reduce((sum, hall) => sum + Number(hall.activeRequests || 0), 0);
 
   els.metricEvents.textContent = state.events.length;
@@ -2628,12 +3821,15 @@ function renderDashboard() {
     ? state.events
         .slice(0, 5)
         .map(
-          (event) => `
+          (event) => {
+            const displayEvent = localizeEvent(event);
+            return `
       <button class="mini-item" type="button" data-details="${event._id}">
-        <strong>${escapeHtml(event.title)}</strong>
-        <p>${escapeHtml(dateRangeText(event))} - ${escapeHtml(event.city || event.location)}</p>
+        <strong>${escapeHtml(displayEvent.title)}</strong>
+        <p>${escapeHtml(dateRangeText(event))} - ${escapeHtml(displayEvent.city || displayEvent.location)}</p>
       </button>
-    `
+    `;
+          }
         )
         .join("")
     : `<div class="empty">${escapeHtml(t("noEvents"))}</div>`;
@@ -2642,12 +3838,15 @@ function renderDashboard() {
     ? state.events
         .slice(0, 6)
         .map(
-          (event) => `
+          (event) => {
+            const displayEvent = localizeEvent(event);
+            return `
       <div class="calendar-item">
         <strong>${escapeHtml(dateRangeText(event, { weekday: "short", day: "numeric", month: "short" }))}</strong>
-        <p>${escapeHtml(event.time || "")} - ${escapeHtml(event.title)}</p>
+        <p>${escapeHtml(event.time || "")} - ${escapeHtml(displayEvent.title)}</p>
       </div>
-    `
+    `;
+          }
         )
         .join("")
     : `<div class="empty">${escapeHtml(t("noEvents"))}</div>`;
@@ -2727,11 +3926,12 @@ function renderDashboard() {
   const featured = state.events.find((event) => event.featured && event.status === "published") || state.events[0];
   const featuredBanner = document.querySelector("#featuredEventBanner");
   if (featuredBanner && featured) {
+    const displayFeatured = localizeEvent(featured);
     featuredBanner.classList.remove("hidden");
-    document.querySelector("#featuredTitle").textContent = featured.title;
+    document.querySelector("#featuredTitle").textContent = displayFeatured.title;
     document.querySelector("#featuredMeta").innerHTML = `
       <span class="pill">${escapeHtml(dateRangeText(featured))}</span>
-      <span class="pill">${escapeHtml(featured.city || featured.location || "")}</span>
+      <span class="pill">${escapeHtml(displayFeatured.city || displayFeatured.location || "")}</span>
       <span class="pill">${escapeHtml(t(categoryKeys[featured.category] || "category"))}</span>
     `;
     const diff = Math.max(0, new Date(`${featured.date}T${featured.time || "10:00"}`) - new Date());
@@ -2755,10 +3955,17 @@ function syncCalendarHallFilterOptions() {
   state.events
     .map((event) => event.location)
     .filter(Boolean)
-    .forEach((location) => options.push({ value: location, label: location }));
+    .forEach((location) => {
+      const event = state.events.find((item) => item.location === location);
+      const displayEvent = event ? localizeEvent(event) : null;
+      options.push({ value: location, label: displayEvent?.location || location });
+    });
   state.halls
     .filter((hall) => hall.name)
     .forEach((hall) => options.push({ value: hall.name, label: hallText(hall, "name") || hall.name }));
+  state.availability
+    .filter((entry) => entry.hallName)
+    .forEach((entry) => options.push({ value: entry.hallName, label: entry.hallName }));
   const unique = [...new Map(options.map((item) => [item.value, item])).values()].sort((a, b) =>
     String(a.label).localeCompare(String(b.label))
   );
@@ -2784,7 +3991,8 @@ function eventMatchesCalendarFilters(event, filters = calendarFilterValues()) {
   if (filters.type !== "all" && event.category !== filters.type) return false;
   if (filters.hall !== "all" && event.location !== filters.hall) return false;
   if (!filters.search) return true;
-  const haystack = [event.title, event.description, event.location, event.city, event.organizer, (event.tags || []).join(" ")]
+  const displayEvent = localizeEvent(event);
+  const haystack = [event.title, event.description, event.location, event.city, event.organizer, (event.tags || []).join(" "), displayEvent.title, displayEvent.description, displayEvent.location, displayEvent.city, displayEvent.organizer, (displayEvent.tags || []).join(" ")]
     .join(" ")
     .toLowerCase();
   return haystack.includes(filters.search);
@@ -2800,6 +4008,7 @@ function requestMatchesCalendarFilters(request, filters = calendarFilterValues()
   if (filters.hall !== "all" && requestHall !== filters.hall) return false;
 
   if (!filters.search) return true;
+  const displayEvent = linkedEvent ? localizeEvent(linkedEvent) : null;
   const haystack = [
     request.eventTitle,
     request.hallName,
@@ -2807,20 +4016,26 @@ function requestMatchesCalendarFilters(request, filters = calendarFilterValues()
     request.organization,
     linkedEvent?.title,
     linkedEvent?.location,
+    displayEvent?.title,
+    displayEvent?.location,
+    displayEvent?.description,
   ]
     .join(" ")
     .toLowerCase();
   return haystack.includes(filters.search);
 }
 
+function availabilityMatchesCalendarFilters(entry, filters = calendarFilterValues()) {
+  const status = entry.status === "busy" ? "approved" : "pending";
+  if (filters.status !== "all" && filters.status !== status) return false;
+  if (filters.type !== "all") return false;
+  if (filters.hall !== "all" && entry.hallName !== filters.hall) return false;
+  if (!filters.search) return true;
+  return [entry.title, entry.hallName, entry.status].join(" ").toLowerCase().includes(filters.search);
+}
+
 function calendarAgendaToggleText(expanded) {
-  const labels = {
-    ru: { more: "Показать полностью", less: "Свернуть" },
-    kk: { more: "Толық көрсету", less: "Жинау" },
-    en: { more: "Show full list", less: "Collapse" },
-  };
-  const pack = labels[state.lang] || labels.ru;
-  return expanded ? pack.less : pack.more;
+  return expanded ? t("calendarCollapse") : t("calendarShowFull");
 }
 
 function ensureCalendarAgendaToggle(total) {
@@ -2895,12 +4110,15 @@ function renderCalendar() {
         <div class="calendar-list">
           ${events
             .map(
-              (event) => `
+              (event) => {
+                const displayEvent = localizeEvent(event);
+                return `
             <button class="calendar-item" type="button" data-details="${event._id}">
               <strong>${escapeHtml(dateRangeText(event, { day: "numeric", weekday: "short" }))} - ${escapeHtml(event.time || "")}</strong>
-              <p>${escapeHtml(event.title)} - ${escapeHtml(event.location)}</p>
+              <p>${escapeHtml(displayEvent.title)} - ${escapeHtml(displayEvent.location)}</p>
             </button>
-          `
+          `;
+              }
             )
             .join("")}
         </div>
@@ -2915,15 +4133,18 @@ function renderCalendar() {
     els.calendarAgendaList.innerHTML = visibleAgenda.length
       ? visibleAgenda
           .map(
-            (event) => `
+            (event) => {
+              const displayEvent = localizeEvent(event);
+              return `
         <button class="calendar-agenda-card" type="button" data-details="${escapeHtml(event._id)}">
-          ${event.image ? `<img src="${escapeHtml(event.image)}" alt="${escapeHtml(event.title)}" loading="lazy" />` : ""}
+          ${event.image ? `<img src="${escapeHtml(event.image)}" alt="${escapeHtml(displayEvent.title)}" loading="lazy" />` : ""}
           <span>${escapeHtml(dateRangeText(event, { month: "short", day: "numeric" }))} - ${escapeHtml(event.time || "")}</span>
-          <strong>${escapeHtml(event.title)}</strong>
-          <p>${escapeHtml(event.location || event.city || "")}</p>
+          <strong>${escapeHtml(displayEvent.title)}</strong>
+          <p>${escapeHtml(displayEvent.location || displayEvent.city || "")}</p>
           <small class="calendar-agenda-status">${escapeHtml(t(categoryKeys[event.category] || "category"))} · ${escapeHtml(t(event.status === "draft" ? "calendarStatusPending" : event.status === "closed" ? "calendarStatusCancelled" : "calendarStatusPlanned"))}</small>
         </button>
-      `
+      `;
+            }
           )
           .join("")
       : `<div class="empty">${escapeHtml(t("noEvents"))}</div>`;
@@ -2939,20 +4160,24 @@ function buildCalendarItems() {
   const sourceEvents = state.events.filter((event) => eventMatchesCalendarFilters(event, filters));
 
   sourceEvents.forEach((event) => {
+    const displayEvent = localizeEvent(event);
     datesBetween(event.date, event.endDate).forEach((date, index) => {
       items.push({
         type: "event",
         id: event._id,
         date,
         time: event.time || "10:00",
-        title: index > 0 ? `${event.title} · ${index + 1}` : event.title,
-        location: event.location,
-        hall: event.location,
+        title: index > 0 ? `${displayEvent.title} · ${index + 1}` : displayEvent.title,
+        location: displayEvent.location,
+        hall: displayEvent.location,
         status: event.status || "published",
         statusLabel:
           event.status === "draft" ? t("calendarStatusPending") : event.status === "closed" ? t("calendarStatusCancelled") : t("calendarStatusPlanned"),
+        occupationType: t("calendarOccupationEvent"),
+        occupiedBy: t("calendarOccupiedByOrganizer"),
+        confirmationLabel: event.status === "draft" ? t("calendarConfirmationPending") : t("calendarConfirmationApproved"),
         attendees: `${Number(event.booked || 0)}/${Number(event.capacity || 0)}`,
-        description: event.description || "",
+        description: displayEvent.description || "",
       });
     });
   });
@@ -2960,9 +4185,14 @@ function buildCalendarItems() {
   const requestsSource = (state.role === "admin" ? state.adminBookings : [...state.bookings, ...state.hallBookings]).filter((request) =>
     requestMatchesCalendarFilters(request, filters)
   );
+  const visibleRequestIds = new Set(requestsSource.map((request) => request._id));
   requestsSource.forEach((request) => {
-    const date = request.date || (request.type === "event" ? state.events.find((event) => event._id === request.eventId)?.date : "");
-    const time = request.time || (request.type === "event" ? state.events.find((event) => event._id === request.eventId)?.time : "");
+    const linkedEvent = request.type === "event" ? state.events.find((event) => event._id === request.eventId) : null;
+    const displayEvent = linkedEvent ? localizeEvent(linkedEvent) : null;
+    const linkedHall = request.hallId ? state.halls.find((hall) => String(hall._id) === String(request.hallId)) : null;
+    const displayHallName = linkedHall ? hallText(linkedHall, "name") : request.hallName;
+    const date = request.date || (request.type === "event" ? linkedEvent?.date : "");
+    const time = request.time || (request.type === "event" ? linkedEvent?.time : "");
     if (!date) return;
 
     items.push({
@@ -2972,24 +4202,57 @@ function buildCalendarItems() {
       time: time || "",
       title:
         request.type === "event"
-          ? request.eventTitle || t("requestTypeEvent")
+          ? displayEvent?.title || request.eventTitle || t("requestTypeEvent")
           : request.type === "custom-event"
             ? request.eventTitle || t("requestTypeCustomEvent")
-            : request.hallName || t("requestTypeHall"),
+            : displayHallName || t("requestTypeHall"),
       location: request.type === "event"
-        ? state.events.find((event) => event._id === request.eventId)?.location || "-"
-        : request.hallName || "-",
-      hall: request.hallName || state.events.find((event) => event._id === request.eventId)?.location || "-",
+        ? displayEvent?.location || "-"
+        : displayHallName || "-",
+      hall: displayHallName || displayEvent?.location || "-",
       status: request.status,
       statusLabel:
         request.type === "event" && request.paymentStatus === "unpaid"
           ? t("paymentUnpaid")
           : bookingStatusLabel(request.status),
+      occupationType:
+        request.type === "event"
+          ? t("calendarOccupationEventRequest")
+          : request.type === "custom-event"
+            ? t("calendarOccupationAnnouncement")
+            : t("calendarOccupationHallBooking"),
+      occupiedBy: request.type === "event" ? t("calendarOccupiedByUser") : t("calendarOccupiedByClient"),
+      confirmationLabel: ["approved", "registered"].includes(request.status) ? t("calendarConfirmationApproved") : t("calendarConfirmationPending"),
       attendees: request.attendees ? String(request.attendees) : "",
       description: request.purpose || request.organization || "",
       raw: request,
     });
   });
+
+  state.availability
+    .filter((entry) => entry.source === "booking")
+    .filter((entry) => !visibleRequestIds.has(entry.sourceId))
+    .filter((entry) => availabilityMatchesCalendarFilters(entry, filters))
+    .forEach((entry) => {
+      const planned = entry.status !== "busy";
+      items.push({
+        type: "availability",
+        id: entry.sourceId,
+        date: entry.date,
+        time: entry.endTime ? `${entry.startTime}-${entry.endTime}` : entry.startTime,
+        title: planned ? t("calendarFallbackPlanned") : t("calendarOccupied"),
+        location: entry.hallName || "-",
+        hall: entry.hallName || "-",
+        status: planned ? "pending" : "approved",
+        statusLabel: planned ? t("calendarFallbackPlanned") : t("calendarOccupied"),
+        occupationType: entry.requestType === "custom-event" ? t("calendarOccupationAnnouncement") : t("calendarOccupationHallBooking"),
+        occupiedBy: t("calendarOccupiedByClient"),
+        confirmationLabel: planned ? t("calendarConfirmationPending") : t("calendarConfirmationApproved"),
+        attendees: "",
+        description: entry.title || entry.hallName || "",
+        raw: entry,
+      });
+    });
 
   window.ORDA._calendarItems = items;
 }
@@ -3023,7 +4286,7 @@ function buildAdminNotifications() {
   }
 
   state.adminBookings.slice(0, 12).forEach((request) => {
-    if (request.type === "hall" && request.status === "pending") {
+    if (request.type === "hall" && ["new", "review", "pending"].includes(request.status)) {
       notifications.push({
         type: "warn",
         text: `${t("notifNewHallRequest")}: ${request.hallName || "-"}`,
@@ -3039,7 +4302,7 @@ function buildAdminNotifications() {
       });
     }
 
-    if (request.status === "pending") {
+    if (["new", "review", "pending"].includes(request.status)) {
       notifications.push({
         type: "info",
         text: `${t("notifRequestPending")}: ${request.userName || "-"}`,
@@ -3053,9 +4316,10 @@ function buildAdminNotifications() {
     .slice(0, 3);
 
   nearest.forEach((event) => {
+    const displayEvent = localizeEvent(event);
     notifications.push({
       type: "info",
-      text: `${t("notifEventSoon")}: ${event.title}`,
+      text: `${t("notifEventSoon")}: ${displayEvent.title}`,
       sub: `${formatDate(event.date)} ${event.time || ""}`.trim(),
     });
   });
@@ -3070,15 +4334,17 @@ function renderBookings() {
   const html = state.bookings.length
     ? state.bookings
         .map((booking) => {
+          const sourceEvent = state.events.find((event) => event._id === booking.eventId);
+          const displayEvent = sourceEvent ? localizeEvent(sourceEvent) : null;
           const canPay =
-            ["pending", "approved"].includes(booking.status) &&
+            ["new", "review", "pending", "approved"].includes(booking.status) &&
             Number(booking.price || 0) > 0 &&
             booking.paymentStatus === "unpaid";
           const canUseTicket = !isInactiveRequest(booking.status) && ["paid", "free"].includes(booking.paymentStatus);
           return `
       <article class="booking-row">
         <div>
-          <strong>${escapeHtml(booking.eventTitle || "-")}</strong>
+          <strong>${escapeHtml(displayEvent?.title || booking.eventTitle || "-")}</strong>
           <p>${escapeHtml(dateTimeText(booking.createdAt))}</p>
           ${paymentLabel(booking)
             ? `<span class="status-pill ${paymentClass(booking)}">${escapeHtml(paymentLabel(booking))}</span>`
@@ -3092,7 +4358,7 @@ function renderBookings() {
           ${canPay
             ? `<button type="button" data-pay-booking="${booking._id}">${escapeHtml(t("payNow"))}</button>`
             : ""}
-          ${["pending", "approved"].includes(booking.status)
+          ${["new", "review", "pending", "approved"].includes(booking.status)
             ? `<button class="secondary" type="button" data-cancel-event="${booking._id}">${escapeHtml(t("cancel"))}</button>`
             : ""}
         </div>
@@ -3111,15 +4377,18 @@ function renderHallBookings() {
     ? state.hallBookings
         .map(
           (booking) => {
+            const sourceHall = booking.hallId ? state.halls.find((hall) => String(hall._id) === String(booking.hallId)) : null;
+            const displayHallName = sourceHall ? hallText(sourceHall, "name") : booking.hallName;
             const canPay =
-              ["pending", "approved"].includes(booking.status) &&
+              ["new", "review", "pending", "approved"].includes(booking.status) &&
               Number(booking.amount || 0) > 0 &&
               booking.paymentStatus === "unpaid";
             const canUseTicket = !isInactiveRequest(booking.status) && ["paid", "free"].includes(booking.paymentStatus);
             return `
       <article class="booking-row">
-        <div>
-          <strong>${escapeHtml(booking.type === "custom-event" ? booking.eventTitle || "-" : booking.hallName || "-")}</strong>
+        <div class="booking-main">
+          ${booking.image ? `<img class="booking-thumb" src="${escapeHtml(booking.image)}" alt="${escapeHtml(booking.eventTitle || displayHallName || t("requestAttachPhoto"))}" loading="lazy" />` : ""}
+          <strong>${escapeHtml(booking.type === "custom-event" ? booking.eventTitle || "-" : displayHallName || "-")}</strong>
           <p>${escapeHtml(
             tr("hallBookingSummary", {
               date: formatDate(booking.date),
@@ -3140,7 +4409,7 @@ function renderHallBookings() {
           ${canPay
             ? `<button type="button" data-pay-hall-booking="${booking._id}">${escapeHtml(t("payNow"))}</button>`
             : ""}
-          ${["pending", "approved"].includes(booking.status)
+          ${["new", "review", "pending", "approved"].includes(booking.status)
             ? `<button class="secondary" type="button" data-cancel-hall="${booking._id}">${escapeHtml(t("cancel"))}</button>`
             : ""}
         </div>
@@ -3202,60 +4471,63 @@ function renderAdminBookings() {
   els.adminBookingsList.innerHTML = list.length
     ? list
         .map((request) => {
-          const sourceEvent = request.type === "event" ? state.events.find((event) => event._id === request.eventId) : null;
-          const scheduleDate = request.date || sourceEvent?.date || "-";
-          const scheduleTime = request.endTime ? `${request.time || request.startTime}-${request.endTime}` : request.time || sourceEvent?.time || "-";
-          const hallLabel = request.location || request.hallName || sourceEvent?.location || "-";
-          const attendees = request.attendees || sourceEvent?.booked || "-";
-          const amount = request.amount ?? request.price ?? sourceEvent?.price ?? 0;
-          const details =
-            request.type === "hall"
-              ? tr("hallRequestMeta", { attendees: request.attendees || 0, duration: request.duration || 0 })
-              : request.type === "custom-event"
-                ? request.description || request.purpose || "-"
-                : `${sourceEvent?.organizer || request.organization || "-"}`;
-          const services = Array.isArray(request.services) && request.services.length
-            ? request.services.map((service) => service.name || t(service.key || service.id)).join(", ")
-            : "";
-          const title =
-            request.type === "hall"
-              ? request.hallName || "-"
-              : request.type === "custom-event"
-                ? request.eventTitle || "-"
-                : request.eventTitle || "-";
+          const rawSourceEvent = request.type === "event" ? state.events.find((event) => event._id === request.eventId) : null;
+          const sourceEvent = rawSourceEvent ? localizeEvent(rawSourceEvent) : null;
+          const view = adminRequestViewModel(request, sourceEvent);
+          const fields = [
+            adminField(t("adminFieldRequestType"), view.typeLabel, { keepEmpty: true }),
+            adminField(t("adminFieldUserName"), view.userName, { keepEmpty: true }),
+            adminField(t("adminFieldUserEmail"), view.userEmail, { keepEmpty: true }),
+            adminField(t("adminFieldUserPhone"), view.userPhone, { keepEmpty: true }),
+          ];
 
-          const payment = paymentLabel(request);
+          if (request.type === "event") {
+            fields.push(
+              adminField(t("adminFieldSelectedEvent"), view.eventTitle, { keepEmpty: true }),
+              adminField(t("adminFieldEventSchedule"), view.schedule, { keepEmpty: true }),
+              adminField(t("adminFieldPaymentStatus"), view.payment, { keepEmpty: true }),
+              adminField(t("adminFieldRequestStatus"), view.status, { keepEmpty: true })
+            );
+          } else if (request.type === "hall") {
+            fields.push(
+              adminField(t("adminFieldSelectedHall"), view.hallName, { keepEmpty: true }),
+              adminField(t("adminFieldHallSchedule"), view.schedule, { keepEmpty: true }),
+              adminField(t("adminFieldPaymentStatus"), view.payment, { keepEmpty: true }),
+              adminField(t("adminFieldRequestStatus"), view.status, { keepEmpty: true }),
+              adminField(t("adminFieldAdditionalServices"), view.services),
+              adminField(t("adminFieldEquipmentServices"), view.equipmentServices && view.equipmentServices !== view.services ? view.equipmentServices : "")
+            );
+          } else {
+            fields.push(
+              adminField(t("adminFieldEventTitle"), view.eventTitle, { keepEmpty: true }),
+              adminField(t("adminFieldEventDescription"), view.description),
+              adminField(t("adminFieldDateTime"), view.schedule, { keepEmpty: true }),
+              adminField(t("adminFieldVenueOrLocation"), view.place),
+              adminField(t("adminFieldRequestStatus"), view.status, { keepEmpty: true })
+            );
+          }
+
+          if (view.adminNotes) fields.push(adminField(t("requestAdminNotes"), view.adminNotes));
+          if (view.adminReason) fields.push(adminField(t("notificationReason"), view.adminReason));
 
           return `
-            <article class="booking-row booking-row-detailed">
+            <article class="booking-row booking-row-detailed admin-request-card admin-request-card--${escapeHtml(request.type)}">
               <div class="booking-main">
-                <strong>${escapeHtml(title)}</strong>
-                <p>${escapeHtml(requestTypeLabel(request.type))}</p>
+                <div class="admin-request-title">
+                  <span class="request-type">${escapeHtml(view.typeLabel)}</span>
+                  <strong>${escapeHtml(view.title || view.typeLabel)}</strong>
+                </div>
+                ${view.image ? `<img class="admin-request-image" src="${escapeHtml(view.image)}" alt="${escapeHtml(view.title || view.typeLabel)}" loading="lazy" />` : ""}
                 <div class="admin-request-meta">
-                  <span><b>${escapeHtml(t("date"))}:</b> ${escapeHtml(formatDate(scheduleDate))}</span>
-                  <span><b>${escapeHtml(t("time"))}:</b> ${escapeHtml(scheduleTime)}</span>
-                  <span><b>${escapeHtml(t("location"))}:</b> ${escapeHtml(hallLabel)}</span>
-                  ${request.city ? `<span><b>${escapeHtml(t("city"))}:</b> ${escapeHtml(request.city)}</span>` : ""}
-                  ${request.duration ? `<span><b>${escapeHtml(t("hallDuration"))}:</b> ${escapeHtml(`${request.duration} ${t("hourShort")}`)}</span>` : ""}
-                  <span><b>${escapeHtml(t("hallGuests"))}:</b> ${escapeHtml(String(attendees))}</span>
-                  <span><b>${escapeHtml(t("price"))}:</b> ${escapeHtml(formatCurrency(amount))}</span>
-                  ${request.ticketPrice !== undefined ? `<span><b>${escapeHtml(t("requestTicketPrice"))}:</b> ${escapeHtml(formatCurrency(request.ticketPrice))}</span>` : ""}
-                  <span><b>${escapeHtml(t("email"))}:</b> ${escapeHtml(request.userEmail || "-")}</span>
-                  <span><b>${escapeHtml(t("phone"))}:</b> ${escapeHtml(request.userPhone || "-")}</span>
-                  ${request.userName ? `<span><b>${escapeHtml(t("requestContactPerson"))}:</b> ${escapeHtml(request.userName)}</span>` : ""}
-                  <span><b>${escapeHtml(t("organization"))}:</b> ${escapeHtml(request.organization || "-")}</span>
-                  <span><b>${escapeHtml(t("description"))}:</b> ${escapeHtml(details)}</span>
-                  ${services ? `<span><b>${escapeHtml(t("requestServicesTitle"))}:</b> ${escapeHtml(services)}</span>` : ""}
-                  ${request.adminNotes ? `<span><b>${escapeHtml(t("requestAdminNotes"))}:</b> ${escapeHtml(request.adminNotes)}</span>` : ""}
-                  <span><b>${escapeHtml(t("status"))}:</b> ${escapeHtml(statusLabel(request.status))}</span>
-                  ${request.adminReason
-                    ? `<span><b>${escapeHtml(t("notificationReason"))}:</b> ${escapeHtml(request.adminReason)}</span>`
-                    : ""}
-                  <span><b>${escapeHtml(t("dateTime"))}:</b> ${escapeHtml(dateTimeText(request.createdAt))}</span>
+                  ${fields.filter(Boolean).join("")}
                 </div>
                 <div class="admin-request-badges">
                   <span class="status-pill ${statusClass(request.status)}">${escapeHtml(statusLabel(request.status))}</span>
-                  ${payment ? `<span class="status-pill ${paymentClass(request)}">${escapeHtml(payment)}</span>` : ""}
+                  ${
+                    request.type !== "custom-event"
+                      ? `<span class="status-pill ${paymentClass(request)}">${escapeHtml(view.payment)}</span>`
+                      : ""
+                  }
                 </div>
               </div>
               <div class="row-actions">
@@ -3300,7 +4572,7 @@ function renderAdminSupportMessages() {
           (item) => `
       <article class="support-row">
         <div>
-          <strong>${escapeHtml(item.userName || item.userEmail || "Клиент")}</strong>
+          <strong>${escapeHtml(item.userName || item.userEmail || t("roleUser"))}</strong>
           <p>${escapeHtml(item.userEmail || "-")} · ${escapeHtml(dateTimeText(item.createdAt))}</p>
           <p>${escapeHtml(item.text || "")}</p>
         </div>
@@ -3426,6 +4698,15 @@ async function loadHalls() {
   renderAll();
 }
 
+async function loadAvailability(options = {}) {
+  const availability = await api("/availability", { localFallback: true });
+  state.availability = Array.isArray(availability) ? availability : [];
+  if (options.render !== false) {
+    renderAll();
+    if (typeof window.ORDA.renderCalendar === "function") window.ORDA.renderCalendar();
+  }
+}
+
 async function loadMyBookings() {
   if (!state.token) {
     state.bookings = [];
@@ -3540,20 +4821,21 @@ async function loadAdmin() {
 
 async function showEventDetails(eventId) {
   const event = await api(`/events/${eventId}`);
+  const displayEvent = localizeEvent(event);
   const booked = Number(event.booked || 0);
   const seatsLeft = Number(event.seatsLeft || 0);
 
   els.eventDetails.innerHTML = `
     <p class="eyebrow">${escapeHtml(t(categoryKeys[event.category] || "category"))}</p>
-    <h2>${escapeHtml(event.title)}</h2>
-    <p class="lead">${escapeHtml(event.description || "")}</p>
+    <h2>${escapeHtml(displayEvent.title)}</h2>
+    <p class="lead">${escapeHtml(displayEvent.description || "")}</p>
     <div class="detail-grid">
       <div class="detail-box"><span>${escapeHtml(t("date"))}</span><strong>${escapeHtml(
         dateRangeText(event, { weekday: "long", year: "numeric", month: "long", day: "numeric" })
       )}</strong></div>
       <div class="detail-box"><span>${escapeHtml(t("time"))}</span><strong>${escapeHtml(event.time || "10:00")}</strong></div>
-      <div class="detail-box"><span>${escapeHtml(t("location"))}</span><strong>${escapeHtml(event.location)}</strong></div>
-      <div class="detail-box"><span>${escapeHtml(t("organizer"))}</span><strong>${escapeHtml(event.organizer || "ORDA")}</strong></div>
+      <div class="detail-box"><span>${escapeHtml(t("location"))}</span><strong>${escapeHtml(displayEvent.location)}</strong></div>
+      <div class="detail-box"><span>${escapeHtml(t("organizer"))}</span><strong>${escapeHtml(displayEvent.organizer || "ORDA")}</strong></div>
       <div class="detail-box"><span>${escapeHtml(t("allFormats"))}</span><strong>${escapeHtml(
         t(formatKeys[event.format] || "formatOffline")
       )}</strong></div>
@@ -3563,7 +4845,7 @@ async function showEventDetails(eventId) {
     </div>
     ${event.meetingUrl ? `<p><a href="${escapeHtml(event.meetingUrl)}" target="_blank" rel="noreferrer">${escapeHtml(t("meetingUrl"))}</a></p>` : ""}
     <h3>${escapeHtml(t("agendaTitle"))}</h3>
-    <p class="event-description">${escapeHtml(event.agenda || event.description || "")}</p>
+    <p class="event-description">${escapeHtml(displayEvent.agenda || displayEvent.description || "")}</p>
   `;
 
   els.eventModal.classList.remove("hidden");
@@ -3574,6 +4856,7 @@ function fillEventForm(eventId) {
   if (!event) return;
 
   const fields = els.eventForm.elements;
+  els.eventFormTitle.dataset.i18n = "editEvent";
   els.eventFormTitle.textContent = t("editEvent");
   fields.namedItem("id").value = event._id;
   fields.namedItem("title").value = event.title || "";
@@ -3607,6 +4890,7 @@ function resetEventForm() {
   els.eventForm.elements.namedItem("featured").checked = false;
   els.eventForm.elements.namedItem("tags").value = "";
   els.eventForm.elements.namedItem("status").value = "published";
+  els.eventFormTitle.dataset.i18n = "newEvent";
   els.eventFormTitle.textContent = t("newEvent");
 }
 
@@ -3616,6 +4900,7 @@ function fillHallForm(hallId) {
   if (!hall) return;
 
   const fields = els.hallForm.elements;
+  els.hallFormTitle.dataset.i18n = "hallFormEditTitle";
   els.hallFormTitle.textContent = t("hallFormEditTitle");
   fields.namedItem("id").value = hall._id;
   fields.namedItem("name").value = hall.name || "";
@@ -3638,12 +4923,17 @@ function resetHallForm() {
   fields.namedItem("capacity").value = 50;
   fields.namedItem("pricePerHour").value = 15000;
   fields.namedItem("status").value = "available";
-  els.hallFormTitle.textContent = "Залы";
+  els.hallFormTitle.dataset.i18n = "adminHallsTitle";
+  els.hallFormTitle.textContent = t("adminHallsTitle");
 }
 
 function openHallBookingModal(hallId) {
   const hall = state.halls.find((item) => item._id === hallId);
   if (!hall) return;
+  if (activeHallBookingForHall(hall)) {
+    showMessage(t("errHallAlreadyBooked"), "error");
+    return;
+  }
 
   els.hallBookingForm.reset();
   els.hallBookingForm.elements.namedItem("hallId").value = hall._id;
@@ -3669,6 +4959,10 @@ function closeHallBookingModal() {
 
 function openPaymentModal(eventId, bookingId = "", bookingData = null, bookingType = "event") {
   if (!els.paymentModal || !els.paymentForm) return;
+  if (!bookingId && bookingType === "event" && eventBookingByMe(eventId)) {
+    showMessage(t("eventParticipating"), "success");
+    return;
+  }
   const event =
     state.events.find((item) => item._id === eventId) ||
     (bookingData
@@ -3715,7 +5009,7 @@ function openAdminRequestModal(requestId) {
   const fields = els.adminRequestForm.elements;
   fields.namedItem("id").value = request._id;
   fields.namedItem("type").value = request.type;
-  fields.namedItem("status").value = request.status || "pending";
+  fields.namedItem("status").value = request.status || "new";
   fields.namedItem("date").value = request.date || "";
   fields.namedItem("time").value = request.time || "";
   fields.namedItem("duration").value = request.duration || "";
@@ -3768,8 +5062,13 @@ function showHallDetails(hallId) {
 
 function openCalendarItem(item) {
   if (!item) return;
+  const itemTypeLabel = item.type === "hall" || item.type === "availability"
+    ? t("requestTypeHall")
+    : item.type === "custom-event"
+      ? t("requestTypeCustomEvent")
+      : t("requestTypeEvent");
   const details = `
-    <p class="eyebrow">${escapeHtml(item.type === "hall" ? t("requestTypeHall") : t("requestTypeEvent"))}</p>
+    <p class="eyebrow">${escapeHtml(itemTypeLabel)}</p>
     <h2>${escapeHtml(item.title || "-")}</h2>
     <p class="lead">${escapeHtml(item.description || "")}</p>
     <div class="detail-grid">
@@ -3784,8 +5083,43 @@ function openCalendarItem(item) {
   els.eventModal.classList.remove("hidden");
 }
 
+function calendarPlan(action, date = "") {
+  document.querySelector("#calDayEvents")?.classList.add("hidden");
+
+  if (action === "events") {
+    setView("events");
+    return;
+  }
+
+  if (action === "halls") {
+    setView("halls");
+    return;
+  }
+
+  if (action === "request-hall") {
+    requestSelection.date = cleanDisplayValue(date, "") || requestSelection.date;
+    if (els.requestDate && requestSelection.date) els.requestDate.value = requestSelection.date;
+    setRequestMode("hall");
+    setView("request");
+    requestAnimationFrame(renderRequestView);
+    return;
+  }
+
+  if (action === "request-event") {
+    const targetDate = cleanDisplayValue(date, "");
+    setRequestMode("event");
+    setView("request");
+    requestAnimationFrame(() => {
+      const ownDate = els.customRequestForm?.elements.namedItem("ownDate");
+      if (ownDate && targetDate) ownDate.value = targetDate;
+      renderRequestSummary();
+    });
+  }
+}
+
 window.ORDA = window.ORDA || {};
 window.ORDA.openCalendarItem = openCalendarItem;
+window.ORDA.calendarPlan = calendarPlan;
 window.ORDA.openHallBooking = (hallOrId) => {
   if (!state.token) {
     showMessage(t("loginRequired"), "error");
@@ -3807,9 +5141,11 @@ function openTicket(requestId) {
     return;
   }
 
+  const ticketHall = request.hallId ? state.halls.find((hall) => String(hall._id) === String(request.hallId)) : null;
+  const ticketHallName = ticketHall ? hallText(ticketHall, "name") : request.hallName;
   const event =
     request.type === "event"
-      ? state.events.find((item) => item._id === request.eventId) || {
+      ? localizeEvent(state.events.find((item) => item._id === request.eventId)) || {
           _id: request._id,
           title: request.eventTitle || "-",
           date: "-",
@@ -3818,10 +5154,10 @@ function openTicket(requestId) {
         }
       : {
           _id: request._id,
-          title: request.hallName || "-",
+          title: ticketHallName || "-",
           date: request.date || "-",
           time: request.time || "-",
-          location: request.hallName || "-",
+          location: ticketHallName || "-",
         };
 
   const paymentMeta = {
@@ -3981,12 +5317,28 @@ document.querySelectorAll("[data-request-mode]").forEach((button) => {
 els.requestHallGrid?.addEventListener("click", (event) => {
   const button = event.target.closest("[data-request-hall]");
   if (!button || button.disabled) return;
-  requestSelection.hallId = button.dataset.requestHall;
-  requestSelection.slotId = "";
+  const hallId = button.dataset.requestHall;
+  const hall = state.halls.find((item) => item._id === hallId);
+  if (!hall) return;
+  requestSubmitFeedback = null;
+  requestSelection = { hallId, date: "", slotId: "" };
   renderRequestView();
+  const myBooking = activeHallBookingForHall(hall);
+  if (myBooking) {
+    showMessage(t(isConfirmedRequestStatus(myBooking.status) ? "hallBooked" : "requestAlreadySent"));
+    return;
+  }
+  openRequestSlotModal(hallId);
 });
 
 els.requestDate?.addEventListener("change", () => {
+  requestSubmitFeedback = null;
+  if (isRequestSlotModalOpen()) {
+    requestSlotDraft.date = els.requestDate.value;
+    requestSlotDraft.slotId = "";
+    renderRequestSlots(requestSlotDraft, { syncSummary: false });
+    return;
+  }
   requestSelection.date = els.requestDate.value;
   requestSelection.slotId = "";
   renderRequestSlots();
@@ -3994,19 +5346,53 @@ els.requestDate?.addEventListener("change", () => {
 
 els.requestSlotGrid?.addEventListener("click", (event) => {
   const button = event.target.closest("[data-request-slot]");
-  if (!button || button.disabled) return;
-  requestSelection.slotId = button.dataset.requestSlot;
+  if (!button) return;
+  requestSubmitFeedback = null;
+  const slotId = button.dataset.requestSlot;
+  const slotState = button.dataset.slotState || "free";
+  if (slotState !== "free") {
+    const message = requestSlotUnavailableMessage(slotState);
+    if (isRequestSlotModalOpen()) {
+      requestSlotDraft.slotId = "";
+      renderRequestSlots(requestSlotDraft, { syncSummary: false });
+      setRequestSlotModalMessage(message, "error");
+    } else {
+      showMessage(message, "error");
+    }
+    return;
+  }
+  if (isRequestSlotModalOpen()) {
+    requestSlotDraft.slotId = slotId;
+    renderRequestSlots(requestSlotDraft, { syncSummary: false });
+    return;
+  }
+  requestSelection.slotId = slotId;
   renderRequestSlots();
 });
 
-els.customRequestForm?.addEventListener("change", (event) => {
+els.closeRequestSlotModal?.addEventListener("click", closeRequestSlotModal);
+els.cancelRequestSlotModal?.addEventListener("click", closeRequestSlotModal);
+els.confirmRequestSlot?.addEventListener("click", confirmRequestSlotSelection);
+els.requestSlotModal?.addEventListener("click", (event) => {
+  if (event.target === els.requestSlotModal) closeRequestSlotModal();
+});
+
+els.customRequestForm?.addEventListener("change", async (event) => {
+  if (event.target?.name && event.target.name !== "requestImageFile") {
+    requestSubmitFeedback = null;
+  }
+  if (event.target?.name === "requestImageFile") {
+    await handleRequestImageChange(event.target);
+    return;
+  }
   if (event.target?.name === "services" || event.target?.name === "duration") {
     renderRequestSummary();
     updateRequestTotals();
   }
+  updateRequestSubmitButton();
 });
 
-els.customRequestForm?.addEventListener("submit", (event) => {
+els.customRequestForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!state.token) {
     showMessage(t("loginRequired"), "error");
@@ -4014,6 +5400,9 @@ els.customRequestForm?.addEventListener("submit", (event) => {
   }
   if (!els.customRequestForm.reportValidity()) return;
   try {
+    if (els.requestImageFile?.files?.[0] && !els.customRequestForm.elements.namedItem("image")?.value) {
+      await handleRequestImageChange(els.requestImageFile);
+    }
     openRequestPaymentModal(buildCustomRequestPayload());
   } catch (error) {
     showMessage(error.message, "error");
@@ -4034,15 +5423,23 @@ els.requestPaymentForm?.addEventListener("submit", async (event) => {
     els.requestPaymentProcessText?.classList.remove("hidden");
     await new Promise((resolve) => setTimeout(resolve, 650));
     const result = await saveCustomEventRequest(pendingCustomRequest);
+    const submittedType = pendingCustomRequest.type;
     closeRequestPaymentModal();
     els.customRequestForm.reset();
+    if (els.requestImageFile) els.requestImageFile.value = "";
+    setRequestImagePreview("");
+    requestSubmitFeedback = {
+      mode: submittedType === "custom-event" ? "event" : "hall",
+      labelKey: submittedType === "custom-event" ? "requestEventPublished" : "requestAlreadySent",
+      status: submittedType === "custom-event" ? "success" : "pending",
+    };
     requestSelection.slotId = "";
     renderRequestView();
     if (result.localFallback) {
       state.hallBookings = await localApiTranslated("/my-hall-bookings");
       renderAll();
     } else {
-      await Promise.all([loadMyHallBookings(), state.role === "admin" ? loadAdmin() : Promise.resolve()]);
+      await Promise.all([loadMyHallBookings(), loadAvailability(), state.role === "admin" ? loadAdmin() : Promise.resolve()]);
     }
     showMessage(responseMessage(result) || t("requestSubmitSuccess"));
   } catch (error) {
@@ -4054,9 +5451,7 @@ els.requestPaymentForm?.addEventListener("submit", async (event) => {
 });
 
 els.languageSelect.addEventListener("change", () => {
-  state.lang = els.languageSelect.value;
-  localStorage.setItem(STORAGE_KEYS.lang, state.lang);
-  applyTranslations();
+  setLanguage(els.languageSelect.value);
 });
 
 els.loginForm.addEventListener("submit", async (event) => {
@@ -4069,7 +5464,7 @@ els.loginForm.addEventListener("submit", async (event) => {
     state.portal = result.role === "admin" ? "admin" : "client";
     updateShell();
     showMessage(responseMessage(result));
-    await Promise.all([loadEvents(), loadHalls()]);
+    await Promise.all([loadEvents(), loadHalls(), loadAvailability()]);
 
     if (result.role === "admin") {
       await loadAdmin();
@@ -4125,7 +5520,7 @@ els.logoutBtn.addEventListener("click", () => {
 els.seedBtn.addEventListener("click", async () => {
   try {
     showMessage(t("dataRefreshed"));
-    await Promise.all([loadEvents(), loadHalls(), loadMyBookings(), loadMyHallBookings(), loadMyNotifications()]);
+    await Promise.all([loadEvents(), loadHalls(), loadAvailability(), loadMyBookings(), loadMyHallBookings(), loadMyNotifications()]);
     if (state.role === "admin") await loadAdmin();
   } catch (error) {
     showMessage(error.message, "error");
@@ -4235,13 +5630,17 @@ document.body.addEventListener("click", async (event) => {
         showMessage(t("errEventNotFound"), "error");
         return;
       }
+      if (eventItem.isBookedByMe || eventBookingByMe(eventItem._id)) {
+        showMessage(t("eventParticipating"), "success");
+        return;
+      }
       if (Number(eventItem.price || 0) > 0) {
         openPaymentModal(eventItem._id);
         return;
       }
       const result = await api("/book", { method: "POST", body: JSON.stringify({ eventId: eventItem._id }) });
       showMessage(responseMessage(result));
-      await Promise.all([loadEvents(), loadMyBookings()]);
+      await Promise.all([loadEvents(), loadAvailability(), loadMyBookings()]);
       if (state.role === "admin") await loadAdmin();
       return;
     }
@@ -4263,7 +5662,7 @@ document.body.addEventListener("click", async (event) => {
     if (deleteBtn) {
       const result = await api(`/events/${deleteBtn.dataset.delete}`, { method: "DELETE" });
       showMessage(responseMessage(result));
-      await Promise.all([loadEvents(), loadHalls()]);
+      await Promise.all([loadEvents(), loadHalls(), loadAvailability()]);
       await loadAdmin();
       return;
     }
@@ -4276,7 +5675,7 @@ document.body.addEventListener("click", async (event) => {
     if (deleteHallBtn) {
       const result = await api(`/halls/${deleteHallBtn.dataset.deleteHall}`, { method: "DELETE" });
       showMessage(responseMessage(result));
-      await Promise.all([loadHalls(), loadEvents()]);
+      await Promise.all([loadHalls(), loadEvents(), loadAvailability()]);
       await loadAdmin();
       return;
     }
@@ -4289,7 +5688,7 @@ document.body.addEventListener("click", async (event) => {
     if (deleteRequestBtn) {
       const result = await adminBookingApi(deleteRequestBtn.dataset.deleteRequest, "", { method: "DELETE" });
       showMessage(responseMessage(result));
-      await Promise.all([loadEvents(), loadHalls(), loadMyBookings(), loadMyHallBookings(), loadMyNotifications()]);
+      await Promise.all([loadEvents(), loadHalls(), loadAvailability(), loadMyBookings(), loadMyHallBookings(), loadMyNotifications()]);
       await loadAdmin();
       return;
     }
@@ -4297,7 +5696,7 @@ document.body.addEventListener("click", async (event) => {
     if (cancelEventBtn) {
       const result = await api(`/my-bookings/${cancelEventBtn.dataset.cancelEvent}`, { method: "DELETE" });
       showMessage(responseMessage(result));
-      await Promise.all([loadEvents(), loadMyBookings()]);
+      await Promise.all([loadEvents(), loadAvailability(), loadMyBookings()]);
       if (state.role === "admin") await loadAdmin();
       return;
     }
@@ -4305,7 +5704,7 @@ document.body.addEventListener("click", async (event) => {
     if (cancelHallBtn) {
       const result = await api(`/my-hall-bookings/${cancelHallBtn.dataset.cancelHall}`, { method: "DELETE" });
       showMessage(responseMessage(result));
-      await Promise.all([loadHalls(), loadMyHallBookings()]);
+      await Promise.all([loadHalls(), loadAvailability(), loadMyHallBookings()]);
       if (state.role === "admin") await loadAdmin();
       return;
     }
@@ -4345,7 +5744,7 @@ document.body.addEventListener("click", async (event) => {
     if (approveBtn) {
       const result = await updateAdminBookingStatus(approveBtn.dataset.approve, { status: "approved" });
       showMessage(responseMessage(result));
-      await Promise.all([loadEvents(), loadHalls(), loadMyBookings(), loadMyHallBookings(), loadMyNotifications()]);
+      await Promise.all([loadEvents(), loadHalls(), loadAvailability(), loadMyBookings(), loadMyHallBookings(), loadMyNotifications()]);
       await loadAdmin();
       return;
     }
@@ -4358,7 +5757,7 @@ document.body.addEventListener("click", async (event) => {
         reason: String(reasonRaw || "").trim(),
       });
       showMessage(responseMessage(result));
-      await Promise.all([loadEvents(), loadHalls(), loadMyBookings(), loadMyHallBookings(), loadMyNotifications()]);
+      await Promise.all([loadEvents(), loadHalls(), loadAvailability(), loadMyBookings(), loadMyHallBookings(), loadMyNotifications()]);
       await loadAdmin();
       return;
     }
@@ -4371,7 +5770,7 @@ document.body.addEventListener("click", async (event) => {
         reason: String(reasonRaw || "").trim(),
       });
       showMessage(responseMessage(result));
-      await Promise.all([loadEvents(), loadHalls(), loadMyBookings(), loadMyHallBookings(), loadMyNotifications()]);
+      await Promise.all([loadEvents(), loadHalls(), loadAvailability(), loadMyBookings(), loadMyHallBookings(), loadMyNotifications()]);
       await loadAdmin();
       return;
     }
@@ -4489,7 +5888,7 @@ els.eventForm.addEventListener("submit", async (event) => {
     });
     resetEventForm();
     showMessage(responseMessage(result));
-    await Promise.all([loadEvents(), loadHalls()]);
+    await Promise.all([loadEvents(), loadHalls(), loadAvailability()]);
     await loadAdmin();
   } catch (error) {
     showMessage(error.message, "error");
@@ -4513,7 +5912,7 @@ if (els.hallForm) {
       });
       resetHallForm();
       showMessage(responseMessage(result));
-      await Promise.all([loadHalls(), loadEvents()]);
+      await Promise.all([loadHalls(), loadEvents(), loadAvailability()]);
       await loadAdmin();
     } catch (error) {
       showMessage(error.message, "error");
@@ -4529,6 +5928,9 @@ els.hallBookingForm.addEventListener("submit", async (event) => {
     const payload = Object.fromEntries(new FormData(els.hallBookingForm));
     setFormLoading(els.hallBookingForm, true);
     const hall = state.halls.find((item) => item._id === payload.hallId);
+    if (activeHallBookingForHall(hall)) {
+      throw createError("errHallAlreadyBooked");
+    }
     const duration = Number(payload.duration || 0);
     const pricePerHour = Number(hall?.pricePerHour || 0);
     payload.hallName = hall?.name || "";
@@ -4543,7 +5945,7 @@ els.hallBookingForm.addEventListener("submit", async (event) => {
 
     closeHallBookingModal();
     showMessage(responseMessage(result));
-    await Promise.all([loadHalls(), loadMyHallBookings()]);
+    await Promise.all([loadHalls(), loadAvailability(), loadMyHallBookings()]);
     if (state.role === "admin") await loadAdmin();
   } catch (error) {
     showMessage(error.message, "error");
@@ -4589,6 +5991,11 @@ els.payLaterBtn?.addEventListener("click", async () => {
   const bookingId = String(payload.bookingId || "");
   const paymentMethod = selectedPaymentMethod();
   if (bookingId) return;
+  if (eventBookingByMe(eventId)) {
+    showMessage(t("eventParticipating"), "success");
+    closePaymentModal();
+    return;
+  }
 
   try {
     setPaymentProcessing(true);
@@ -4604,7 +6011,7 @@ els.payLaterBtn?.addEventListener("click", async () => {
     });
     closePaymentModal();
     showMessage(responseMessage(result));
-    await Promise.all([loadEvents(), loadMyBookings()]);
+    await Promise.all([loadEvents(), loadAvailability(), loadMyBookings()]);
     if (state.role === "admin") await loadAdmin();
   } catch (error) {
     showMessage(error.message, "error");
@@ -4619,6 +6026,11 @@ els.paymentForm?.addEventListener("submit", async (event) => {
   const bookingId = String(payload.bookingId || "");
   const bookingType = String(payload.bookingType || "event");
   const paymentMethod = selectedPaymentMethod();
+  if (!bookingId && bookingType === "event" && eventBookingByMe(eventId)) {
+    showMessage(t("eventParticipating"), "success");
+    closePaymentModal();
+    return;
+  }
 
   try {
     setPaymentProcessing(true);
@@ -4644,7 +6056,7 @@ els.paymentForm?.addEventListener("submit", async (event) => {
 
     if (els.paymentOrderStatus) els.paymentOrderStatus.textContent = t("paymentStatusPaid");
     showMessage(responseMessage(result));
-    await Promise.all([loadEvents(), loadMyBookings(), loadMyHallBookings()]);
+    await Promise.all([loadEvents(), loadAvailability(), loadMyBookings(), loadMyHallBookings()]);
     if (state.role === "admin") await loadAdmin();
     closePaymentModal();
 
@@ -4681,7 +6093,7 @@ els.adminRequestForm?.addEventListener("submit", async (event) => {
     });
     closeAdminRequestModal();
     showMessage(responseMessage(result));
-    await Promise.all([loadEvents(), loadHalls(), loadMyBookings(), loadMyHallBookings(), loadMyNotifications()]);
+    await Promise.all([loadEvents(), loadHalls(), loadAvailability(), loadMyBookings(), loadMyHallBookings(), loadMyNotifications()]);
     await loadAdmin();
   } catch (error) {
     showMessage(error.message, "error");
@@ -4708,7 +6120,7 @@ function bootstrap() {
   resetHallForm();
   setRequestMode("hall");
 
-  Promise.all([loadEvents(), loadHalls(), loadMyBookings(), loadMyHallBookings(), loadMyNotifications()])
+  Promise.all([loadEvents(), loadHalls(), loadAvailability(), loadMyBookings(), loadMyHallBookings(), loadMyNotifications()])
     .then(async () => {
       if (state.role === "admin") {
         await loadAdmin();
@@ -4726,6 +6138,7 @@ function bootstrap() {
       state.bookings = [];
       state.hallBookings = [];
       state.clientNotifications = [];
+      state.availability = [];
       state.adminBookings = [];
       state.adminUsers = [];
       renderAll();

@@ -3,13 +3,18 @@ const Event = require("../models/Event");
 const Booking = require("../models/Booking");
 const ApiError = require("../utils/apiError");
 const demoEvents = require("../utils/seedData");
+const {
+  activeBookingStatuses,
+  confirmedBookingStatuses,
+  endTimeFrom,
+  findScheduleConflicts,
+} = require("../utils/availability");
 
-const activeBookingStatuses = ["registered", "new", "review", "pending", "approved"];
 const adminBookingStatuses = ["new", "review", "pending", "approved", "rejected", "cancelled", "registered"];
 
 async function getBookings(req, res) {
-  const bookings = await Booking.find().sort({ createdAt: -1 });
-  res.json(bookings);
+  const bookings = await Booking.find().sort({ createdAt: -1 }).lean();
+  res.json(bookings.map(normalizeBookingForAdmin));
 }
 
 async function getUsers(req, res) {
@@ -69,8 +74,48 @@ function bookingStatusPayload(body, fallbackStatus) {
   };
 }
 
+function normalizeBookingForAdmin(booking = {}) {
+  const type = ["event", "hall", "custom-event"].includes(booking.type)
+    ? booking.type
+    : booking.hallId || booking.hallName
+      ? "hall"
+      : "event";
+  const status = booking.status === "registered" ? "approved" : booking.status || "new";
+  const amount = Number(booking.amount ?? booking.price ?? booking.rentAmount ?? 0);
+  const paymentStatus = booking.paymentStatus || (amount > 0 ? "unpaid" : "free");
+
+  return {
+    ...booking,
+    type,
+    status,
+    paymentStatus,
+  };
+}
+
+async function assertRequestSlotAvailable(booking, statuses = confirmedBookingStatuses) {
+  if (!["hall", "custom-event"].includes(booking.type)) return;
+
+  const conflicts = await findScheduleConflicts({
+    hallId: booking.type === "hall" ? booking.hallId : "",
+    hallName: booking.type === "hall" ? booking.hallName : "",
+    location: booking.type === "custom-event" ? booking.location || booking.hallName : booking.hallName || booking.location,
+    date: booking.date,
+    time: booking.time || booking.startTime,
+    duration: Number(booking.duration || 2),
+    endTime: booking.endTime,
+    excludeBookingId: String(booking._id),
+    statuses,
+  });
+
+  if (conflicts.length) {
+    throw new ApiError(400, "This date and time are already occupied.");
+  }
+}
+
 async function publishCustomEvent(booking) {
   if (booking.type !== "custom-event" || booking.eventId) return;
+
+  await assertRequestSlotAvailable(booking);
 
   const event = await Event.create({
     title: booking.eventTitle || "Client event",
@@ -78,6 +123,7 @@ async function publishCustomEvent(booking) {
     time: booking.time || booking.startTime || "10:00",
     category: booking.category || "conference",
     description: booking.description || booking.purpose || "",
+    image: booking.image || "",
     agenda: `Длительность: ${booking.duration || 1} ч. ${booking.adminNotes || ""}`.trim(),
     organizer: booking.organization || booking.userName || "Client",
     location: booking.location || booking.hallName || "Client venue",
@@ -113,6 +159,10 @@ async function updateBooking(req, res) {
     if (Number(req.body.duration) > 0) booking.duration = Number(req.body.duration);
     if (Number(req.body.attendees) > 0) booking.attendees = Number(req.body.attendees);
     if (typeof req.body.purpose === "string") booking.purpose = String(req.body.purpose).trim();
+    if (booking.time && Number(booking.duration || 0) > 0) {
+      booking.startTime = booking.startTime || booking.time;
+      booking.endTime = booking.endTime || endTimeFrom(booking.time || booking.startTime, booking.duration);
+    }
     booking.amount = Number(booking.pricePerHour || 0) * Number(booking.duration || 0) || Number(booking.amount || 0);
   }
 
@@ -122,6 +172,7 @@ async function updateBooking(req, res) {
   }
 
   if (payload.status === "approved") {
+    await assertRequestSlotAvailable(booking);
     await publishCustomEvent(booking);
   }
 
