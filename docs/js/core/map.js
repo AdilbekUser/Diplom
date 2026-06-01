@@ -22,6 +22,17 @@
     return lang === 'kk' ? 'kk-KZ' : lang === 'en' ? 'en-US' : 'ru-RU';
   }
 
+  function toDateOnly(date) {
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  }
+
+  function formatDateOnly(value, options) {
+    if (window.ORDA && window.ORDA.format && window.ORDA.format.date) {
+      return window.ORDA.format.date(value, currentLang(), options);
+    }
+    return new Date(String(value || '') + 'T00:00:00').toLocaleDateString(locale(), options);
+  }
+
   function venueTranslation(venue) {
     return venue.translations?.[currentLang()] || venue.translations?.ru || venue.translations?.en || {};
   }
@@ -34,12 +45,8 @@
     const startDate = new Date(String(start || '') + 'T00:00:00');
     if (Number.isNaN(startDate.getTime())) return start || '';
     const options = { day: 'numeric', month: 'long' };
-    const kkMonths = ['қаңтар', 'ақпан', 'наурыз', 'сәуір', 'мамыр', 'маусым', 'шілде', 'тамыз', 'қыркүйек', 'қазан', 'қараша', 'желтоқсан'];
     const formatOne = (date, includeYear) => {
-      if (currentLang() === 'kk') {
-        return `${date.getDate()} ${kkMonths[date.getMonth()]}${includeYear ? ' ' + date.getFullYear() : ''}`;
-      }
-      return date.toLocaleDateString(locale(), includeYear ? { ...options, year: 'numeric' } : options);
+      return formatDateOnly(toDateOnly(date), includeYear ? { ...options, year: 'numeric' } : options);
     };
     const endDate = end ? new Date(String(end) + 'T00:00:00') : null;
     if (endDate && !Number.isNaN(endDate.getTime())) {
@@ -684,8 +691,7 @@
     const datesList = document.getElementById('drawerDatesList');
     if (datesList) {
       datesList.innerHTML = venue.freeDates.map(d => {
-        const dt = new Date(d + 'T00:00:00');
-        const formatted = dt.toLocaleDateString(locale(), { day: 'numeric', month: 'long', year: 'numeric' });
+        const formatted = formatDateOnly(d, { day: 'numeric', month: 'long', year: 'numeric' });
         return `
           <button class="map-date-chip" type="button" data-free-date="${d}">
             <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1" y="2.5" width="11" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M1 6h11M4 1v2M9 1v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>

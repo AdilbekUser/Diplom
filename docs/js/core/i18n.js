@@ -480,10 +480,10 @@
     cdMins: "мин",
     calMon: "Дс",
     calTue: "Сс",
-    calWed: "Ср",
+    calWed: "Сәр",
     calThu: "Бс",
     calFri: "Жм",
-    calSat: "Сб",
+    calSat: "Сен",
     calSun: "Жс",
 
     noEvents: "Әзірге іс-шара жоқ. Demo деректерін қосыңыз немесе жаңа іс-шара жасаңыз.",

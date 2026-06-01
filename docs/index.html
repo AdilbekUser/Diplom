@@ -1862,8 +1862,8 @@
         if (!grid || !label) return;
 
         const lang = (window.ORDA && window.ORDA.lang) || 'ru';
-        const locale = lang === 'kk' ? 'kk-KZ' : lang === 'en' ? 'en-US' : 'ru-RU';
-        label.textContent = current.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
+        const monthDate = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}-01`;
+        label.textContent = window.ORDA.format.date(monthDate, lang, { month: 'long', year: 'numeric' });
 
         const year = current.getFullYear();
         const month = current.getMonth();
@@ -1900,19 +1900,18 @@
           cell.dataset.date = dayStr;
 
           cell.addEventListener('click', function() {
-            showDayEvents(dayStr, dayEvents, locale);
+            showDayEvents(dayStr, dayEvents, lang);
           });
           grid.appendChild(cell);
         }
       }
 
-      function showDayEvents(dateStr, events, locale) {
+      function showDayEvents(dateStr, events, lang) {
         const panel = document.getElementById('calDayEvents');
         const title = document.getElementById('calDayTitle');
         const list  = document.getElementById('calDayList');
         if (!panel || !list) return;
-        const d = new Date(dateStr + 'T00:00:00');
-        if (title) title.textContent = d.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
+        if (title) title.textContent = window.ORDA.format.date(dateStr, lang, { day: 'numeric', month: 'long', year: 'numeric' });
         list.innerHTML = '';
         const state = dayState(events);
         const summary = document.createElement('div');
