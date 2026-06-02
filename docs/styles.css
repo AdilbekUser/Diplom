@@ -4571,3 +4571,391 @@ body[data-view="dashboard"] .content {
     grid-template-columns: 1fr;
   }
 }
+
+/* Phone-first fit pass */
+@media (max-width: 760px) {
+  html,
+  body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .shell-header {
+    width: 100%;
+    max-width: 100vw;
+    overflow: hidden;
+    justify-content: flex-start;
+    gap: 8px;
+    padding-inline: 10px;
+  }
+
+  .header-left,
+  .header-actions,
+  .brand {
+    min-width: 0;
+  }
+
+  .brand {
+    gap: 8px;
+  }
+
+  .brand-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    font-size: 16px;
+  }
+
+  .brand strong {
+    max-width: 82px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .header-actions {
+    flex: 0 0 auto;
+    justify-content: flex-end;
+    gap: 0;
+    margin-left: auto;
+  }
+
+  .header-actions > :not(#loginBtn):not(#logoutBtn) {
+    display: none;
+  }
+
+  #loginBtn,
+  #logoutBtn {
+    max-width: 86px;
+    min-height: 36px;
+    padding: 7px 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .icon-button {
+    width: 36px;
+    min-height: 36px;
+  }
+
+  .content,
+  body[data-view="dashboard"] .content {
+    width: calc(100% - 16px);
+    margin-top: 8px;
+    margin-bottom: 28px;
+  }
+
+  .view,
+  .landing-page,
+  .panel,
+  .event-card,
+  .hall-card,
+  .modal-card,
+  .calendar-day-dialog,
+  .request-payment-card,
+  .request-slot-modal-card,
+  .map-drawer-panel {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  h1,
+  h2,
+  h3,
+  p,
+  strong,
+  span,
+  button,
+  label,
+  input,
+  select,
+  textarea {
+    overflow-wrap: anywhere;
+  }
+
+  h1,
+  h2 {
+    word-break: break-word;
+  }
+
+  .home-cover.landing-hero {
+    display: flex;
+    align-items: stretch;
+    flex-direction: column;
+    min-height: auto;
+    gap: 20px;
+    padding: 24px 18px;
+    border-radius: 8px;
+    background-position: 58% center;
+  }
+
+  .home-cover.landing-hero > *,
+  .landing-hero-content {
+    min-width: 0;
+    max-width: 312px;
+    width: 100%;
+  }
+
+  .landing-hero h1 {
+    margin-block: 10px 14px;
+    font-size: 31px;
+    line-height: 1.12;
+  }
+
+  .landing-hero .lead {
+    width: 100%;
+    max-width: 100%;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  .landing-hero .hero-actions {
+    max-width: 312px;
+  }
+
+  button,
+  .secondary,
+  a.secondary {
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  .hero-actions,
+  .landing-hero .hero-actions,
+  .home-cta-actions,
+  .form-actions,
+  .request-form-actions,
+  .ticket-actions,
+  .payment-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .hero-actions button,
+  .landing-hero .hero-actions button,
+  .home-cta-actions button,
+  .form-actions button,
+  .request-form-actions button,
+  .ticket-actions button,
+  .payment-actions button {
+    width: 100%;
+  }
+
+  .landing-hero-card,
+  .landing-photo-card {
+    min-height: 260px;
+    padding: 18px;
+  }
+
+  .landing-hero-card strong {
+    font-size: 27px;
+  }
+
+  .landing-stat-row,
+  .landing-nav-strip,
+  .landing-showcase,
+  .landing-preview-grid,
+  .landing-process,
+  .landing-process ol,
+  .metric-grid,
+  .events-grid,
+  .halls-grid,
+  .events-list-view .event-card,
+  .request-form-grid,
+  .request-own-event-fields,
+  .request-date-grid,
+  .request-hall-grid,
+  .request-availability-layout,
+  .request-summary-grid,
+  .admin-inner-form,
+  .admin-layout,
+  .profile-grid,
+  .dashboard-grid,
+  .about-grid,
+  .floorplan-dashboard,
+  .floor-summary,
+  .floor-zone-grid,
+  .map-layout,
+  .calendar-hero,
+  .calendar-workbench,
+  .calendar-toolbar,
+  .calendar-insight-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .events-list-view .event-card > *,
+  .events-list-view .event-top {
+    grid-column: auto;
+  }
+
+  .event-card,
+  .hall-card,
+  .panel,
+  .discover-panel,
+  .auth-panel,
+  .modal-card {
+    padding: 14px;
+  }
+
+  .event-top,
+  .hall-load-head,
+  .section-head,
+  .calendar-panel-head,
+  .map-sidebar-head,
+  .admin-requests-head,
+  .cal-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .card-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .card-actions > button:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .admin-action {
+    width: 100%;
+  }
+
+  .filters,
+  .hall-filters,
+  .discover-search,
+  .admin-request-filters,
+  .map-filters-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .discover-search button,
+  .row-actions button,
+  .admin-request-filters select {
+    width: 100%;
+  }
+
+  .booking-row,
+  .booking-row-table,
+  .hall-admin-row,
+  .support-row,
+  .map-drawer-event-item,
+  .calendar-agenda-card {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-agenda-card img {
+    width: 100%;
+    height: 140px;
+  }
+
+  .full-calendar {
+    padding: 8px;
+    overflow-x: auto;
+  }
+
+  .cal-header-row,
+  .cal-grid {
+    min-width: 336px;
+  }
+
+  .cal-cell {
+    min-height: 50px;
+    padding: 5px;
+  }
+
+  .cal-month-label {
+    min-width: 0;
+  }
+
+  .calendar-day-modal,
+  .modal {
+    padding: 8px;
+  }
+
+  .modal-card,
+  .calendar-day-dialog {
+    max-height: calc(100dvh - 16px);
+    border-radius: 8px;
+  }
+
+  .ticket-body,
+  .ticket-receipt-grid,
+  .payment-review,
+  .pay-methods,
+  .detail-grid,
+  .calendar-occupied-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .ticket-qr {
+    margin-inline: auto;
+  }
+
+  .request-payment-summary > div,
+  .request-payment-services {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .request-payment-summary strong,
+  .request-payment-services strong {
+    max-width: none;
+    text-align: left;
+  }
+
+  .floorplan-wrap {
+    padding: 10px;
+    overflow-x: auto;
+  }
+
+  .floorplan-svg {
+    min-width: 520px;
+  }
+
+  .map-canvas,
+  .map-container {
+    height: 420px;
+    min-height: 420px;
+    border-radius: 8px;
+  }
+
+  .map-sidebar {
+    max-height: 360px;
+  }
+
+  .map-drawer-panel,
+  #mapDrawerPanel {
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100vw;
+    padding: 18px;
+  }
+}
+
+@media (max-width: 420px) {
+  .sidebar {
+    width: min(286px, calc(100vw - 24px));
+  }
+
+  .landing-hero h1 {
+    font-size: 29px;
+  }
+
+  .landing-photo-card h2 {
+    font-size: 28px;
+  }
+
+  .landing-preview-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .landing-preview-head .secondary {
+    width: 100%;
+  }
+
+  .speakers-list {
+    grid-template-columns: 1fr;
+  }
+}

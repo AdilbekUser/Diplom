@@ -10,7 +10,12 @@
     document.documentElement.dataset.theme = theme;
 
     if (toggleButton) {
-      toggleButton.textContent = theme === "dark" ? "Light" : "Dark";
+      const label = theme === "dark" ? "Light" : "Dark";
+      toggleButton.setAttribute("aria-label", label);
+      toggleButton.setAttribute("title", label);
+      if (!toggleButton.querySelector("svg")) {
+        toggleButton.textContent = label;
+      }
     }
   }
 
